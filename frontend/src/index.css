@@ -1,0 +1,17 @@
+:root {
+ 
+
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+
+}
+
+body::-webkit-scrollbar {
+  display: none;
+}
+
+@import "tailwindcss";
+
+
