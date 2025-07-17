@@ -1,39 +1,56 @@
-import React, { useState } from 'react';
-import { endpoints } from '../services/api';
-import { apiConnector } from '../services/apiConnector';
-import toast from 'react-hot-toast';
+import React, { useState } from "react";
+import { endpoints } from "../services/api";
+import { apiConnector } from "../services/apiConnector";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { setLoading } from "../slices/authSlice";
 
-const  {SIGN_UP} = endpoints;
+const { SIGN_UP } = endpoints;
 
 export default function Signup() {
+
+    const loading = useSelector((state)=>state.auth.loading)
+
+    const dispatch = useDispatch();
+
   const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    password: '',
+    name: "",
+    phone: "",
+    password: "",
   });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    try{
-        const response = await apiConnector('POST',SIGN_UP,formData);
+    try {
 
-        console.log(response);
+        dispatch(setLoading(true));
+      const response = await apiConnector("POST", SIGN_UP, formData);
 
-        toast.success("Registered Successfully!")
+      console.log(response);
 
+      toast.success("Registered Successfully!");
 
-    }catch(err){
+      setFormData({
+        name: "",
+        phone: "",
+        password: "",
+      });
 
-        console.log(err)
-        toast.error("Unable to register!")
-
+      navigate("/");
+    } catch (err) {
+      console.log(err);
+      toast.error("Unable to register!");
+    }finally{
+        setLoading(false)
     }
-    
   };
 
   return (
@@ -87,7 +104,7 @@ export default function Signup() {
 
         <button
           type="submit"
-          className="w-full py-3 bg-[#FFD700] text-black font-semibold rounded hover:bg-black hover:text-[#FFD700] transition-all duration-300"
+          className="w-full py-3 bg-[#FFD700] text-black font-semibold rounded hover:bg-slate-700 hover:text-[#FFD700] transition-all duration-300"
         >
           Create Account
         </button>
