@@ -1,17 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { endpoints } from "../services/api";
 import { apiConnector } from "../services/apiConnector";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { setLoading } from "../slices/authSlice";
+import { setLoading, setRole, setUserData, setToken } from "../slices/authSlice";
 
 const { SIGN_UP } = endpoints;
 
 export default function Signup() {
 
     const loading = useSelector((state)=>state.auth.loading)
-
+    const token = useSelector(state=>state.auth.token);
+     const userData = useSelector(state => state.auth.userData)
     const dispatch = useDispatch();
 
   const [formData, setFormData] = useState({
@@ -38,6 +39,10 @@ export default function Signup() {
 
       toast.success("Registered Successfully!");
 
+        dispatch(setUserData(response.data.user))
+        dispatch(setToken(response.data.user.token))
+        dispatch(setRole(response.data.user.accountType))
+
       setFormData({
         name: "",
         phone: "",
@@ -49,9 +54,16 @@ export default function Signup() {
       console.log(err);
       toast.error("Unable to register!");
     }finally{
-        setLoading(false)
+        dispatch(setLoading(false))
     }
   };
+
+  useEffect(()=>{
+  if(token){
+    navigate("/home");
+    toast.success(`Welcome! ${userData.name}`);
+  }
+  },[])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-black px-4">
@@ -106,8 +118,14 @@ export default function Signup() {
           type="submit"
           className="w-full py-3 bg-[#FFD700] text-black font-semibold rounded hover:bg-slate-700 hover:text-[#FFD700] transition-all duration-300"
         >
-          Create Account
+          {
+            loading ? (<div className="loader1"></div>):(<>Create Account</>)
+          }
         </button>
+
+        <div className=" w-[full] flex justify-center mt-5 cursor-pointer underline" onClick={()=>navigate('/login')}>
+            Already have an account
+        </div>
       </form>
     </div>
   );

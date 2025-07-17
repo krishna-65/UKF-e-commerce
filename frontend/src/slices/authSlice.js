@@ -1,35 +1,38 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  signupData: null,
+  userData: localStorage.getItem('userdata')? JSON.parse(localStorage.getItem('userdata')) : null,
   loading: false,
-  role:null,
-  token:null,
+  role:localStorage.getItem('role')? JSON.parse(localStorage.getItem('role')) : null,
+  token:localStorage.getItem('token')? JSON.parse(localStorage.getItem('token')) : null,
 };
 
 const authSlice = createSlice({
   name: "auth",
   initialState: initialState,
   reducers: {
-    setSignupData(state, value) {
-      state.signupData = value.payload;
-      console.log("+.+.+.+.+.",state.signupData);
+    setUserData(state, value) {
+      state.userData = value.payload;
+      localStorage.setItem('userdata',JSON.stringify(value.payload))
+      console.log("+.+.+.+.+.",state.userData);
     },
     setLoading(state, value) {
       state.loading = value.payload;
     },
     setRole(state,value){
       state.role = value.payload;
+      localStorage.setItem('role',JSON.stringify(value.payload))
       console.log("role is : ",state.role)
     
     },
     setToken(state, value) {
       state.token = value.payload;
+      localStorage.setItem('token',JSON.stringify(value.payload))
       console.log("Token:", state.token)
     },
   },
 });
 
-export const { setSignupData, setLoading,setRole, setToken } = authSlice.actions;
+export const { setUserData, setLoading,setRole, setToken } = authSlice.actions;
 
 export default authSlice.reducer;

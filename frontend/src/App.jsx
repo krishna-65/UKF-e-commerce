@@ -4,16 +4,23 @@ import { Route, Routes } from 'react-router-dom'
 import Home from './pages/Home'
 import Footer from './components/core/Footer'
 import Signup from './pages/Signup'
+import Login from './pages/Login'
+import ScrollToTop from './pages/Scrolltotop'
+
 
 const App = () => {
+
+ 
+
   return (
-    <div>
+    <div >
 
     <Navbar/>
-
+      <ScrollToTop />
       <Routes>
-        <Route path="/" element={<Home/>}/>
-        <Route path="/signup" element={<Signup/>}/>
+        <Route path="/" element={<Signup/>}/>
+        <Route path="/home" element={<Home/>}/>
+        <Route path="/login" element={<Login/>}/>
       </Routes>
 
       <Footer/>
