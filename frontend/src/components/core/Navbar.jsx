@@ -3,8 +3,36 @@ import logo from "../../assets/images/LOGO.jpg";
 import { FaSearch } from "react-icons/fa";
 import { FaUser } from "react-icons/fa";
 import { FaShoppingCart } from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
+import { setRole, setUserData, setToken } from "../../slices/authSlice";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
+
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+
+    const token = useSelector(state=> state.auth.token)
+
+    const logoutHandler = () =>{
+        try{
+            localStorage.removeItem('token');
+            localStorage.removeItem('role');
+            localStorage.removeItem('userdata');
+
+            dispatch(setToken(null));
+            dispatch(setUserData(null));
+            dispatch(setRole(null))
+
+            toast.success("Logged out Successfully!")
+            navigate('/')
+        }catch(err){
+            console.log(err);
+            toast.error("unable to LogOut")
+        }
+    }
+
   return (
     <>
     <div className="bg-black h-[10vh] text-yellow-500 flex items-center justify-between px-3 lg:px-10 ">
@@ -41,7 +69,12 @@ const Navbar = () => {
      
       <div className="flex gap-4 text-xl">
         <FaSearch />
-        <FaUser />
+        <div className="group relative">
+            <FaUser />
+            <div className="absolute hidden opacity-0 w-[150px] h-[150px] bg-[#FFC107] z-[100] left-[-70px] top-[30px] rounded-3xl shadow-amber-400 border border-black lg:group-hover:flex lg:group-hover:opacity-100 justify-center items-center transition-opacity duration-1000 ease-in-out">
+              {token ? (  <button onClick={logoutHandler} className="text-black cursor-pointer">LogOut</button> ) : ( <button onClick={() => navigate('/')} className="text-black cursor-pointer">Signup</button>)} 
+            </div>
+        </div>
         <FaShoppingCart />
       </div>
     </div>
