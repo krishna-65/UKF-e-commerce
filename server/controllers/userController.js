@@ -5,20 +5,20 @@ import jwt from 'jsonwebtoken';
 // Register User : /api/user/register
 export const register = async (req, res)=>{
     try {
-        const { name, email, password } = req.body;
+        const { name, phone, password } = req.body;
 
-        if(!name || !email || !password){
+        if(!name || !phone || !password){
             return res.json({success: false, message: 'Missing Details'})
         }
 
-        const existingUser = await User.findOne({email})
+        const existingUser = await User.findOne({phone})
 
         if(existingUser)
             return res.json({success: false, message: 'User already exists'})
 
         const hashedPassword = await bcrypt.hash(password, 10)
 
-        const user = await User.create({name, email, password: hashedPassword})
+        const user = await User.create({name, phone, password: hashedPassword})
 
         const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, {expiresIn: '7d'});
 
@@ -29,7 +29,7 @@ export const register = async (req, res)=>{
             maxAge: 7 * 24 * 60 * 60 * 1000, // Cookie expiration time
         })
 
-        return res.json({success: true, user: {email: user.email, name: user.name}})
+        return res.json({success: true, user: {phone: user.phone, name: user.name}})
     } catch (error) {
         console.log(error.message);
         res.json({ success: false, message: error.message });
@@ -40,20 +40,20 @@ export const register = async (req, res)=>{
 
 export const login = async (req, res)=>{
     try {
-        const { email, password } = req.body;
+        const { phone, password } = req.body;
 
-        if(!email || !password)
-            return res.json({success: false, message: 'Email and password are required'});
-        const user = await User.findOne({email});
+        if(!phone || !password)
+            return res.json({success: false, message: 'phone and password are required'});
+        const user = await User.findOne({phone});
 
         if(!user){
-            return res.json({success: false, message: 'Invalid email or password'});
+            return res.json({success: false, message: 'Invalid phone or password'});
         }
 
         const isMatch = await bcrypt.compare(password, user.password)
 
         if(!isMatch)
-            return res.json({success: false, message: 'Invalid email or password'});
+            return res.json({success: false, message: 'Invalid phone or password'});
 
         const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, {expiresIn: '7d'});
 
@@ -64,7 +64,7 @@ export const login = async (req, res)=>{
             maxAge: 7 * 24 * 60 * 60 * 1000,
         })
 
-        return res.json({success: true, user: {email: user.email, name: user.name}})
+        return res.json({success: true, user: {phone: user.phone, name: user.name,accountType: user.accountType, token:token}})
     } catch (error) {
         console.log(error.message);
         res.json({ success: false, message: error.message });
