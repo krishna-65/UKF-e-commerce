@@ -37,7 +37,7 @@ const Navbar = () => {
     <>
     <div className="bg-black h-[10vh] text-yellow-500 flex items-center justify-between px-3 lg:px-10 ">
 
-         <img src={logo} className="w-[10vh]" alt="UKF-Outlets" />
+         <img src={logo} className="w-[10vh] ml-10 lg:ml-0" alt="UKF-Outlets" />
 
         <div className="hidden opacity-0 lg:opacity-100 lg:flex">
             <ul className="flex gap-5">
