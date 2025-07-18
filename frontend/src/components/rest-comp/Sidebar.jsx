@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { Link, useNavigate } from 'react-router-dom';
+import { setRole, setToken, setUserData } from '../../slices/authSlice';
+import toast from 'react-hot-toast';
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,11 +15,32 @@ export default function Sidebar() {
     { name: 'Manage Categories', path: '/admindashboard/addcategory' },
   ];
 
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const logoutHandler = () =>{
+          try{
+              localStorage.removeItem('token');
+              localStorage.removeItem('role');
+              localStorage.removeItem('userdata');
+  
+              dispatch(setToken(null));
+              dispatch(setUserData(null));
+              dispatch(setRole(null))
+  
+              toast.success("Logged out Successfully!")
+              navigate('/')
+          }catch(err){
+              console.log(err);
+              toast.error("unable to LogOut")
+          }
+      }
+
   return (
     <>
       {/* Hamburger for small screens */}
       <button
-        className="lg:hidden fixed top-4 left-4 z-50 text-[#FFD700] bg-black p-2 rounded focus:outline-none"
+        className="lg:hidden fixed top-4 left-4 z-50 cursor-pointer text-[#FFD700] bg-black p-2 rounded focus:outline-none"
         onClick={() => setIsOpen(true)}
       >
         ☰
@@ -29,8 +53,8 @@ export default function Sidebar() {
         } transition-transform duration-300 ease-in-out lg:translate-x-0 z-40 overflow-y-auto shadow-lg`}
       >
         {/* Close button on mobile */}
-        <div className="lg:hidden flex justify-end p-4">
-          <button onClick={() => setIsOpen(false)} className="text-[#FFD700] text-xl">×</button>
+        <div className="lg:hidden  flex justify-end p-4">
+          <button onClick={() => setIsOpen(false)} className="text-[#FFD700] cursor-pointer text-xl">×</button>
         </div>
 
         {/* Navigation */}
@@ -45,7 +69,11 @@ export default function Sidebar() {
             >
               {link.name}
             </Link>
+            
           ))}
+          <div onClick={logoutHandler} className='block lg:hidden cursor-pointer hover:text-white transition duration-300'>
+            LogOut
+          </div>
         </nav>
       </div>
     </>

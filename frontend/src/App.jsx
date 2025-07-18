@@ -12,6 +12,7 @@ import AddProduct from './pages/AddProduct'
 import ManageProduct from './pages/ManageProduct'
 import AddCategory from './pages/AddCategory'
 import ViewUsers from './pages/ViewUsers'
+import AboutUs from './pages/AboutUs'
 
 
 const App = () => {
@@ -27,6 +28,7 @@ const App = () => {
         <Route path="/" element={<Signup/>}/>
         <Route path="/home" element={<Home/>}/>
         <Route path="/login" element={<Login/>}/>
+        <Route path="/about" element={<AboutUs/>}/>
 
          <Route path="/admindashboard" element={<AdminLayout />}>
         <Route index element={<AdminDashboard />} />

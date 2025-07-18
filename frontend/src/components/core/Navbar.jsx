@@ -6,7 +6,7 @@ import { FaShoppingCart } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { setRole, setUserData, setToken } from "../../slices/authSlice";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 const Navbar = () => {
 
@@ -57,9 +57,9 @@ const Navbar = () => {
                     </div>
                 </li>
                 <li className="group flex flex-col justify-between">
-                    <div className="h-[9vh] flex items-center justify-center w-[4vw] cursor-pointer">
+                    <NavLink to='/about' className="h-[9vh] flex items-center justify-center w-[4vw] cursor-pointer">
                         About
-                    </div>
+                    </NavLink>
                     <div className="opacity-0 group-hover:opacity-100 w-[4vw] h-[1px] bg-yellow-500">
                     </div>
                 </li>
