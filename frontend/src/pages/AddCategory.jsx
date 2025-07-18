@@ -81,7 +81,7 @@ const AddCategory = () => {
       {/* Add Category Button */}
       <button
         onClick={() => setShowAddModal(true)}
-        className="bg-[#FFD770] text-black px-6 py-2 rounded mb-4 hover:brightness-110 transition"
+        className="bg-[#FFD770] text-black px-6 py-2 rounded shadow-lg mb-4 hover:brightness-110 transition"
       >
         + Add Category
       </button>
@@ -92,7 +92,7 @@ const AddCategory = () => {
          <div className="spinner"></div>
        </div>
       ) : (
-        <table className="w-full text-black bg-white rounded overflow-hidden shadow-md">
+        <table className="w-full text-black bg-white rounded-lg overflow-hidden shadow-lg">
           <thead className="bg-[#FFD770]">
             <tr>
               <th className="py-2 px-4 text-left">Sr. No.</th>

@@ -150,7 +150,7 @@ const AddProduct = () => {
             });
             setShowAddModal(true);
           }}
-          className="bg-[#FFD770] text-black px-4 py-2 rounded hover:brightness-110 transition"
+          className="bg-[#FFD770] text-black px-4 py-2 rounded shadow-lg hover:brightness-110 transition"
         >
           + Add Product
         </button>
@@ -170,8 +170,8 @@ const AddProduct = () => {
          <div className="spinner"></div>
        </div>
           ):(
-               <div className="overflow-x-auto">
-        <table className="lg:min-w-[700px] w-full bg-white shadow rounded">
+               <div className="overflow-x-auto shadow-lg rounded-lg">
+        <table className="lg:min-w-[700px] w-full  bg-white  rounded">
           <thead className="bg-[#FFD770]">
             <tr>
               <th className="px-4 py-2 text-left">Sr. No.</th>
@@ -287,9 +287,14 @@ const AddProduct = () => {
               </button>
               <button
                 onClick={() => handleSubmit(showEditModal)}
-                className="px-4 py-2 bg-[#FFD770] text-black rounded"
+                className="px-4 py-2 w-[100px] flex justify-center items-center bg-[#FFD770] text-black rounded"
               >
-                {showAddModal ? "Save" : "Update"}
+
+                 {
+            loading ? (<div className="loader1"></div>):(<>{showAddModal ? "Save" : "Update"}</>)
+          }
+
+                
               </button>
             </div>
           </div>
