@@ -100,3 +100,25 @@ export const logout = async (req, res)=>{
         res.json({ success: false, message: error.message });
     }
 }
+
+// Edit Profile Controller
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.params.id; // from route param
+    const updateFields = req.body;
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updateFields, { new: true });
+
+    if (!updatedUser) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    res.json({
+      success: true,
+      message: "Profile updated successfully",
+      user: updatedUser,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

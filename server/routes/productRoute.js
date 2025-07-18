@@ -1,13 +1,17 @@
+// routes/productRoutes.js
 import express from 'express';
-import { upload } from '../configs/multer.js';
-import authSeller from '../middlewares/authSeller.js';
-import { addProduct, changeStock, productById, productList } from '../controllers/productController.js';
+import {
+  createProduct,
+  updateProduct,
+  getAllProducts,
+  getProductById
+} from '../controllers/productController.js';
 
-const productRouter = express.Router();
+const router = express.Router();
 
-productRouter.post('/add', upload.array(["images"]), authSeller, addProduct);
-productRouter.get('/list', productList)
-productRouter.get('/id', productById)
-productRouter.post('/stock', authSeller, changeStock)
+router.post('/add', createProduct);            // POST /api/products/add
+router.put('/update/:id', updateProduct);      // PUT  /api/products/update/:id
+router.get('/', getAllProducts);               // GET  /api/products/
+router.get('/:id', getProductById);            // GET  /api/products/:id
 
-export default productRouter;
+export default router;
