@@ -55,7 +55,7 @@ export default function Login() {
       }
     } catch (err) {
       console.log(err);
-      toast.error("Unable to register!");
+      toast.error("Unable to login!");
     }finally{
         dispatch(setLoading(false))
     }

@@ -97,7 +97,7 @@ const AddCategory = () => {
             <tr>
               <th className="py-2 px-4 text-left">Sr. No.</th>
               <th className="py-2 px-4 text-left">Name</th>
-              <th className="py-2 px-4 text-left hidden lg:block">Description</th>
+              <th className="py-2 px-4 text-left hidden lg:table-cell">Description</th>
               <th className="py-2 px-4 text-left">Action</th>
             </tr>
           </thead>
@@ -106,7 +106,7 @@ const AddCategory = () => {
               <tr key={cat._id} className="border-t border-gray-200">
                 <td className="py-2 px-4">{index + 1}</td>
                 <td className="py-2 px-4">{cat.name}</td>
-                <td className="py-2 px-4 hidden lg:block">
+                <td className="py-2 px-4 hidden lg:table-cell">
                   {cat.description.substr(0, 30)}...
                 </td>
                 <td className="py-2 px-4">

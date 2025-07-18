@@ -17,3 +17,12 @@ export const categoryEndpoints = {
   getCategory : BASE_URL + "/api/category/",
   updateCategory : BASE_URL + "/api/category/",
 }
+
+//product endpoints
+
+export const productEndpoints = {
+  createProduct : BASE_URL + "/api/product/add",
+  getAllProduct : BASE_URL + "/api/product/",
+  getProduct : BASE_URL + "/api/product/",
+  updateProduct : BASE_URL + "/api/product/update/",
+}

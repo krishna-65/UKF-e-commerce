@@ -9,8 +9,7 @@ export default function Sidebar() {
 
   const links = [
     { name: 'Admin Dashboard', path: '/admindashboard' },
-    { name: 'Add Product', path: '/admindashboard/addproduct' },
-    { name: 'Manage Product', path: '/admindashboard/manageproduct' },
+    { name: 'Manage Product', path: '/admindashboard/addproduct' },
     { name: 'View Users', path: '/admindashboard/viewusers' },
     { name: 'Manage Categories', path: '/admindashboard/addcategory' },
   ];
