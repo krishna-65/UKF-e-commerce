@@ -12,6 +12,15 @@ body::-webkit-scrollbar {
   display: none;
 }
 
+.add-category::-webkit-scrollbar {
+  display: none;
+}
+
+.product-sidebar::-webkit-scrollbar {
+  display: none;
+}
+
+
 @import "tailwindcss";
 
 .loader1 {

@@ -46,6 +46,7 @@ const AddCategory = () => {
       toast.success("Category created successfully!");
       setShowAddModal(false);
       getAllCategories();
+      setNewCategory({ name: "", description: "" });
     } catch (err) {
       console.log(err);
       toast.error("Failed to create category");
@@ -66,6 +67,11 @@ const AddCategory = () => {
       toast.success("Category updated successfully!");
       setShowEditModal(false);
       getAllCategories();
+      setEditData({
+    id: "",
+    name: "",
+    description: "",
+  })
     } catch (err) {
       console.log(err);
       toast.error("Failed to update category");
@@ -73,7 +79,7 @@ const AddCategory = () => {
   };
 
   return (
-    <div className="lg:w-[calc(100vw-256px)] h-[100vh] overflow-y-auto p-6 ">
+    <div className="add-category lg:w-[calc(100vw-256px)] h-[100vh] overflow-y-auto p-6 ">
       <h2 className="text-2xl font-semibold mb-4 text-black">
         Manage Categories
       </h2>

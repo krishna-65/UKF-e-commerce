@@ -9,6 +9,10 @@ const productSchema = new mongoose.Schema({
   sold: { type: Number, default: 0 }, // Track how much is sold
   category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
   brand: { type: String },
+  gender:{type: String, enum: ["Male","Female","Both"], default: "Both"},
+  material: { type: String} ,
+  color: { type: String },
+  size: { type: String },
   images: [{ type: String }],
   isFeatured: { type: Boolean, default: false },
   ratings: { type: Number, default: 0 },

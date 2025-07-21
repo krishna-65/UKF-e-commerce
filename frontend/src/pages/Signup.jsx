@@ -13,7 +13,7 @@ export default function Signup() {
     const loading = useSelector((state)=>state.auth.loading)
     const token = useSelector(state=>state.auth.token);
      const userData = useSelector(state => state.auth.userData)
-     const accountType = useSelector(state => state.auth.accountType)
+     const accountType = useSelector(state => state.auth.role)
 
     const dispatch = useDispatch();
 
@@ -67,11 +67,11 @@ export default function Signup() {
 
   useEffect(()=>{
   if(token){
-    if(accountType === "user"){
-      navigate("/Home");
+    if(accountType === "admin"){
+      navigate("/admindashboard");
       }
       else{
-        navigate("/admindashboard")
+        navigate("/Home")
       };
     toast.success(`Welcome! ${userData.name}`);
   }

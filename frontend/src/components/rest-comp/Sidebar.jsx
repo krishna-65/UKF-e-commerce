@@ -39,8 +39,8 @@ export default function Sidebar() {
     <>
       {/* Hamburger for small screens */}
       <button
-        className="lg:hidden fixed top-4 left-4 z-50 cursor-pointer text-[#FFD700] bg-black p-2 rounded focus:outline-none"
-        onClick={() => setIsOpen(true)}
+        className="lg:hidden fixed top-4 left-4 z-150 cursor-pointer text-[#FFD700] bg-black p-2 rounded focus:outline-none"
+        onClick={() => setIsOpen(!isOpen)}
       >
         ☰
       </button>
@@ -52,7 +52,7 @@ export default function Sidebar() {
         } transition-transform duration-300 ease-in-out lg:translate-x-0 z-40 overflow-y-auto shadow-lg`}
       >
         {/* Close button on mobile */}
-        <div className="lg:hidden  flex justify-end p-4">
+        <div className="lg:hidden z-150  flex justify-end p-4">
           <button onClick={() => setIsOpen(false)} className="text-[#FFD700] cursor-pointer text-xl">×</button>
         </div>
 
