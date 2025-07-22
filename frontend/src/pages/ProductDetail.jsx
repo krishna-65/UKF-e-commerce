@@ -13,7 +13,7 @@ export default function ProductDetail() {
   const dispatch = useDispatch();
 
   const cartHandler = async (product) => {
-    if (!product || !product.id) {
+    if (!product || !product._id) {
       console.error("Invalid product data");
       return;
     }
@@ -43,7 +43,7 @@ export default function ProductDetail() {
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8">
         {/* Image Section */}
         <div className="flex flex-col gap-4">
-          <div className="w-[90vw] h-[40vh] lg:w-[40vw] lg:h-[50vh]">
+          <div className="w-[90vw] h-[60vh] lg:w-[40vw] lg:h-[50vh]">
             {open && (
               <img
                 src={open}
@@ -57,7 +57,7 @@ export default function ProductDetail() {
             {images.map((img, index) => (
               <img
                 key={index}
-                onClick={() => setOpen(img)}
+                onClick={() => setOpen(img.url)}
                 src={img.url}
                 alt={`Thumbnail ${index + 1}`}
                 className={`w-14 h-14 cursor-pointer rounded border ${

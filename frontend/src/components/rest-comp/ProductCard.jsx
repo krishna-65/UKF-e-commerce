@@ -19,7 +19,7 @@ const ProductCard = ({ product }) => {
       <img
         src={product.images[0].url}
         alt={product.name}
-        className="w-full h-[200px] object-cover rounded-lg mb-4"
+        className="w-full h-[250px] object-cover rounded-lg mb-4"
       />
       <h3 className="text-lg font-semibold">{product.name}</h3>
       <p className="text-sm">₹{product.price}</p>
