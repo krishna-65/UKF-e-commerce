@@ -416,13 +416,8 @@ export const bulkAddToCart = async (req, res) => {
     });
 
   } catch (error) {
-<<<<<<< HEAD
-
     console.log(error)
-
-=======
     console.error('Cart update error:', error);
->>>>>>> a18e7a6d2943b9450f9024a740558c8eabb2d5f2
     res.status(500).json({
       success: false,
       message: error.message || 'Internal server error'
