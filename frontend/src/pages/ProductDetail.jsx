@@ -35,7 +35,7 @@ export default function ProductDetail() {
   };
 
   useEffect(() => {
-    if (images.length > 0) setOpen(images[0]);
+    if (images.length > 0) setOpen(images[0].url);
   }, [images]);
 
   return (
@@ -58,7 +58,7 @@ export default function ProductDetail() {
               <img
                 key={index}
                 onClick={() => setOpen(img)}
-                src={img}
+                src={img.url}
                 alt={`Thumbnail ${index + 1}`}
                 className={`w-14 h-14 cursor-pointer rounded border ${
                   open === img ? "border-[#ecba49]" : "border-transparent"

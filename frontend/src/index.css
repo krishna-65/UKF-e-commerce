@@ -20,6 +20,9 @@ body::-webkit-scrollbar {
   display: none;
 }
 
+.hidescroll::-webkit-scrollbar {
+  display: none;
+}
 
 @import "tailwindcss";
 

@@ -13,6 +13,7 @@ import perfumes from "../../assets/images/perfumes.webp";
 import accessories from "../../assets/images/accessories.jpg";
 import { setSearchData } from "../../slices/searchSlice";
 import { updateFilter } from "../../slices/filterSlice";
+import CartSidebar from "../rest-comp/CartSidebar";
 
 const Navbar = () => {
   const dispatch = useDispatch();
@@ -244,13 +245,7 @@ const Navbar = () => {
           </div>
 
           
-          <div className="relative">
-            <FaShoppingCart />
-            {
-                cartItems && <div className="absolute z-[200] w-5 h-5 bg-[#FFD700] rounded-full top-0 right-0 text-sm text-black -translate-y-1/2 translate-x-1/2 flex justify-center items-center"> {cartItems} </div>
-            
-            }
-            </div>
+         <CartSidebar />
         </div>
       </div>
 

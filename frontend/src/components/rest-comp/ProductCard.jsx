@@ -17,7 +17,7 @@ const ProductCard = ({ product }) => {
       className="bg-[#1a1a1a] cursor-pointer hover:scale-105 border border-[#FFD700] p-4 rounded-xl text-[#FFD700]"
     >
       <img
-        src={product.images[0]}
+        src={product.images[0].url}
         alt={product.name}
         className="w-full h-[200px] object-cover rounded-lg mb-4"
       />
