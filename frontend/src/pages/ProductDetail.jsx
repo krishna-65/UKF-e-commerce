@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../slices/cartSlice";
+import toast from "react-hot-toast";
 
 export default function ProductDetail() {
   const product = useSelector((state) => state.product.productData);
   const images = product?.images || [];
+
+  const user = useSelector(state =>state.auth.role)
 
   const [isAddingToCart, setIsAddingToCart] = useState(false);
 
@@ -15,6 +18,11 @@ export default function ProductDetail() {
   const cartHandler = async (product) => {
     if (!product || !product._id) {
       console.error("Invalid product data");
+      return;
+    }
+
+    if( user !== 'user') {
+      toast.error("Please log in as a valid user!");
       return;
     }
 

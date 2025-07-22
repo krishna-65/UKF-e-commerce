@@ -34,5 +34,6 @@ export const cartEndpoints = {
   getCart : BASE_URL + "/api/cart/",
   removeFromCart : BASE_URL + "/api/cart/",
   updateCartItem : BASE_URL + "/api/cart/",
-  clearCart : BASE_URL + "/api/cart/clear/"
+  clearCart : BASE_URL + "/api/cart/",
+  bulkCart : BASE_URL + "/api/cart/"
 }

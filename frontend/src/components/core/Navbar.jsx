@@ -16,6 +16,11 @@ import { updateFilter } from "../../slices/filterSlice";
 import CartSidebar from "../rest-comp/CartSidebar";
 import { IoIosLogOut } from "react-icons/io";
 import { resetCart } from "../../slices/cartSlice";
+import { cartEndpoints } from "../../services/api";
+import { apiConnector } from "../../services/apiConnector";
+
+
+const {bulkCart} = cartEndpoints;
 
 const Navbar = () => {
   const dispatch = useDispatch();
@@ -29,25 +34,69 @@ const Navbar = () => {
   const search = useSelector((state) => state.search.searchData);
 
   const cartItems = useSelector((state) => state.cart.totalItems);
+  const cart = useSelector(state => state.cart.cart);
 
-  const logoutHandler = () => {
+   const user = useSelector(state=>state.auth.userData)
+
+   // Add loading state
+   const [isSavingCart, setIsSavingCart] = useState(false);
+
+  // Improved saveCart function
+  const saveCart = async () => {
+    if (!user?._id || cart.length === 0) return;
+
     try {
+      setIsSavingCart(true);
+      
+      const cartItems = cart.map(item => ({
+        productId: item._id, // Assuming product ID is directly on item
+        quantity: item.quantity,
+        price: item.price
+      }));
+
+      console.log("the cart is : ",cart)
+
+      const response = await apiConnector(
+        "POST", 
+        `${bulkCart}${user._id}/bulk`, 
+        { items: cartItems }
+      );
+
+      if (!response.data.success) {
+        throw new Error(response.data.message || "Failed to save cart");
+      }
+
+      toast.success("Cart saved successfully");
+    } catch (error) {
+      console.error("Error saving cart:", error);
+      toast.error("Failed to save cart");
+    } finally {
+      setIsSavingCart(false);
+    }
+  };
+
+  const logoutHandler = async () => {
+    try {
+      if (cart.length > 0) {
+        await saveCart(); // Wait for cart to be saved
+      }
+
+      // Clear local storage
       localStorage.removeItem("token");
       localStorage.removeItem("role");
       localStorage.removeItem("userdata");
-    
 
+      // Clear Redux state
       dispatch(setToken(null));
       dispatch(setUserData(null));
       dispatch(setRole(null));
-      
       dispatch(resetCart());
 
       toast.success("Logged out Successfully!");
       navigate("/");
-    } catch (err) {
-      console.log(err);
-      toast.error("unable to LogOut");
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("Unable to logout. Please try again.");
     }
   };
 
