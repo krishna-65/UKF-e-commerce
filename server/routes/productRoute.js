@@ -1,3 +1,4 @@
+
 // routes/productRoutes.js
 import express from 'express';
 import {
@@ -30,8 +31,10 @@ router.get('/:id', getProductById);
 router.post('/:id/reviews',  addProductReview);
 
 // Admin routes (require admin privileges)
-router.post('/', createProduct);
-router.put('/:id',  updateProduct);
+router.post('/add', createProduct);            // POST /api/products/add
+router.put('/update/:id', updateProduct);
 router.delete('/:id', deleteProduct);
 
 export default router;
+
+
