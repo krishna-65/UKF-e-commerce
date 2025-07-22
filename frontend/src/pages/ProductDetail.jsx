@@ -1,10 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { addToCart } from "../slices/cartSlice";
 
 export default function ProductDetail() {
   const product = useSelector((state) => state.product.productData);
   const images = product?.images || [];
   const [open, setOpen] = useState(images[0]);
+
+  const dispatch = useDispatch();
+
+
+  const cartHandler = (product)=>{
+    dispatch(addToCart(product))
+  }
 
   useEffect(() => {
     if (images.length > 0) setOpen(images[0]);
@@ -126,7 +134,7 @@ export default function ProductDetail() {
 
           {/* Actions */}
           <div className="flex gap-4 mt-4">
-            <button className="bg-[#ecba49] text-black px-6 py-2 cursor-pointer rounded font-semibold hover:opacity-90">
+            <button onClick={()=>cartHandler(product)} className="bg-[#ecba49] text-black px-6 py-2 cursor-pointer rounded font-semibold hover:opacity-90">
               Add to Cart
             </button>
             <button className="border border-[#ecba49] px-6 py-2 rounded duration-500 cursor-pointer font-semibold hover:bg-[#ecba49] hover:text-black">
