@@ -280,15 +280,21 @@ export const clearCart = async (req, res) => {
 
 export const bulkAddToCart = async (req, res) => {
   try {
-    const { items } = req.body;
-    const userId = req.params?.id; // Safe access with optional chaining
+    const { items } = req.body; // Expecting array of { productId, quantity }
+    const userId = req.params.id;
 
-    if (!userId) {
-      return res.status(400).json({
-        success: false,
-        message: 'User ID is required'
-      });
-    }
+// If items is a string, parse it
+if (typeof items === 'string') {
+  try {
+    items = JSON.parse(items);
+  } catch (err) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid items format'
+    });
+  }
+}
+
 
     // Validate user exists
     const user = await User.findById(userId);
@@ -307,42 +313,49 @@ export const bulkAddToCart = async (req, res) => {
       });
     }
 
-    // Validate all items have required fields
-    const invalidItems = items.filter(item => 
-      !item?.productId || !item?.quantity
-    );
-    
-    if (invalidItems.length > 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Each item must have productId and quantity'
-      });
-    }
-
-    // Extract and validate product IDs
-    const productIds = items.map(item => {
-      if (!mongoose.Types.ObjectId.isValid(item.productId)) {
-        return null;
-      }
-      return new mongoose.Types.ObjectId(item.productId);
-    }).filter(Boolean);
-
-    if (productIds.length !== items.length) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid product IDs provided'
-      });
-    }
-
-    // Get all products
-    const products = await Product.find({ _id: { $in: productIds } });
-    const productMap = new Map(
-      products.map(product => [product._id.toString(), product])
-    );
-
-    // Validate stock and prepare updates
+    // Validate all product IDs and quantities
     const validatedItems = [];
+    const productIds = items.map(item => item.productId);
+    
+    // Check for duplicate product IDs in request
+    const uniqueIds = [...new Set(productIds)];
+    if (uniqueIds.length !== productIds.length) {
+      return res.status(400).json({
+        success: false,
+        message: 'Duplicate product IDs in request'
+      });
+    }
+
+    // Get all products at once for efficiency
+    const products = await Product.find({
+      _id: { $in: productIds }
+    }).lean();
+
+    // Create a map for quick product lookup
+    const productMap = new Map();
+    products.forEach(product => {
+      productMap.set(product._id.toString(), product);
+    });
+
+    // Validate each item and prepare for processing
     for (const item of items) {
+      // Validate item structure
+      if (!item.productId || !item.quantity) {
+        return res.status(400).json({
+          success: false,
+          message: 'Each item must have productId and quantity'
+        });
+      }
+
+      // Validate quantity
+      if (typeof item.quantity !== 'number' || item.quantity < 1) {
+        return res.status(400).json({
+          success: false,
+          message: `Invalid quantity for product ${item.productId}`
+        });
+      }
+
+      // Find the product
       const product = productMap.get(item.productId);
       if (!product) {
         return res.status(404).json({
@@ -351,24 +364,18 @@ export const bulkAddToCart = async (req, res) => {
         });
       }
 
-      if (typeof item.quantity !== 'number' || item.quantity < 1) {
-        return res.status(400).json({
-          success: false,
-          message: `Invalid quantity for product ${product.name}`
-        });
-      }
-
+      // Check stock availability
       if (product.stock < item.quantity) {
         return res.status(400).json({
           success: false,
-          message: `Insufficient stock for ${product.name}`
+          message: `Insufficient stock for product: ${product.name}`
         });
       }
 
       validatedItems.push({
-        product: product._id,
+        product: item.productId,
         quantity: item.quantity,
-        productData: {
+        productData: { // Include full product data for new items
           name: product.name,
           price: product.price,
           images: product.images,
@@ -377,51 +384,82 @@ export const bulkAddToCart = async (req, res) => {
       });
     }
 
-    // Process cart updates
-    const updatedCart = user.cartItems.map(item => ({ ...item.toObject() }));
+    // Process cart updates - only update quantity for existing items
+    const updatedCart = [...user.cartItems];
+    const newItems = [];
     
     for (const item of validatedItems) {
-      const existingItem = updatedCart.find(cartItem => 
-        cartItem.product.toString() === item.product.toString()
-      );
+     const existingIndex = updatedCart.findIndex(
+  cartItem => cartItem.product && cartItem.product.toString() === item.product
+);
 
-      if (existingItem) {
-        existingItem.quantity += item.quantity;
+      
+
+      if (existingIndex >= 0) {
+        // Only update quantity if product already in cart
+        updatedCart[existingIndex].quantity += item.quantity;
       } else {
-        updatedCart.push({
+        // Prepare new item with full product data
+        newItems.push({
           product: item.product,
           quantity: item.quantity,
           addedAt: new Date(),
-          productDetails: item.productData
+          productDetails: item.productData // Store essential product details
         });
       }
     }
 
-    user.cartItems = updatedCart;
+    // Combine existing (updated) and new items
+    user.cartItems = [...updatedCart, ...newItems];
     await user.save();
 
-    // Prepare response
-    const responseCart = updatedCart.map(item => ({
-      ...item,
-      product: item.productDetails || productMap.get(item.product.toString())
-    }));
+    // Return populated cart data
+    const resultCart = user.cartItems.map(item => {
+      // For existing items that were updated, we need to populate the product data
+      if (!item.productDetails) {
+        const product = productMap.get(item.product.toString());
+        return {
+          ...item.toObject(),
+          product: {
+            _id: product._id,
+            name: product.name,
+            price: product.price,
+            images: product.images,
+            stock: product.stock
+          }
+        };
+      }
+      // For new items, we already have the product data
+      return {
+        ...item.toObject(),
+        product: {
+          _id: item.product,
+          name: item.productDetails.name,
+          price: item.productDetails.price,
+          images: item.productDetails.images,
+          stock: item.productDetails.stock
+        }
+      };
+    });
 
-    const cartTotal = responseCart.reduce((total, item) => 
-      total + (item.product.price * item.quantity), 0);
+    // Calculate totals
+    const cartTotal = resultCart.reduce((total, item) => {
+      return total + (item.product.price * item.quantity);
+    }, 0);
 
     res.status(200).json({
       success: true,
-      cart: responseCart,
-      totalItems: responseCart.length,
-      cartTotal
+      message: 'Products added to cart successfully',
+      cart: resultCart,
+      totalItems: resultCart.length,
+      cartTotal,
+      newItemsAdded: newItems.length // Additional info about what was added
     });
 
   } catch (error) {
-    console.log(error)
-    console.error('Cart update error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'Internal server error'
+      message: error.message
     });
   }
 };
