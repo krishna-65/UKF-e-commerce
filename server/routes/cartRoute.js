@@ -5,7 +5,8 @@ import {
   removeFromCart,
   getCart,
   updateCartItem,
-  clearCart
+  clearCart,
+  bulkAddToCart
 } from '../controllers/cartController.js';
 
 
@@ -17,5 +18,6 @@ router.delete('/:id', removeFromCart);
 router.get('/:id',  getCart);
 router.put('/:id',  updateCartItem);
 router.delete('/:id/clear',  clearCart);
+router.post('/:id/bulk', bulkAddToCart);
 
 export default router;
