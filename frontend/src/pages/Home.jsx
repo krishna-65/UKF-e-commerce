@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import shirt from '../assets/images/shirts.avif'
 import denim from '../assets/images/denim.jpg'
 import tees from '../assets/images/tees.jpg'
@@ -12,9 +12,18 @@ import forest from '../assets/images/forest.jpeg'
 import { PiPackage } from "react-icons/pi";
 import { PiRecycleThin } from "react-icons/pi";
 import { CiLocationOn } from "react-icons/ci";
+import { useDispatch } from 'react-redux'
+import { clearFilters } from '../slices/filterSlice'
 
 
 const Home = () => {
+
+    const dispatch= useDispatch();
+
+useEffect(()=>{
+    dispatch(clearFilters());
+},[])
+
   return (
     <div className=''>
       {/* HeroSection */}

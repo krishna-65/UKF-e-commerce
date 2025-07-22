@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  productData: null
+  productData: localStorage.getItem('product') ? JSON.parse(localStorage.getItem("product")) : null
 };
 
 const productSlice = createSlice({
@@ -10,6 +10,7 @@ const productSlice = createSlice({
   reducers: {
     setProductData(state, value) {
       state.productData = value.payload;
+      localStorage.setItem("product", JSON.stringify(state.productData))
     },
   },
 });

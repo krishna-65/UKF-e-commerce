@@ -1,5 +1,5 @@
-import { createSlice } from "@reduxjs/toolkit"
-import { toast } from "react-hot-toast"
+import { createSlice } from "@reduxjs/toolkit";
+import { toast } from "react-hot-toast";
 
 const initialState = {
   cart: localStorage.getItem("cart")
@@ -11,56 +11,85 @@ const initialState = {
   totalItems: localStorage.getItem("totalItems")
     ? JSON.parse(localStorage.getItem("totalItems"))
     : 0,
-}
+};
 
 const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
     addToCart: (state, action) => {
-      const item = action.payload
-      
-     
-      state.cart.push(item)
-      // Update the total quantity and price
-      state.totalItems++
-      state.total += item.price
-      // Update to localstorage
-      localStorage.setItem("cart", JSON.stringify(state.cart))
-      localStorage.setItem("total", JSON.stringify(state.total))
-      localStorage.setItem("totalItems", JSON.stringify(state.totalItems))
-      // show toast
-      toast.success("Item added to cart")
-    },
-    removeFromCart: (state, action) => {
-      const itemId = action.payload
-      const index = state.cart.findIndex((item) => item._id === itemId)
+      const newItem = action.payload;
+      const existingItem = state.cart.find((item) => item._id === newItem._id);
 
-      if (index >= 0) {
-        // If the item is found in the cart, remove it
-        state.totalItems--
-        state.total -= state.cart[index].price
-        state.cart.splice(index, 1)
-        // Update to localstorage
-        localStorage.setItem("cart", JSON.stringify(state.cart))
-        localStorage.setItem("total", JSON.stringify(state.total))
-        localStorage.setItem("totalItems", JSON.stringify(state.totalItems))
-        // show toast
-        toast.success("Course removed from cart")
+      if (existingItem) {
+        existingItem.quantity += 1;
+        toast.success("Increased quantity");
+      } else {
+        state.cart.push({ ...newItem, quantity: 1 });
+        toast.success("Item added to cart");
+      }
+
+      state.totalItems += 1;
+      state.total += newItem.price;
+
+      localStorage.setItem("cart", JSON.stringify(state.cart));
+      localStorage.setItem("total", JSON.stringify(state.total));
+      localStorage.setItem("totalItems", JSON.stringify(state.totalItems));
+    },
+
+    decreaseItemQuantity: (state, action) => {
+      const itemId = action.payload;
+      const item = state.cart.find((item) => item._id === itemId);
+
+      if (item) {
+        if (item.quantity > 1) {
+          item.quantity -= 1;
+          state.totalItems -= 1;
+          state.total -= item.price;
+          toast.success("Decreased quantity");
+        } else {
+          toast.error("Minimum quantity is 1");
+        }
+
+        localStorage.setItem("cart", JSON.stringify(state.cart));
+        localStorage.setItem("total", JSON.stringify(state.total));
+        localStorage.setItem("totalItems", JSON.stringify(state.totalItems));
       }
     },
+
+    removeFromCart: (state, action) => {
+      const itemId = action.payload;
+      const index = state.cart.findIndex((item) => item._id === itemId);
+
+      if (index >= 0) {
+        const item = state.cart[index];
+        state.totalItems -= item.quantity;
+        state.total -= item.price * item.quantity;
+        state.cart.splice(index, 1);
+
+        localStorage.setItem("cart", JSON.stringify(state.cart));
+        localStorage.setItem("total", JSON.stringify(state.total));
+        localStorage.setItem("totalItems", JSON.stringify(state.totalItems));
+        toast.success("Item removed from cart");
+      }
+    },
+
     resetCart: (state) => {
-      state.cart = []
-      state.total = 0
-      state.totalItems = 0
-      // Update to localstorage
-      localStorage.removeItem("cart")
-      localStorage.removeItem("total")
-      localStorage.removeItem("totalItems")
+      state.cart = [];
+      state.total = 0;
+      state.totalItems = 0;
+      localStorage.removeItem("cart");
+      localStorage.removeItem("total");
+      localStorage.removeItem("totalItems");
     },
   },
-})
+});
 
-export const { addToCart, removeFromCart, resetCart } = cartSlice.actions
+export const {
+  addToCart,
+  decreaseItemQuantity,
+  removeFromCart,
+  resetCart,
+} = cartSlice.actions;
 
-export default cartSlice.reducer
+export default cartSlice.reducer;
