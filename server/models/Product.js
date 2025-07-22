@@ -1,8 +1,6 @@
 // controllers/productController.js
 import Product from '../models/Product.js';
-import mongoose from 'mongoose';
 
-<<<<<<< HEAD
 // Helper function for building filters
 const buildFilters = (query) => {
   const filters = {};
@@ -61,31 +59,6 @@ const buildFilters = (query) => {
   
   return filters;
 };
-=======
-const productSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  description: { type: String, required: true },
-  price: { type: Number, required: true },
-  stock: { type: Number, required: true },
-  sold: { type: Number, default: 0 }, // Track how much is sold
-  category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
-  brand: { type: String },
-  gender:{type: String, enum: ["Male","Female","Both"], default: "Both"},
-  material: { type: String} ,
-  color: { type: String },
-  size: { type: String },
-  images: [{ type: String }],
-  isFeatured: { type: Boolean, default: false },
-  ratings: { type: Number, default: 0 },
-  reviews: [
-    {
-      user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-      rating: Number,
-      comment: String,
-    }
-  ],
-}, { timestamps: true });
->>>>>>> 4154b35bdca5f500025e4e58a6c286c813d98056
 
 // Create a new product
 export const createProduct = async (req, res) => {
