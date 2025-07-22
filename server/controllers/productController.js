@@ -1,3 +1,4 @@
+
 // controllers/productController.js
 import Product from '../models/Product.js';
 import mongoose from 'mongoose';
@@ -75,7 +76,25 @@ export const createProduct = async (req, res) => {
     if (!req.body.slug) {
       req.body.slug = req.body.name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
     }
-    
+
+     const imageFiles = req.files?.images;
+
+    if (!imageFiles || imageFiles.length === 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No images uploaded" });
+    }
+
+    // Support both single and multiple images
+    const imageArray = Array.isArray(imageFiles) ? imageFiles : [imageFiles];
+
+    const uploadedImages = [];
+
+    for (const file of imageArray) {
+      const cloudRes = await uploadImageToCloudinary(file, "UKF-Products");
+      uploadedImages.push(cloudRes.secure_url);
+    }
+    req.body.lookbookImages = uploadedImages;
     const product = new Product(req.body);
     const savedProduct = await product.save();
     
