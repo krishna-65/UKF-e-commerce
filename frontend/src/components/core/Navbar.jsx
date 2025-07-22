@@ -14,6 +14,8 @@ import accessories from "../../assets/images/accessories.jpg";
 import { setSearchData } from "../../slices/searchSlice";
 import { updateFilter } from "../../slices/filterSlice";
 import CartSidebar from "../rest-comp/CartSidebar";
+import { IoIosLogOut } from "react-icons/io";
+import { resetCart } from "../../slices/cartSlice";
 
 const Navbar = () => {
   const dispatch = useDispatch();
@@ -26,17 +28,20 @@ const Navbar = () => {
   const token = useSelector((state) => state.auth.token);
   const search = useSelector((state) => state.search.searchData);
 
-    const cartItems = useSelector(state=> state.cart.totalItems)
+  const cartItems = useSelector((state) => state.cart.totalItems);
 
   const logoutHandler = () => {
     try {
       localStorage.removeItem("token");
       localStorage.removeItem("role");
       localStorage.removeItem("userdata");
+    
 
       dispatch(setToken(null));
       dispatch(setUserData(null));
       dispatch(setRole(null));
+      
+      dispatch(resetCart());
 
       toast.success("Logged out Successfully!");
       navigate("/");
@@ -55,8 +60,6 @@ const Navbar = () => {
 
     toast.success(`Results for ${searchBar}`);
   };
-
-
 
   return (
     <div className="fixed top-0 w-full z-100">
@@ -94,14 +97,38 @@ const Navbar = () => {
               <div className="opacity-0 group-hover:opacity-100 w-[4vw] h-[1px] bg-[#FFD700]"></div>
             </li>
             <li className="group flex flex-col justify-between">
-              <NavLink to='/products' onClick={()=> dispatch(updateFilter({type:'gender',value:'Female',checked:true}))} className="h-[9vh] flex items-center justify-center w-[4vw] cursor-pointer">
+              <NavLink
+                to="/products"
+                onClick={() =>
+                  dispatch(
+                    updateFilter({
+                      type: "gender",
+                      value: "Female",
+                      checked: true,
+                    })
+                  )
+                }
+                className="h-[9vh] flex items-center justify-center w-[4vw] cursor-pointer"
+              >
                 Women
               </NavLink>
               <div className="opacity-0 group-hover:opacity-100 w-[4vw] h-[1px] bg-[#FFD700]"></div>
             </li>
 
             <li className="group flex flex-col justify-between relative">
-              <NavLink  to='/products' onClick={()=> dispatch(updateFilter({type:'categories',value:'Perfume',checked:true}))} className="h-[9vh] flex items-center justify-center w-[4vw] cursor-pointer">
+              <NavLink
+                to="/products"
+                onClick={() =>
+                  dispatch(
+                    updateFilter({
+                      type: "categories",
+                      value: "Perfume",
+                      checked: true,
+                    })
+                  )
+                }
+                className="h-[9vh] flex items-center justify-center w-[4vw] cursor-pointer"
+              >
                 Perfume
               </NavLink>
               <div className="opacity-0 group-hover:opacity-100 w-[4vw] h-[1px] bg-[#FFD700]"></div>
@@ -109,7 +136,15 @@ const Navbar = () => {
             <li className="group flex flex-col justify-between relative">
               <NavLink
                 to="/products"
-                 onClick={()=> dispatch(updateFilter({type:'categories',value:'Wallet',checked:true}))}
+                onClick={() =>
+                  dispatch(
+                    updateFilter({
+                      type: "categories",
+                      value: "Wallet",
+                      checked: true,
+                    })
+                  )
+                }
                 className="h-[9vh] flex items-center justify-center w-[6vw] cursor-pointer"
               >
                 Accessories
@@ -215,37 +250,22 @@ const Navbar = () => {
             )}
           </div>
 
-          <div className="relative group">
-            <div className="peer cursor-pointer">
-              <FaUser />
-            </div>
-
-            <div
-              className="absolute opacity-0 pointer-events-none w-[150px] h-[150px] bg-[#FFD700] z-[100] left-[-70px] top-[30px] rounded-3xl border border-black shadow-amber-400 
-    transition-opacity duration-1000 ease-out 
-    group-hover:opacity-100 group-hover:pointer-events-auto 
-    flex justify-center items-center"
-            >
-              {token ? (
-                <button
-                  onClick={logoutHandler}
-                  className="text-black cursor-pointer"
-                >
-                  LogOut
-                </button>
-              ) : (
-                <button
-                  onClick={() => navigate("/")}
-                  className="text-black cursor-pointer"
-                >
-                  Signup
-                </button>
-              )}
-            </div>
+          <div className="">
+            {token ? (
+              <div onClick={logoutHandler} className="peer cursor-pointer">
+                <IoIosLogOut />
+              </div>
+            ) : (
+              <div
+                onClick={() => navigate("/")}
+                className="peer cursor-pointer"
+              >
+                <FaUser />
+              </div>
+            )}
           </div>
 
-          
-         <CartSidebar />
+          <CartSidebar />
         </div>
       </div>
 

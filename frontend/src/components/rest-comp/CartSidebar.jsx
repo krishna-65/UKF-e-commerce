@@ -76,7 +76,7 @@ const CartSidebar = () => {
               {displayItems.map((item) => (
                 <div key={item.id} className="flex gap-3 p-4 bg-gray-900 bg-opacity-70 rounded-lg border border-[#FFD700] border-opacity-20">
                   <img 
-                    src={item.images[0].url} 
+                    src={item.images?.[0]?.url} 
                     alt={item.name}
                     className="w-20 h-24 object-cover rounded-md flex-shrink-0"
                   />
@@ -89,11 +89,11 @@ const CartSidebar = () => {
                     
                     <div className="space-y-2">
                       <div className="flex flex-col">
-                        <span className="text-[#FFD700] font-bold text-lg">${item.price}</span>
+                        <span className="text-[#FFD700] font-bold text-lg">₹{item.price}</span>
                         {item.originalPrice && (
                           <div className="flex items-center gap-2">
                             <span className="text-xs text-gray-400 line-through">
-                              ${item.originalPrice}
+                              ₹{item.originalPrice}
                             </span>
                             <span className="text-xs text-red-400 font-semibold">
                               ({item.discount}% Off)
@@ -175,7 +175,7 @@ const CartSidebar = () => {
                 Subtotal ({cart.length} items)
               </span>
               <span className="text-2xl font-bold text-[#FFD700]">
-                {total}
+                ₹{total}
               </span>
             </div>
             
