@@ -1,450 +1,146 @@
-// controllers/productController.js
-import Product from '../models/Product.js';
+// models/Product.js
+import mongoose from 'mongoose';
 
-// Helper function for building filters
-const buildFilters = (query) => {
-  const filters = {};
+const productSchema = new mongoose.Schema({
+  // Basic Information
+  name: { type: String, required: true, trim: true },
+  slug: { type: String, required: true, unique: true, lowercase: true },
+  description: { type: String, required: true },
+  shortDescription: { type: String, maxlength: 160 }, // For meta description
+  sku: { type: String, unique: true }, // Stock Keeping Unit
   
-  // Price range filter
-  if (query.minPrice || query.maxPrice) {
-    filters.price = {};
-    if (query.minPrice) filters.price.$gte = Number(query.minPrice);
-    if (query.maxPrice) filters.price.$lte = Number(query.maxPrice);
-  }
+  // Pricing Information
+  price: { type: Number, required: true },
+  comparePrice: { type: Number }, // Original price for showing discounts
+  costPerItem: { type: Number }, // Cost to the business
+  profitMargin: { type: Number }, // Calculated field
+  taxRate: { type: Number, default: 0 }, // Tax percentage
   
-  // Category filter
-  if (query.category) {
-    filters.category = mongoose.Types.ObjectId(query.category);
-  }
+  // Inventory
+  stock: { type: Number, required: true },
+  sold: { type: Number, default: 0 },
+  lowStockThreshold: { type: Number, default: 5 },
+  trackInventory: { type: Boolean, default: true },
   
-  // Size filter
-  if (query.size) {
-    filters.size = { $in: query.size.split(',') };
-  }
+  // Clothing Specific Attributes
+  category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
+  subCategory: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' }, // For sub-categories like T-Shirts under Men
+  brand: { type: mongoose.Schema.Types.ObjectId, ref: 'Brand' }, // Reference to Brand model
+  size: {
+    type: String,
+    enum: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '4XL', '5XL', 'One Size'],
+    required: true
+  },
+  color: { type: String, required: true },
+  material: { type: String }, // e.g., Cotton, Polyester, etc.
+  fabric: { type: String }, // More specific than material
+  weight: { type: Number }, // In grams
+  fit: { type: String, enum: ['Slim', 'Regular', 'Oversized', 'Relaxed'] },
+  sleeveLength: { type: String, enum: ['Short', 'Half', 'Long', 'Sleeveless'] },
+  pattern: { type: String }, // e.g., Striped, Printed, Solid, etc.
+  occasion: { type: String }, // e.g., Casual, Formal, Party, etc.
+  season: { type: String, enum: ['Summer', 'Winter', 'Spring', 'Fall', 'All Season'] },
+  gender: { type: String, enum: ['Men', 'Women', 'Unisex', 'Kids', 'Boys', 'Girls'] },
+  ageGroup: { type: String }, // For kids clothing
   
-  // Color filter
-  if (query.color) {
-    filters.color = { $in: query.color.split(',') };
-  }
+  // Media
+  images: [{ 
+    url: { type: String, required: true },
+    altText: { type: String },
+    isDefault: { type: Boolean, default: false }
+  }],
+  video: { type: String }, // URL to product video
+  lookbookImages: [{ type: String }], // Styled images
   
-  // Gender filter
-  if (query.gender) {
-    filters.gender = query.gender;
-  }
+  // Variants
+  variants: [{
+    color: String,
+    size: String,
+    price: Number,
+    stock: Number,
+    sku: String,
+    images: [{ type: String }]
+  }],
   
-  // Search term filter
-  if (query.search) {
-    filters.$text = { $search: query.search };
-  }
+  // SEO
+  metaTitle: { type: String },
+  metaDescription: { type: String },
+  keywords: [{ type: String }],
   
-  // Featured products
-  if (query.featured === 'true') {
-    filters.isFeatured = true;
-  }
+  // Display
+  isFeatured: { type: Boolean, default: false },
+  isNewArrival: { type: Boolean, default: false },
+  isBestSeller: { type: Boolean, default: false },
+  isOnSale: { type: Boolean, default: false },
+  featuredOrder: { type: Number }, // For sorting featured products
   
-  // New arrivals
-  if (query.newArrivals === 'true') {
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    filters.createdAt = { $gte: thirtyDaysAgo };
-    filters.isNewArrival = true;
-  }
+  // Ratings & Reviews
+  ratings: {
+    average: { type: Number, default: 0 },
+    count: { type: Number, default: 0 },
+    breakdown: {
+      1: { type: Number, default: 0 },
+      2: { type: Number, default: 0 },
+      3: { type: Number, default: 0 },
+      4: { type: Number, default: 0 },
+      5: { type: Number, default: 0 }
+    }
+  },
+  reviews: [{
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    rating: { type: Number, min: 1, max: 5, required: true },
+    title: { type: String },
+    comment: { type: String, required: true },
+    images: [{ type: String }], // Review images
+    likes: { type: Number, default: 0 },
+    dislikes: { type: Number, default: 0 },
+    verifiedPurchase: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now }
+  }],
   
-  // On sale products
-  if (query.onSale === 'true') {
-    filters.isOnSale = true;
-    filters.saleStartDate = { $lte: new Date() };
-    filters.saleEndDate = { $gte: new Date() };
-  }
+  // Shipping
+  weight: { type: Number }, // In grams
+  shippingClass: { type: String },
+  freeShipping: { type: Boolean, default: false },
   
-  return filters;
-};
+  // Additional Information
+  careInstructions: { type: String },
+  tags: [{ type: String }],
+  customFields: mongoose.Schema.Types.Mixed, // For any additional custom fields
+  
+  // Status
+  status: { type: String, enum: ['draft', 'active', 'archived'], default: 'draft' },
+  
+  // Dates
+  releaseDate: { type: Date }, // For pre-orders
+  saleStartDate: { type: Date },
+  saleEndDate: { type: Date }
+}, { 
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
 
-// Create a new product
-export const createProduct = async (req, res) => {
-  try {
-    // Generate SKU if not provided
-    if (!req.body.sku) {
-      const prefix = req.body.name.substring(0, 3).toUpperCase();
-      const randomNum = Math.floor(1000 + Math.random() * 9000);
-      req.body.sku = `${prefix}-${randomNum}`;
-    }
-    
-    // Generate slug if not provided
-    if (!req.body.slug) {
-      req.body.slug = req.body.name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
-    }
-    
-    const product = new Product(req.body);
-    const savedProduct = await product.save();
-    
-    res.status(201).json({ 
-      success: true, 
-      product: savedProduct 
-    });
-  } catch (error) {
-    res.status(400).json({ 
-      success: false, 
-      message: error.message 
-    });
-  }
-};
+// Virtual for discount percentage
+productSchema.virtual('discountPercentage').get(function() {
+  if (!this.comparePrice || this.comparePrice <= this.price) return 0;
+  return Math.round(((this.comparePrice - this.price) / this.comparePrice) * 100);
+});
 
-// Get all products with pagination and filtering
-export const getAllProducts = async (req, res) => {
-  try {
-    // Pagination
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 12;
-    const skip = (page - 1) * limit;
-    
-    // Sorting
-    let sort = {};
-    if (req.query.sort) {
-      const sortParts = req.query.sort.split(':');
-      sort[sortParts[0]] = sortParts[1] === 'desc' ? -1 : 1;
-    } else {
-      sort = { createdAt: -1 }; // Default sort by newest
-    }
-    
-    // Build filters
-    const filters = buildFilters(req.query);
-    
-    // Get total count for pagination
-    const total = await Product.countDocuments(filters);
-    
-    // Get products with filters, pagination, and sorting
-    const products = await Product.find(filters)
-      .populate('category')
-      .populate('brand')
-      .sort(sort)
-      .skip(skip)
-      .limit(limit);
-    
-    res.json({
-      success: true,
-      total,
-      page,
-      pages: Math.ceil(total / limit),
-      limit,
-      products
-    });
-  } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
-    });
-  }
-};
+// Indexes for better performance
+productSchema.index({ name: 'text', description: 'text', tags: 'text' });
+productSchema.index({ category: 1, isFeatured: 1 });
+productSchema.index({ price: 1 });
+productSchema.index({ ratings: -1 });
 
-// Get single product by ID or slug
-export const getProductById = async (req, res) => {
-  try {
-    let product;
-    
-    // Check if the parameter is an ID or slug
-    if (mongoose.Types.ObjectId.isValid(req.params.id)) {
-      product = await Product.findById(req.params.id)
-        .populate('category')
-        .populate('brand')
-        .populate('reviews.user');
-    } else {
-      product = await Product.findOne({ slug: req.params.id })
-        .populate('category')
-        .populate('brand')
-        .populate('reviews.user');
+// Pre-save hook to calculate profit margin
+productSchema.pre('save', function(next) {
+  if (this.isModified('price') || this.isModified('costPerItem')) {
+    if (this.price && this.costPerItem) {
+      this.profitMargin = ((this.price - this.costPerItem) / this.price) * 100;
     }
-    
-    if (!product) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Product not found" 
-      });
-    }
-    
-    // Get related products (same category)
-    const relatedProducts = await Product.find({
-      category: product.category,
-      _id: { $ne: product._id }
-    }).limit(4);
-    
-    res.json({ 
-      success: true, 
-      product,
-      relatedProducts 
-    });
-  } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
-    });
   }
-};
+  next();
+});
 
-// Update an existing product
-export const updateProduct = async (req, res) => {
-  try {
-    // Don't allow updating SKU
-    if (req.body.sku) {
-      delete req.body.sku;
-    }
-    
-    const updated = await Product.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    ).populate('category').populate('brand');
-    
-    if (!updated) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Product not found" 
-      });
-    }
-    
-    res.json({ 
-      success: true, 
-      product: updated 
-    });
-  } catch (error) {
-    res.status(400).json({ 
-      success: false, 
-      message: error.message 
-    });
-  }
-};
-
-// Delete a product
-export const deleteProduct = async (req, res) => {
-  try {
-    const deleted = await Product.findByIdAndDelete(req.params.id);
-    
-    if (!deleted) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Product not found" 
-      });
-    }
-    
-    res.json({ 
-      success: true, 
-      message: "Product deleted successfully" 
-    });
-  } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
-    });
-  }
-};
-
-// Get featured products
-export const getFeaturedProducts = async (req, res) => {
-  try {
-    const limit = parseInt(req.query.limit) || 8;
-    const products = await Product.find({ isFeatured: true })
-      .limit(limit)
-      .populate('category');
-    
-    res.json({ 
-      success: true, 
-      products 
-    });
-  } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
-    });
-  }
-};
-
-// Get new arrivals
-export const getNewArrivals = async (req, res) => {
-  try {
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
-    const limit = parseInt(req.query.limit) || 8;
-    const products = await Product.find({
-      isNewArrival: true,
-      createdAt: { $gte: thirtyDaysAgo }
-    })
-    .sort({ createdAt: -1 })
-    .limit(limit)
-    .populate('category');
-    
-    res.json({ 
-      success: true, 
-      products 
-    });
-  } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
-    });
-  }
-};
-
-// Get products on sale
-export const getProductsOnSale = async (req, res) => {
-  try {
-    const limit = parseInt(req.query.limit) || 8;
-    const products = await Product.find({
-      isOnSale: true,
-      saleStartDate: { $lte: new Date() },
-      saleEndDate: { $gte: new Date() }
-    })
-    .sort({ discountPercentage: -1 })
-    .limit(limit)
-    .populate('category');
-    
-    res.json({ 
-      success: true, 
-      products 
-    });
-  } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
-    });
-  }
-};
-
-// Add or update a review
-export const addProductReview = async (req, res) => {
-  try {
-    const { rating, comment, title } = req.body;
-    const userId = req.user._id; // Assuming you have user auth
-    
-    const product = await Product.findById(req.params.id);
-    
-    if (!product) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Product not found" 
-      });
-    }
-    
-    // Check if user already reviewed this product
-    const existingReviewIndex = product.reviews.findIndex(
-      r => r.user.toString() === userId.toString()
-    );
-    
-    const review = {
-      user: userId,
-      rating: Number(rating),
-      title,
-      comment,
-      verifiedPurchase: true // You might want to verify if user actually purchased
-    };
-    
-    if (existingReviewIndex >= 0) {
-      // Update existing review
-      product.reviews[existingReviewIndex] = review;
-    } else {
-      // Add new review
-      product.reviews.push(review);
-    }
-    
-    // Recalculate average rating
-    const totalRatings = product.reviews.reduce(
-      (acc, item) => item.rating + acc, 0
-    );
-    product.ratings.average = totalRatings / product.reviews.length;
-    
-    // Update rating breakdown
-    product.ratings.breakdown = {
-      1: product.reviews.filter(r => r.rating === 1).length,
-      2: product.reviews.filter(r => r.rating === 2).length,
-      3: product.reviews.filter(r => r.rating === 3).length,
-      4: product.reviews.filter(r => r.rating === 4).length,
-      5: product.reviews.filter(r => r.rating === 5).length
-    };
-    
-    product.ratings.count = product.reviews.length;
-    
-    await product.save();
-    
-    res.json({ 
-      success: true, 
-      product 
-    });
-  } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
-    });
-  }
-};
-
-// Get product statistics
-export const getProductStats = async (req, res) => {
-  try {
-    const stats = await Product.aggregate([
-      {
-        $group: {
-          _id: null,
-          totalProducts: { $sum: 1 },
-          totalStock: { $sum: "$stock" },
-          totalSold: { $sum: "$sold" },
-          averagePrice: { $avg: "$price" },
-          minPrice: { $min: "$price" },
-          maxPrice: { $max: "$price" }
-        }
-      },
-      {
-        $project: {
-          _id: 0,
-          totalProducts: 1,
-          totalStock: 1,
-          totalSold: 1,
-          averagePrice: { $round: ["$averagePrice", 2] },
-          minPrice: 1,
-          maxPrice: 1
-        }
-      }
-    ]);
-    
-    res.json({ 
-      success: true, 
-      stats: stats[0] || {} 
-    });
-  } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
-    });
-  }
-};
-
-// Search products
-export const searchProducts = async (req, res) => {
-  try {
-    const { query } = req.query;
-    
-    if (!query) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Search query is required" 
-      });
-    }
-    
-    const products = await Product.find(
-      { $text: { $search: query } },
-      { score: { $meta: "textScore" } }
-    )
-    .sort({ score: { $meta: "textScore" } })
-    .limit(10)
-    .populate('category');
-    
-    res.json({ 
-      success: true, 
-      products 
-    });
-  } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
-    });
-  }
-};
+export default mongoose.model('Product', productSchema);

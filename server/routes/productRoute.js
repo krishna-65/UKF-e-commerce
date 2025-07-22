@@ -13,7 +13,7 @@ import {
   getProductStats,
   searchProducts
 } from '../controllers/productController.js';
-import { protect, admin } from '../middleware/authMiddleware.js'; // Assuming you have auth middleware
+// Assuming you have auth middleware
 
 const router = express.Router();
 
@@ -27,7 +27,7 @@ router.get('/stats', getProductStats);
 router.get('/:id', getProductById);
 
 // Protected routes (require authentication)
-router.post('/:id/reviews', protect, addProductReview);
+router.post('/:id/reviews',  addProductReview);
 
 // Admin routes (require admin privileges)
 router.post('/', createProduct);
