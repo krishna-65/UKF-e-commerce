@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import logo from "../../assets/images/LOGO.jpg";
 import { FaSearch } from "react-icons/fa";
 import { FaUser } from "react-icons/fa";
@@ -54,6 +54,7 @@ const Navbar = () => {
 
     toast.success(`Results for ${searchBar}`);
   };
+
 
   return (
     <div className="fixed top-0 w-full z-100">
@@ -245,7 +246,7 @@ const Navbar = () => {
           <div className="relative">
             <FaShoppingCart />
             {
-                cartItems && <div className="absolute z-[200] w-4 h-4 bg-red-500 rounded-full top-0 right-0 -translate-y-1/2 translate-x-1/2"> {cartItems   } </div>
+                cartItems && <div className="absolute z-[200] w-4 h-4 bg-red-500 rounded-full top-0 right-0 -translate-y-1/2 translate-x-1/2"> {cartItems} </div>
             
             }
             </div>
