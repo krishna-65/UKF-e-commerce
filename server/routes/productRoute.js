@@ -2,16 +2,36 @@
 import express from 'express';
 import {
   createProduct,
-  updateProduct,
   getAllProducts,
-  getProductById
+  getProductById,
+  updateProduct,
+  deleteProduct,
+  getFeaturedProducts,
+  getNewArrivals,
+  getProductsOnSale,
+  addProductReview,
+  getProductStats,
+  searchProducts
 } from '../controllers/productController.js';
+import { protect, admin } from '../middleware/authMiddleware.js'; // Assuming you have auth middleware
 
 const router = express.Router();
 
-router.post('/add', createProduct);            // POST /api/products/add
-router.put('/update/:id', updateProduct);      // PUT  /api/products/update/:id
-router.get('/', getAllProducts);               // GET  /api/products/
-router.get('/:id', getProductById);            // GET  /api/products/:id
+// Public routes
+router.get('/', getAllProducts);
+router.get('/search', searchProducts);
+router.get('/featured', getFeaturedProducts);
+router.get('/new-arrivals', getNewArrivals);
+router.get('/on-sale', getProductsOnSale);
+router.get('/stats', getProductStats);
+router.get('/:id', getProductById);
+
+// Protected routes (require authentication)
+router.post('/:id/reviews', protect, addProductReview);
+
+// Admin routes (require admin privileges)
+router.post('/', createProduct);
+router.put('/:id',  updateProduct);
+router.delete('/:id', deleteProduct);
 
 export default router;
