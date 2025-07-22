@@ -109,19 +109,50 @@ export const getAllProducts = async (req, res) => {
     }
     
     // Build filters
-    const filters = buildFilters(req.query);
+const filters = {};
+    if (req.query.category) filters.category = req.query.category;
+    if (req.query.status) filters.status = req.query.status;
+    if (req.query.search) {
+      filters.$or = [
+        { name: { $regex: req.query.search, $options: 'i' } },
+        { description: { $regex: req.query.search, $options: 'i' } }
+      ];
+    }
     
     // Get total count for pagination
     const total = await Product.countDocuments(filters);
     
     // Get products with filters, pagination, and sorting
-    const products = await Product.find(filters)
+  const products = await Product.find(filters)
       .populate('category')
-      .populate('brand')
-      .sort(sort)
       .skip(skip)
-      .limit(limit);
-    
+      .limit(limit)
+      .lean() // Convert to plain JavaScript objects
+      .then(products => products.map(product => ({
+        ...product,
+        // Fix image URLs
+        images: product.images.map(img => {
+          // If image is already a string, return as is
+          if (typeof img === 'string') return { url: img, isDefault: false };
+          
+          // If image is broken into characters, reconstruct
+          if (img['0']) {
+            const url = Object.keys(img)
+              .filter(k => !isNaN(k))
+              .sort((a, b) => a - b)
+              .map(k => img[k])
+              .join('');
+            return { 
+              url, 
+              isDefault: img.isDefault || false,
+              _id: img._id 
+            };
+          }
+          
+          return img;
+        })
+      })));
+
     res.json({
       success: true,
       total,
