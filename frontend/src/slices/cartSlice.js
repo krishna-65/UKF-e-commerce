@@ -1,6 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { toast } from "react-hot-toast";
 
+
+
 const initialState = {
   cart: localStorage.getItem("cart")
     ? JSON.parse(localStorage.getItem("cart"))
@@ -20,6 +22,8 @@ const cartSlice = createSlice({
     addToCart: (state, action) => {
       const newItem = action.payload;
       const existingItem = state.cart.find((item) => item._id === newItem._id);
+
+      
 
       if (existingItem) {
         existingItem.quantity += 1;

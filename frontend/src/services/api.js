@@ -26,3 +26,13 @@ export const productEndpoints = {
   getProduct : BASE_URL + "/api/product/",
   updateProduct : BASE_URL + "/api/product/update/",
 }
+
+//cart endopints
+
+export const cartEndpoints = {
+  addToCart : BASE_URL + "/api/cart/",
+  getCart : BASE_URL + "/api/cart/",
+  removeFromCart : BASE_URL + "/api/cart/",
+  updateCartItem : BASE_URL + "/api/cart/",
+  clearCart : BASE_URL + "/api/cart/clear/"
+}

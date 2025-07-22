@@ -34,6 +34,8 @@ export default function ProductDetail() {
     }
   };
 
+  
+
   useEffect(() => {
     if (images.length > 0) setOpen(images[0].url);
   }, [images]);
