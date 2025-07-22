@@ -122,3 +122,8 @@ export const updateProfile = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+export const addToCart  = async (req,res) =>{
+    const {productId} = req.body;
+      const userId = req.params.id; 
+}
