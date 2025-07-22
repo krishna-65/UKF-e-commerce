@@ -62,6 +62,8 @@ const Navbar = () => {
         { items: cartItems }
       );
 
+      console.log("save cart response",response)
+
       if (!response.data.success) {
         throw new Error(response.data.message || "Failed to save cart");
       }

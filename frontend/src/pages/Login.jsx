@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setLoading, setRole, setToken, setUserData } from '../slices/authSlice';
 import { apiConnector } from '../services/apiConnector';
-import { endpoints } from '../services/api';
+import { cartEndpoints, endpoints } from '../services/api';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import { addToCart } from '../slices/cartSlice';
 
 
 const { LOGIN_API } = endpoints;
-
+const {getCart} = cartEndpoints;
 
 
 export default function Login() {
@@ -21,7 +22,7 @@ export default function Login() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
- 
+   
 
   const handleChange = (e) => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
@@ -34,17 +35,23 @@ export default function Login() {
 
         dispatch(setLoading(true));
       const response = await apiConnector("POST", LOGIN_API, credentials);
-
-    
+      const user = response.data.user;
+      const response2 = await apiConnector("GET",`${getCart}/${user._id}`);
 
 
       console.log(response);
+
+      console.log("this is get cart",response2);
 
       toast.success("Logged in Successfully!");
 
         dispatch(setUserData(response.data.user))
         dispatch(setToken(response.data.user.token))
         dispatch(setRole(response.data.user.accountType))
+        
+        response2.data.cart.map((product)=>{
+          dispatch(addToCart(product.product));
+        })
 
       setCredentials({
 
