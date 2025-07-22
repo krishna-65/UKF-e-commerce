@@ -5,14 +5,34 @@ import { addToCart } from "../slices/cartSlice";
 export default function ProductDetail() {
   const product = useSelector((state) => state.product.productData);
   const images = product?.images || [];
+
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+
   const [open, setOpen] = useState(images[0]);
 
   const dispatch = useDispatch();
 
+  const cartHandler = async (product) => {
+    if (!product || !product.id) {
+      console.error("Invalid product data");
+      return;
+    }
 
-  const cartHandler = (product)=>{
-    dispatch(addToCart(product))
-  }
+    if (product.stock <= 0) {
+      alert("Product is out of stock");
+      return;
+    }
+
+    try {
+      setIsAddingToCart(true);
+      dispatch(addToCart(product));
+      // Optional: Show success message
+    } catch (error) {
+      console.error("Failed to add to cart:", error);
+    } finally {
+      setIsAddingToCart(false);
+    }
+  };
 
   useEffect(() => {
     if (images.length > 0) setOpen(images[0]);
@@ -134,8 +154,12 @@ export default function ProductDetail() {
 
           {/* Actions */}
           <div className="flex gap-4 mt-4">
-            <button onClick={()=>cartHandler(product)} className="bg-[#ecba49] text-black px-6 py-2 cursor-pointer rounded font-semibold hover:opacity-90">
-              Add to Cart
+            <button
+              onClick={() => cartHandler(product)}
+              disabled={!product || product.stock <= 0 || isAddingToCart}
+              className="bg-[#ecba49] text-black px-6 py-2 rounded font-semibold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isAddingToCart ? "Adding..." : "Add to Cart"}
             </button>
             <button className="border border-[#ecba49] px-6 py-2 rounded duration-500 cursor-pointer font-semibold hover:bg-[#ecba49] hover:text-black">
               Buy Now

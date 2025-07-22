@@ -25,7 +25,7 @@ const Navbar = () => {
   const token = useSelector((state) => state.auth.token);
   const search = useSelector((state) => state.search.searchData);
 
-    const cartItems = useSelector(state=> state.auth.totalItems)
+    const cartItems = useSelector(state=> state.cart.totalItems)
 
   const logoutHandler = () => {
     try {
@@ -54,6 +54,7 @@ const Navbar = () => {
 
     toast.success(`Results for ${searchBar}`);
   };
+
 
 
   return (
@@ -246,7 +247,7 @@ const Navbar = () => {
           <div className="relative">
             <FaShoppingCart />
             {
-                cartItems && <div className="absolute z-[200] w-4 h-4 bg-red-500 rounded-full top-0 right-0 -translate-y-1/2 translate-x-1/2"> {cartItems} </div>
+                cartItems && <div className="absolute z-[200] w-5 h-5 bg-[#FFD700] rounded-full top-0 right-0 text-sm text-black -translate-y-1/2 translate-x-1/2 flex justify-center items-center"> {cartItems} </div>
             
             }
             </div>
