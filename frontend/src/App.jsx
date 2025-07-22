@@ -6,6 +6,15 @@ import Footer from './components/core/Footer'
 import Signup from './pages/Signup'
 import Login from './pages/Login'
 import ScrollToTop from './pages/Scrolltotop'
+import AdminLayout from './pages/AdminLayout'
+import AdminDashboard from './pages/AdminDashboard'
+import AddProduct from './pages/AddProduct'
+import ManageProduct from './pages/ManageProduct'
+import AddCategory from './pages/AddCategory'
+import ViewUsers from './pages/ViewUsers'
+import AboutUs from './pages/AboutUs'
+import Products from './pages/Products'
+import ProductDetail from './pages/ProductDetail'
 
 
 const App = () => {
@@ -13,16 +22,32 @@ const App = () => {
  
 
   return (
-    <div >
+    <div className='relative' >
 
-    <Navbar/>
+    <Navbar  />
+
       <ScrollToTop />
-      <Routes>
+
+      <div className='mt-[10vh] lg:mt-[17vh]'>
+        <Routes >
         <Route path="/" element={<Signup/>}/>
         <Route path="/home" element={<Home/>}/>
         <Route path="/login" element={<Login/>}/>
-      </Routes>
+        <Route path="/about" element={<AboutUs/>}/>
 
+         <Route path="/admindashboard" element={<AdminLayout />}>
+        <Route index element={<AdminDashboard />} />
+        <Route path="addproduct" element={<AddProduct />} />
+        <Route path="manageproduct" element={<ManageProduct />} />
+        <Route path="addcategory" element={<AddCategory/>} />
+        <Route path="viewusers" element={<ViewUsers />} />
+      </Route>
+
+      <Route path="/products" element={<Products/>}/>
+      <Route path="/productdetail" element={<ProductDetail/>}/>
+      </Routes>
+      </div>
+      
       <Footer/>
     </div>
   )

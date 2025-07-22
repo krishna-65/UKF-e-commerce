@@ -13,6 +13,8 @@ export default function Signup() {
     const loading = useSelector((state)=>state.auth.loading)
     const token = useSelector(state=>state.auth.token);
      const userData = useSelector(state => state.auth.userData)
+     const accountType = useSelector(state => state.auth.role)
+
     const dispatch = useDispatch();
 
   const [formData, setFormData] = useState({
@@ -49,7 +51,12 @@ export default function Signup() {
         password: "",
       });
 
-      navigate("/");
+      if(response.data.user.accountType === "user"){
+      navigate("/Home");
+      }
+      else{
+        navigate("/admindashboard")
+      }
     } catch (err) {
       console.log(err);
       toast.error("Unable to register!");
@@ -60,7 +67,12 @@ export default function Signup() {
 
   useEffect(()=>{
   if(token){
-    navigate("/home");
+    if(accountType === "admin"){
+      navigate("/admindashboard");
+      }
+      else{
+        navigate("/Home")
+      };
     toast.success(`Welcome! ${userData.name}`);
   }
   },[])

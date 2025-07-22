@@ -47,10 +47,15 @@ export default function Login() {
         password: "",
       });
 
-      navigate("/");
+      if(response.data.user.accountType === "user"){
+      navigate("/Home");
+      }
+      else{
+        navigate("/admindashboard")
+      }
     } catch (err) {
       console.log(err);
-      toast.error("Unable to register!");
+      toast.error("Unable to login!");
     }finally{
         dispatch(setLoading(false))
     }

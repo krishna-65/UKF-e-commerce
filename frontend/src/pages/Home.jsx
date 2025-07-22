@@ -16,7 +16,7 @@ import { CiLocationOn } from "react-icons/ci";
 
 const Home = () => {
   return (
-    <div>
+    <div className=''>
       {/* HeroSection */}
 
         <div className='w-full h-full relative'>

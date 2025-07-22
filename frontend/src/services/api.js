@@ -9,3 +9,20 @@ export const endpoints = {
   
 }
 
+//category endpoints
+
+export const categoryEndpoints = {
+  createCategory : BASE_URL + "/api/category/",
+  getAllCategory : BASE_URL + "/api/category/",
+  getCategory : BASE_URL + "/api/category/",
+  updateCategory : BASE_URL + "/api/category/",
+}
+
+//product endpoints
+
+export const productEndpoints = {
+  createProduct : BASE_URL + "/api/product/add",
+  getAllProduct : BASE_URL + "/api/product/",
+  getProduct : BASE_URL + "/api/product/",
+  updateProduct : BASE_URL + "/api/product/update/",
+}
