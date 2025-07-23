@@ -1,75 +1,83 @@
-import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { setLoading, setRole, setToken, setUserData } from '../slices/authSlice';
-import { apiConnector } from '../services/apiConnector';
-import { cartEndpoints, endpoints } from '../services/api';
-import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
-import { addToCart } from '../slices/cartSlice';
-
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  setLoading,
+  setRole,
+  setToken,
+  setUserData,
+} from "../slices/authSlice";
+import { apiConnector } from "../services/apiConnector";
+import { cartEndpoints, endpoints } from "../services/api";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import { addToCart } from "../slices/cartSlice";
 
 const { LOGIN_API } = endpoints;
-const {getCart} = cartEndpoints;
-
+const { getCart } = cartEndpoints;
 
 export default function Login() {
   const [credentials, setCredentials] = useState({
-    phone: '',
-    password: '',
+    phone: "",
+    password: "",
   });
 
-  const loading = useSelector(state=>state.auth.loading)
+  const loading = useSelector((state) => state.auth.loading);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
-   
 
   const handleChange = (e) => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
   };
 
- const handleLogin = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
-
-        dispatch(setLoading(true));
+      dispatch(setLoading(true));
       const response = await apiConnector("POST", LOGIN_API, credentials);
       const user = response.data.user;
-      const response2 = await apiConnector("GET",`${getCart}/${user._id}`);
+        console.log(response);
 
+        toast.success("Logged in Successfully!");
 
-      console.log(response);
+      dispatch(setUserData(response.data.user));
+      dispatch(setToken(response.data.user.token));
+      dispatch(setRole(response.data.user.accountType));
 
-      console.log("this is get cart",response2);
+      if(response.data.user.accountType === "user") {
+          const response2 = await apiConnector("GET", `${getCart}/${user._id}`);
+          console.log("this is get cart", response2);
+           response2.data.cart.forEach((entry) => {
+        const completeProduct = {
+          ...entry.product,
+          quantity: entry.quantity,
+        };
+        dispatch(addToCart(completeProduct));
+      });
+      }
+    
 
-      toast.success("Logged in Successfully!");
+      
 
-        dispatch(setUserData(response.data.user))
-        dispatch(setToken(response.data.user.token))
-        dispatch(setRole(response.data.user.accountType))
-        
-        response2.data.cart.map((product)=>{
-          dispatch(addToCart(product.product));
-        })
+    
+
+     
 
       setCredentials({
-
         phone: "",
         password: "",
       });
 
-      if(response.data.user.accountType === "user"){
-      navigate("/Home");
-      }
-      else{
-        navigate("/admindashboard")
+      if (response.data.user.accountType === "user") {
+        navigate("/Home");
+      } else {
+        navigate("/admindashboard");
       }
     } catch (err) {
       console.log(err);
       toast.error("Unable to login!");
-    }finally{
-        dispatch(setLoading(false))
+    } finally {
+      dispatch(setLoading(false));
     }
   };
 
@@ -113,13 +121,14 @@ export default function Login() {
           type="submit"
           className="w-full py-3 bg-[#FFD700] text-black font-semibold rounded hover:bg-slate-700 hover:text-[#FFD700] transition-all duration-300"
         >
-          {
-            loading ? (<div className="loader1"></div>):(<>LogIn</>)
-          }
+          {loading ? <div className="loader1"></div> : <>LogIn</>}
         </button>
 
-          <div className=" w-[full] flex justify-center mt-5 cursor-pointer underline" onClick={()=>navigate('/')}>
-            Register an account
+        <div
+          className=" w-[full] flex justify-center mt-5 cursor-pointer underline"
+          onClick={() => navigate("/")}
+        >
+          Register an account
         </div>
       </form>
     </div>

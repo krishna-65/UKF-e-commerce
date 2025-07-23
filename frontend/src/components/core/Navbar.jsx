@@ -79,9 +79,12 @@ const Navbar = () => {
 
   const logoutHandler = async () => {
     try {
+
+      if(user.accountType === "user"){
       if (cart.length > 0) {
         await saveCart(); // Wait for cart to be saved
       }
+    }
 
       // Clear local storage
       localStorage.removeItem("token");
@@ -216,7 +219,8 @@ const Navbar = () => {
         </div>
 
         <div className="flex gap-4 text-xl">
-          <div className=" relative">
+          {
+            user?.accountType === 'user' && <div className=" relative">
             <FaSearch onClick={() => setShowSearch(!showSearch)} />
             {showSearch && (
               <div className=" absolute  top-11  left-[-71vw] lg:left-[-1404px] z-[102] shadow-2xl w-[100vw] pb-10 bg-[#FFD700]">
@@ -300,6 +304,7 @@ const Navbar = () => {
               </div>
             )}
           </div>
+          }
 
           <div className="">
             {token ? (
@@ -316,7 +321,7 @@ const Navbar = () => {
             )}
           </div>
 
-          <CartSidebar />
+          {user?.accountType === "user" && <CartSidebar /> }
         </div>
       </div>
 

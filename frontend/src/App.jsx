@@ -9,12 +9,13 @@ import ScrollToTop from './pages/Scrolltotop'
 import AdminLayout from './pages/AdminLayout'
 import AdminDashboard from './pages/AdminDashboard'
 import AddProduct from './pages/AddProduct'
-import ManageProduct from './pages/ManageProduct'
+
 import AddCategory from './pages/AddCategory'
 import ViewUsers from './pages/ViewUsers'
 import AboutUs from './pages/AboutUs'
 import Products from './pages/Products'
 import ProductDetail from './pages/ProductDetail'
+import Brands from './pages/Addbrand'
 
 
 const App = () => {
@@ -38,8 +39,9 @@ const App = () => {
          <Route path="/admindashboard" element={<AdminLayout />}>
         <Route index element={<AdminDashboard />} />
         <Route path="addproduct" element={<AddProduct />} />
-        <Route path="manageproduct" element={<ManageProduct />} />
+     
         <Route path="addcategory" element={<AddCategory/>} />
+        <Route path='addbrands' element={<Brands/>}/>
         <Route path="viewusers" element={<ViewUsers />} />
       </Route>
 

@@ -37,3 +37,11 @@ export const cartEndpoints = {
   clearCart : BASE_URL + "/api/cart/",
   bulkCart : BASE_URL + "/api/cart/"
 }
+
+// brands endpoints
+
+export const brandEndpoints = {
+  getAllBrands : "",
+  createBrand : "",
+  updateBrand : "",
+}

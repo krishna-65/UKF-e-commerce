@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FaShoppingCart, FaTimes, FaPlus, FaMinus, FaTrash } from 'react-icons/fa';
 import { useSelector, useDispatch } from 'react-redux';
+import { addToCart, decreaseItemQuantity, removeFromCart } from '../../slices/cartSlice';
 
 const CartSidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -106,7 +107,7 @@ const CartSidebar = () => {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <button 
-                            onClick={() => updateQuantity(item.id, -1)}
+                            onClick={() => dispatch(decreaseItemQuantity(item))}
                             className="w-8 h-8 bg-[#FFD700] text-black rounded-full flex items-center justify-center text-sm font-bold hover:bg-yellow-500 transition-colors"
                           >
                             <FaMinus />
@@ -115,7 +116,7 @@ const CartSidebar = () => {
                             {item.quantity}
                           </span>
                           <button 
-                            onClick={() => updateQuantity(item.id, 1)}
+                            onClick={() => dispatch(addToCart(item))}
                             className="w-8 h-8 bg-[#FFD700] text-black rounded-full flex items-center justify-center text-sm font-bold hover:bg-yellow-500 transition-colors"
                           >
                             <FaPlus />
@@ -124,7 +125,7 @@ const CartSidebar = () => {
                         
                         {/* Remove Button */}
                         <button 
-                          onClick={() => removeItem(item.id)}
+                          onClick={() => dispatch(removeFromCart(item))}
                           className="text-red-400 hover:text-red-300 p-2 hover:bg-red-900 hover:bg-opacity-20 rounded transition-colors"
                         >
                           <FaTrash className="text-sm" />
@@ -177,14 +178,14 @@ const CartSidebar = () => {
               <span className="text-2xl font-bold text-[#FFD700]">
                 ₹{total}
               </span>
-            </div>
+            </div > 
             
-            <button className="w-full bg-[#FFD700] text-black py-4 rounded-lg font-bold text-base hover:bg-yellow-500 transition-colors mb-3 shadow-lg">
+            <button className="w-full bg-[#FFD700] text-black py-4 rounded-lg font-bold text-base hover:bg-yellow-500 transition-colors  shadow-lg">
               CONTINUE TO CHECKOUT
             </button>
             
-            <p className="text-center text-xs text-gray-400">
-              Psst, get it now before it sells out.
+            <p className="text-center text-xs text-gray-400 mb-6 mt-2">
+              ASAP, get it now before it sells out.
             </p>
           </div>
         </div>
