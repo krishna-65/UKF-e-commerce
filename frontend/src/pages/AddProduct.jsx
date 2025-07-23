@@ -2,13 +2,17 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setLoading } from "../slices/authSlice";
 import { apiConnector } from "../services/apiConnector";
-import { brandEndpoints, categoryEndpoints, productEndpoints } from "../services/api";
+import {
+  brandEndpoints,
+  categoryEndpoints,
+  productEndpoints,
+} from "../services/api";
 import toast from "react-hot-toast";
 
 const { getAllCategory } = categoryEndpoints;
-const { createProduct, getAllProduct, updateProduct,deleteProduct } = productEndpoints;
+const { createProduct, getAllProduct, updateProduct, deleteProduct } =
+  productEndpoints;
 const { getAllBrands } = brandEndpoints;
-
 
 const AddProduct = () => {
   const dispatch = useDispatch();
@@ -49,7 +53,7 @@ const AddProduct = () => {
     isNewArrival: false,
     isBestSeller: false,
     isOnSale: false,
-    lookbookImages: []
+    lookbookImages: [],
   });
 
   const [imageInputs, setImageInputs] = useState([0]);
@@ -72,7 +76,7 @@ const AddProduct = () => {
     try {
       dispatch(setLoading(true));
       const res = await apiConnector("GET", getAllProduct);
-      console.log("Products fetched :",res)
+      console.log("Products fetched :", res);
       setProducts(res.data.products);
       setFiltered(res.data.products);
       toast.success("Products loaded!");
@@ -84,7 +88,7 @@ const AddProduct = () => {
   };
   const [brands, setBrands] = useState([]);
 
-   const fetchBrands = async () => {
+  const fetchBrands = async () => {
     try {
       dispatch(setLoading(true));
       const res = await apiConnector("GET", getAllBrands);
@@ -101,7 +105,6 @@ const AddProduct = () => {
     getAllCategories();
     getAllProducts();
     fetchBrands();
-    
   }, []);
 
   useEffect(() => {
@@ -122,26 +125,27 @@ const AddProduct = () => {
   };
 
   const handleDeleteProduct = async (id) => {
-  try {
-    dispatch(setLoading(true));
-    const confirm = window.confirm("Are you sure you want to delete this product?");
-    if (!confirm) return;
+    try {
+      dispatch(setLoading(true));
+      const confirm = window.confirm(
+        "Are you sure you want to delete this product?"
+      );
+      if (!confirm) return;
 
-    const res = await apiConnector("DELETE", `${deleteProduct}${id}`);
-    if (res.data.success) {
-      toast.success("Product deleted successfully!");
-      getAllProducts(); // Refresh table
-    } else {
-      toast.error("Deletion failed");
+      const res = await apiConnector("DELETE", `${deleteProduct}${id}`);
+      if (res.data.success) {
+        toast.success("Product deleted successfully!");
+        getAllProducts(); // Refresh table
+      } else {
+        toast.error("Deletion failed");
+      }
+    } catch (err) {
+      console.log(err);
+      toast.error("Something went wrong");
+    } finally {
+      dispatch(setLoading(false));
     }
-  } catch (err) {
-    console.log(err);
-    toast.error("Something went wrong");
-  } finally {
-    dispatch(setLoading(false));
-  }
-};
-
+  };
 
   const handleAddMoreImages = () => {
     setImageInputs((prev) => [...prev, prev.length]);
@@ -176,7 +180,7 @@ const AddProduct = () => {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      console.log("response for submit is ",response);
+      console.log("response for submit is ", response);
 
       toast.success(edit ? "Product updated!" : "Product created!");
       setShowAddModal(false);
@@ -221,7 +225,7 @@ const AddProduct = () => {
       isNewArrival: prod.isNewArrival || false,
       isBestSeller: prod.isBestSeller || false,
       isOnSale: prod.isOnSale || false,
-      lookbookImages: prod.lookbookImages || []
+      lookbookImages: prod.lookbookImages || [],
     });
     setImages({});
     setImageInputs([0]);
@@ -260,7 +264,7 @@ const AddProduct = () => {
               isNewArrival: false,
               isBestSeller: false,
               isOnSale: false,
-              lookbookImages: []
+              lookbookImages: [],
             });
             setImages({});
             setImageInputs([0]);
@@ -280,201 +284,258 @@ const AddProduct = () => {
         className="mb-4 w-full p-2 border rounded"
       />
 
-     {loading ? (
-  <div className="w-full h-[50vh] flex justify-center items-center">
-    <div className="spinner"></div>
-  </div>
-) : (
-  <div className="overflow-x-auto shadow-lg rounded-lg">
-    <table className="lg:min-w-[700px] w-full bg-white rounded">
-      <thead className="bg-[#FFD770]">
-        <tr>
-          <th className="px-4 py-2 text-left">Sr. No.</th>
-          <th className="px-4 py-2 text-left">Name</th>
-          <th className="px-4 py-2 text-left">Price</th>
-          <th className="px-4 py-2 hidden lg:table-cell text-left">Stock</th>
-          <th className="px-4 py-2 hidden lg:table-cell text-left">Category</th>
-          <th className="px-4 py-2 hidden lg:table-cell text-left">Brand</th>
-          <th className="px-4 py-2 text-left">Status</th>
-          <th className="px-4 py-2 text-left">Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        {Array.isArray(filtered) && filtered.length > 0 ? (
-          filtered.map((prod, idx) => (
-            <tr key={prod._id} className="border-t">
-              <td className="px-4 py-2">{idx + 1}</td>
-              <td className="px-4 py-2">{prod.name}</td>
-              <td className="px-4 py-2">₹{prod.price}</td>
-              <td className="px-4 hidden lg:table-cell py-2">{prod.stock}</td>
-              <td className="px-4 hidden lg:table-cell py-2">{prod.category?.name}</td>
-              <td className="px-4 hidden lg:table-cell py-2">{prod.brand?.name}</td>
-              <td className="px-4 py-2 capitalize">{prod.status}</td>
-              <td className="px-4 py-2 flex gap-2">
-  <button
-    className="bg-[#FFD770] text-black px-3 py-1 rounded hover:brightness-110"
-    onClick={() => handleEditOpen(prod)}
-  >
-    Edit
-  </button>
-  <button
-    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-    onClick={() => handleDeleteProduct(prod._id)}
-  >
-    Delete
-  </button>
-</td>
+      {loading ? (
+        <div className="w-full h-[50vh] flex justify-center items-center">
+          <div className="spinner"></div>
+        </div>
+      ) : (
+        <div className="overflow-x-auto shadow-lg rounded-lg">
+          <table className="lg:min-w-[700px] w-full bg-white rounded">
+            <thead className="bg-[#FFD770]">
+              <tr>
+                <th className="px-4 py-2 text-left">Sr. No.</th>
+                <th className="px-4 py-2 text-left">Name</th>
+                <th className="px-4 py-2 text-left">Price</th>
+                <th className="px-4 py-2 hidden lg:table-cell text-left">
+                  Stock
+                </th>
+                <th className="px-4 py-2 hidden lg:table-cell text-left">
+                  Category
+                </th>
+                <th className="px-4 py-2 hidden lg:table-cell text-left">
+                  Brand
+                </th>
+                <th className="px-4 py-2 text-left">Status</th>
+                <th className="px-4 py-2 text-left">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Array.isArray(filtered) && filtered.length > 0 ? (
+                filtered.map((prod, idx) => (
+                  <tr key={prod._id} className="border-t">
+                    <td className="px-4 py-2">{idx + 1}</td>
+                    <td className="px-4 py-2">{prod.name}</td>
+                    <td className="px-4 py-2">₹{prod.price}</td>
+                    <td className="px-4 hidden lg:table-cell py-2">
+                      {prod.stock}
+                    </td>
+                    <td className="px-4 hidden lg:table-cell py-2">
+                      {prod.category?.name}
+                    </td>
+                    <td className="px-4 hidden lg:table-cell py-2">
+                      {prod.brand?.name}
+                    </td>
+                    <td className="px-4 py-2 capitalize">{prod.status}</td>
+                    <td className="px-4 py-2 flex gap-2">
+                      <button
+                        className="bg-[#FFD770] text-black px-3 py-1 rounded hover:brightness-110"
+                        onClick={() => handleEditOpen(prod)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                        onClick={() => handleDeleteProduct(prod._id)}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan="8"
+                    className="px-4 py-6 text-center text-gray-500"
+                  >
+                    No products found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
 
-            </tr>
-          ))
-        ) : (
-          <tr>
-            <td colSpan="8" className="px-4 py-6 text-center text-gray-500">
-              No products found
-            </td>
-          </tr>
-        )}
-      </tbody>
-    </table>
-  </div>
-)}
+      {(showAddModal || showEditModal) && (
+        <div className="fixed z-[151] inset-0 backdrop-blur-2xl bg-opacity-30 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-lg max-w-md w-[90%] overflow-y-auto max-h-[90vh] text-black">
+            <h3 className="text-xl font-semibold mb-4">
+              {showAddModal ? "Add Product" : "Edit Product"}
+            </h3>
 
-{(showAddModal || showEditModal) && (
-  <div className="fixed z-[151] inset-0 backdrop-blur-2xl bg-opacity-30 flex justify-center items-center">
-    <div className="bg-white p-6 rounded-lg max-w-md w-[90%] overflow-y-auto max-h-[90vh] text-black">
-      <h3 className="text-xl font-semibold mb-4">
-        {showAddModal ? "Add Product" : "Edit Product"}
-      </h3>
+            {/* Text Inputs */}
+            {[
+              "name",
+              "shortDescription",
+              "price",
+              "comparePrice",
+              "costPerItem",
+              "stock",
+              "size",
+              "color",
+              "material",
+              "fabric",
+              "fit",
+              "sleeveLength",
+              "pattern",
+              "occasion",
+              "season",
+              "gender",
+            ].map((key) => (
+              <input
+                key={key}
+                type={
+                  ["price", "stock", "comparePrice", "costPerItem"].includes(
+                    key
+                  )
+                    ? "number"
+                    : "text"
+                }
+                placeholder={key.charAt(0).toUpperCase() + key.slice(1)}
+                value={formData[key]}
+                onChange={(e) =>
+                  setFormData({ ...formData, [key]: e.target.value })
+                }
+                className="mb-3 w-full p-2 border rounded"
+              />
+            ))}
 
-      {/* Text Inputs */}
-      {[
-        "name", "shortDescription", "price", "comparePrice", "costPerItem",
-        "stock",  "size", "color", "material", "fabric",
-        "fit", "sleeveLength", "pattern", "occasion", "season", "gender"
-      ].map((key) => (
-        <input
-          key={key}
-          type={["price", "stock", "comparePrice", "costPerItem"].includes(key) ? "number" : "text"}
-          placeholder={key.charAt(0).toUpperCase() + key.slice(1)}
-          value={formData[key]}
-          onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
-          className="mb-3 w-full p-2 border rounded"
-        />
-      ))}
+            {/* Brands */}
+            <select
+              value={formData.brand}
+              onChange={(e) =>
+                setFormData({ ...formData, brand: e.target.value })
+              }
+              className="mb-3 w-full p-2 border rounded"
+            >
+              <option value="">Select Brand</option>
+              {brands.map((b) => (
+                <option key={b._id} value={b._id}>
+                  {b.name}
+                </option>
+              ))}
+            </select>
 
-      {/* Brands */}
-      <select
-  value={formData.brand}
-  onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
-  className="mb-3 w-full p-2 border rounded"
->
-  <option value="">Select Brand</option>
-  {brands.map((b) => (
-    <option key={b._id} value={b._id}>{b.name}</option>
-  ))}
-</select>
+            {/* Category & Subcategory */}
+            <select
+              value={formData.category}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  category: e.target.value,
+                  subCategory: e.target.value,
+                })
+              }
+              className="mb-3 w-full p-2 border rounded"
+            >
+              <option value="">Select Category</option>
+              {categories.map((cat) => (
+                <option key={cat._id} value={cat._id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
 
-
-      {/* Category & Subcategory */}
-      <select
-        value={formData.category}
-        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-        className="mb-3 w-full p-2 border rounded"
-      >
-        <option value="">Select Category</option>
-        {categories.map((cat) => (
-          <option key={cat._id} value={cat._id}>{cat.name}</option>
-        ))}
-      </select>
-
-      <input
+            {/* <input
         type="text"
         placeholder="Subcategory"
         value={formData.subCategory}
         onChange={(e) => setFormData({ ...formData, subCategory: e.target.value })}
         className="mb-3 w-full p-2 border rounded"
-      />
+      /> */}
 
-      {/* Description */}
-      <textarea
-        placeholder="Description"
-        value={formData.description}
-        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-        className="mb-3 w-full p-2 border rounded"
-      />
+            {/* Description */}
+            <textarea
+              placeholder="Description"
+              value={formData.description}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
+              className="mb-3 w-full p-2 border rounded"
+            />
 
-      {/* Boolean Flags */}
-      {["isFeatured", "isNewArrival", "isBestSeller", "isOnSale"].map((flag) => (
-        <label key={flag} className="block mb-2">
-          <input
-            type="checkbox"
-            checked={formData[flag]}
-            onChange={(e) => setFormData({ ...formData, [flag]: e.target.checked })}
-          />{" "}
-          {flag}
-        </label>
-      ))}
+            {/* Boolean Flags */}
+            {["isFeatured", "isNewArrival", "isBestSeller", "isOnSale"].map(
+              (flag) => (
+                <label key={flag} className="block mb-2">
+                  <input
+                    type="checkbox"
+                    checked={formData[flag]}
+                    onChange={(e) =>
+                      setFormData({ ...formData, [flag]: e.target.checked })
+                    }
+                  />{" "}
+                  {flag}
+                </label>
+              )
+            )}
 
-      {/* Lookbook Images */}
-      <label className="block mt-4 mb-2 font-semibold">Lookbook Images (URLs)</label>
-      {[0, 1].map((index) => (
-        <input
-          key={index}
-          type="text"
-          placeholder={`Lookbook Image ${index + 1}`}
-          value={formData.lookbookImages[index] || ""}
-          onChange={(e) => {
-            const updatedImages = [...formData.lookbookImages];
-            updatedImages[index] = e.target.value;
-            setFormData({ ...formData, lookbookImages: updatedImages });
-          }}
-          className="mb-2 w-full p-2 border rounded"
-        />
-      ))}
+            {/* Lookbook Images */}
+            <label className="block mt-4 mb-2 font-semibold">
+              Lookbook Images (URLs)
+            </label>
+            {[0, 1].map((index) => (
+              <input
+                key={index}
+                type="text"
+                placeholder={`Lookbook Image ${index + 1}`}
+                value={formData.lookbookImages[index] || ""}
+                onChange={(e) => {
+                  const updatedImages = [...formData.lookbookImages];
+                  updatedImages[index] = e.target.value;
+                  setFormData({ ...formData, lookbookImages: updatedImages });
+                }}
+                className="mb-2 w-full p-2 border rounded"
+              />
+            ))}
 
-      {/* Image Upload */}
-      <div className="mb-4">
-        <label className="block font-medium mb-2">Product Images</label>
-        {imageInputs.map((key) => (
-          <input
-            key={key}
-            type="file"
-            accept="image/*"
-            onChange={(e) => handleSingleImageChange(e, key)}
-            className="mb-2 w-full p-2 rounded border"
-          />
-        ))}
-        <button
-          type="button"
-          onClick={handleAddMoreImages}
-          className="px-4 py-2 bg-[#FFD700] text-black rounded mt-2 hover:brightness-110"
-        >
-          + Add More Pics
-        </button>
-      </div>
+            {/* Image Upload */}
+            <div className="mb-4">
+              <label className="block font-medium mb-2">Product Images</label>
+              {imageInputs.map((key) => (
+                <input
+                  key={key}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleSingleImageChange(e, key)}
+                  className="mb-2 w-full p-2 rounded border"
+                />
+              ))}
+              <button
+                type="button"
+                onClick={handleAddMoreImages}
+                className="px-4 py-2 bg-[#FFD700] text-black rounded mt-2 hover:brightness-110"
+              >
+                + Add More Pics
+              </button>
+            </div>
 
-      {/* Modal Buttons */}
-      <div className="flex justify-end gap-2 mt-4">
-        <button
-          onClick={() => {
-            setShowAddModal(false);
-            setShowEditModal(false);
-          }}
-          className="px-4 py-2 border rounded"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={() => handleSubmit(showEditModal)}
-          className="px-4 py-2 w-[100px] flex justify-center items-center bg-[#FFD770] text-black rounded"
-        >
-          {loading ? <div className="loader1"></div> : <>{showAddModal ? "Save" : "Update"}</>}
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
+            {/* Modal Buttons */}
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                onClick={() => {
+                  setShowAddModal(false);
+                  setShowEditModal(false);
+                }}
+                className="px-4 py-2 border rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleSubmit(showEditModal)}
+                className="px-4 py-2 w-[100px] flex justify-center items-center bg-[#FFD770] text-black rounded"
+              >
+                {loading ? (
+                  <div className="loader1"></div>
+                ) : (
+                  <>{showAddModal ? "Save" : "Update"}</>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

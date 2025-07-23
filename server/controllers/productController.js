@@ -91,14 +91,17 @@ export const createProduct = async (req, res) => {
 
     const uploadedImages = [];
 
-    for (const file of imageArray) {
-      const cloudRes = await uploadImageToCloudinary(file, "UKF-Products");
-      uploadedImages.push(cloudRes.secure_url);
-    }
-    req.body.lookbookImages = uploadedImages;
+for (const file of imageArray) {
+  const cloudRes = await uploadImageToCloudinary(file, "UKF-Products");
+  uploadedImages.push({ url: cloudRes.secure_url }); // 👈 structure matters
+}
+
+req.body.images = uploadedImages;
+req.body.lookbookImages = uploadedImages.map(img => img.url);
     const product = new Product(req.body);
     const savedProduct = await product.save();
     
+    console.log(savedProduct)
     res.status(201).json({ 
       success: true, 
       product: savedProduct 
@@ -244,28 +247,47 @@ export const updateProduct = async (req, res) => {
     if (req.body.sku) {
       delete req.body.sku;
     }
-    
+
+    // Check and upload new images if provided
+    const imageFiles = req.files?.images;
+
+    if (imageFiles) {
+      const imageArray = Array.isArray(imageFiles) ? imageFiles : [imageFiles];
+      const uploadedImages = [];
+
+      for (const file of imageArray) {
+        const cloudRes = await uploadImageToCloudinary(file, "UKF-Products");
+        uploadedImages.push({ url: cloudRes.secure_url });
+      }
+
+      // Replace or append to existing image field
+      req.body.images = uploadedImages;
+      req.body.lookbookImages = uploadedImages.map(img => img.url);
+    }
+
+    // Update product
     const updated = await Product.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true, runValidators: true }
     ).populate('category').populate('brand');
-    
+
     if (!updated) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Product not found" 
+      return res.status(404).json({
+        success: false,
+        message: "Product not found"
       });
     }
-    
-    res.json({ 
-      success: true, 
-      product: updated 
+
+    res.json({
+      success: true,
+      product: updated
     });
   } catch (error) {
-    res.status(400).json({ 
-      success: false, 
-      message: error.message 
+    console.error(error);
+    res.status(400).json({
+      success: false,
+      message: error.message
     });
   }
 };
