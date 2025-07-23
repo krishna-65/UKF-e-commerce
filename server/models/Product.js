@@ -29,7 +29,7 @@ const productSchema = new mongoose.Schema({
   size: {
     type: String,
     enum: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '4XL', '5XL', 'One Size'],
-    required: true
+    
   },
   color: { type: String, required: true },
   material: { type: String }, // e.g., Cotton, Polyester, etc.

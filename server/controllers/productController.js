@@ -2,6 +2,7 @@
 // controllers/productController.js
 import Product from '../models/Product.js';
 import mongoose from 'mongoose';
+import {uploadImageToCloudinary} from '../utils/imageUploader.js'
 
 // Helper function for building filters
 const buildFilters = (query) => {
@@ -103,6 +104,9 @@ export const createProduct = async (req, res) => {
       product: savedProduct 
     });
   } catch (error) {
+
+    console.error(error);
+
     res.status(400).json({ 
       success: false, 
       message: error.message 
@@ -143,6 +147,7 @@ const filters = {};
     
     // Get products with filters, pagination, and sorting
   const products = await Product.find(filters)
+      .populate('brand')
       .populate('category')
       .skip(skip)
       .limit(limit)

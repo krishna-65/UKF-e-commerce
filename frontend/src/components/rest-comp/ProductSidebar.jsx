@@ -124,7 +124,7 @@ const ProductSidebar = () => {
           {/* Gender */}
           <div>
             <h2 className="text-xl font-semibold mb-2">Gender</h2>
-            {["Male", "Female", "Both"].map((gender) => (
+            {["Men", "Women", "Unisex"].map((gender) => (
               <label key={gender} className="flex items-center mb-1">
                 <input
                   type="checkbox"

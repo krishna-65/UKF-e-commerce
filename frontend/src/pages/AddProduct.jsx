@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setLoading } from "../slices/authSlice";
 import { apiConnector } from "../services/apiConnector";
-import { categoryEndpoints, productEndpoints } from "../services/api";
+import { brandEndpoints, categoryEndpoints, productEndpoints } from "../services/api";
 import toast from "react-hot-toast";
 
 const { getAllCategory } = categoryEndpoints;
-const { createProduct, getAllProduct, updateProduct } = productEndpoints;
+const { createProduct, getAllProduct, updateProduct,deleteProduct } = productEndpoints;
+const { getAllBrands } = brandEndpoints;
+
 
 const AddProduct = () => {
   const dispatch = useDispatch();
@@ -70,6 +72,7 @@ const AddProduct = () => {
     try {
       dispatch(setLoading(true));
       const res = await apiConnector("GET", getAllProduct);
+      console.log("Products fetched :",res)
       setProducts(res.data.products);
       setFiltered(res.data.products);
       toast.success("Products loaded!");
@@ -79,10 +82,26 @@ const AddProduct = () => {
       dispatch(setLoading(false));
     }
   };
+  const [brands, setBrands] = useState([]);
+
+   const fetchBrands = async () => {
+    try {
+      dispatch(setLoading(true));
+      const res = await apiConnector("GET", getAllBrands);
+      console.log("Brands fetched:", res);
+      if (res.data.success) setBrands(res.data.brands);
+    } catch {
+      toast.error("Failed to load brands");
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
 
   useEffect(() => {
     getAllCategories();
     getAllProducts();
+    fetchBrands();
+    
   }, []);
 
   useEffect(() => {
@@ -101,6 +120,28 @@ const AddProduct = () => {
     const file = e.target.files[0];
     setImages((prev) => ({ ...prev, [index]: file }));
   };
+
+  const handleDeleteProduct = async (id) => {
+  try {
+    dispatch(setLoading(true));
+    const confirm = window.confirm("Are you sure you want to delete this product?");
+    if (!confirm) return;
+
+    const res = await apiConnector("DELETE", `${deleteProduct}${id}`);
+    if (res.data.success) {
+      toast.success("Product deleted successfully!");
+      getAllProducts(); // Refresh table
+    } else {
+      toast.error("Deletion failed");
+    }
+  } catch (err) {
+    console.log(err);
+    toast.error("Something went wrong");
+  } finally {
+    dispatch(setLoading(false));
+  }
+};
+
 
   const handleAddMoreImages = () => {
     setImageInputs((prev) => [...prev, prev.length]);
@@ -267,16 +308,23 @@ const AddProduct = () => {
               <td className="px-4 py-2">₹{prod.price}</td>
               <td className="px-4 hidden lg:table-cell py-2">{prod.stock}</td>
               <td className="px-4 hidden lg:table-cell py-2">{prod.category?.name}</td>
-              <td className="px-4 hidden lg:table-cell py-2">{prod.brand}</td>
+              <td className="px-4 hidden lg:table-cell py-2">{prod.brand?.name}</td>
               <td className="px-4 py-2 capitalize">{prod.status}</td>
-              <td className="px-4 py-2">
-                <button
-                  className="bg-[#FFD770] text-black px-3 py-1 rounded hover:brightness-110"
-                  onClick={() => handleEditOpen(prod)}
-                >
-                  Edit
-                </button>
-              </td>
+              <td className="px-4 py-2 flex gap-2">
+  <button
+    className="bg-[#FFD770] text-black px-3 py-1 rounded hover:brightness-110"
+    onClick={() => handleEditOpen(prod)}
+  >
+    Edit
+  </button>
+  <button
+    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+    onClick={() => handleDeleteProduct(prod._id)}
+  >
+    Delete
+  </button>
+</td>
+
             </tr>
           ))
         ) : (
@@ -301,7 +349,7 @@ const AddProduct = () => {
       {/* Text Inputs */}
       {[
         "name", "shortDescription", "price", "comparePrice", "costPerItem",
-        "stock", "brand", "size", "color", "material", "fabric",
+        "stock",  "size", "color", "material", "fabric",
         "fit", "sleeveLength", "pattern", "occasion", "season", "gender"
       ].map((key) => (
         <input
@@ -313,6 +361,19 @@ const AddProduct = () => {
           className="mb-3 w-full p-2 border rounded"
         />
       ))}
+
+      {/* Brands */}
+      <select
+  value={formData.brand}
+  onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+  className="mb-3 w-full p-2 border rounded"
+>
+  <option value="">Select Brand</option>
+  {brands.map((b) => (
+    <option key={b._id} value={b._id}>{b.name}</option>
+  ))}
+</select>
+
 
       {/* Category & Subcategory */}
       <select

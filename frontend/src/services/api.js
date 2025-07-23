@@ -25,6 +25,7 @@ export const productEndpoints = {
   getAllProduct : BASE_URL + "/api/product/",
   getProduct : BASE_URL + "/api/product/",
   updateProduct : BASE_URL + "/api/product/update/",
+  deleteProduct : BASE_URL + "/api/product/",
 }
 
 //cart endopints
@@ -41,7 +42,11 @@ export const cartEndpoints = {
 // brands endpoints
 
 export const brandEndpoints = {
-  getAllBrands : "",
-  createBrand : "",
-  updateBrand : "",
+  getAllBrands : BASE_URL + "/api/brand/",
+  createBrand : BASE_URL + "/api/brand/",
+  updateBrand : BASE_URL +  "/api/brand/",
+  getFeaturedBrands : BASE_URL + "/api/brand/featured",
+  getBrandsWithProducts : BASE_URL + "/api/brand/with-products",
+  getBrandById : BASE_URL + "/api/brand/",
+   deleteBrand : BASE_URL +  "/api/brand/",
 }

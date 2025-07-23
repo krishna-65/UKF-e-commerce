@@ -5,7 +5,7 @@ import { setLoading } from "../slices/authSlice";
 import { brandEndpoints } from "../services/api";
 import toast from "react-hot-toast";
 
-const { getAllBrands, createBrand, updateBrand } = brandEndpoints;
+const { getAllBrands, createBrand, updateBrand, deleteBrand } = brandEndpoints;
 
 const Brands = () => {
   const dispatch = useDispatch();
@@ -84,6 +84,28 @@ const Brands = () => {
     });
   };
 
+  const handleDelete = async (id) => {
+  try {
+    dispatch(setLoading(true));
+    const confirmed = window.confirm("Are you sure you want to delete this brand?");
+    if (!confirmed) return;
+
+    const res = await apiConnector("DELETE", `${deleteBrand}${id}`);
+    if (res.data.success) {
+      toast.success("Brand deleted successfully");
+      fetchBrands(); // Refresh list
+    } else {
+      toast.error("Deletion failed");
+    }
+  } catch (err) {
+    console.log(err);
+    toast.error(err.message || "Unable to delete");
+  } finally {
+    dispatch(setLoading(false));
+  }
+};
+
+
   const handleSave = async () => {
     try {
       dispatch(setLoading(true));
@@ -145,28 +167,34 @@ const Brands = () => {
           <table className="min-w-full bg-white">
             <thead className="bg-[#FFD770]">
               <tr>
-                <th className="p-2 text-left">Name</th>
-                <th className="p-2 text-left">Slug</th>
-                <th className="p-2 text-left">Website</th>
-                <th className="p-2 text-left">Featured</th>
-                <th className="p-2 text-left">Status</th>
-                <th className="p-2 text-left">Actions</th>
+                <th className="p-2 pl-6 text-left">Name</th>
+                <th className="p-2 pl-6 text-left">Slug</th>
+                <th className="p-2 pl-6 text-left">Website</th>
+                <th className="p-2 pl-6 text-left">Featured</th>
+                <th className="p-2 pl-6 text-left">Status</th>
+                <th className="p-2 pl-6 text-left">Actions</th>
               </tr>
             </thead>
             <tbody>
               {brands.map((b) => (
                 <tr key={b._id} className="border-t">
-                  <td className="p-2">{b.name}</td>
-                  <td className="p-2">{b.slug}</td>
-                  <td className="p-2 text-blue-600">{b.website}</td>
-                  <td className="p-2">{b.isFeatured ? "Yes" : "No"}</td>
-                  <td className="p-2 capitalize">{b.status}</td>
-                  <td className="p-2">
+                  <td className="p-2 pl-6">{b.name}</td>
+                  <td className="p-2 pl-6">{b.slug}</td>
+                  <td className="p-2 pl-6 text-blue-600">{b.website}</td>
+                  <td className="p-2 pl-6">{b.isFeatured ? "Yes" : "No"}</td>
+                  <td className="p-2 pl-6 capitalize">{b.status}</td>
+                  <td className="p-2 pl-6">
                     <button
                       onClick={() => handleEditOpen(b)}
-                      className="px-3 py-1 bg-[#FFD770] rounded hover:brightness-110 text-black"
+                      className="px-3 py-1 bg-[#FFD770] rounded hover:brightness-110 text-black mr-2"
                     >
                       Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(b._id)}
+                      className="px-3 py-1 bg-red-500 rounded hover:bg-red-600 text-white"
+                    >
+                      Delete
                     </button>
                   </td>
                 </tr>
@@ -184,8 +212,8 @@ const Brands = () => {
       )}
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-[151] bg-black bg-opacity-30 backdrop-blur-lg flex items-center justify-center">
-          <div className="bg-white text-black p-6 rounded-lg max-w-xl w-[90%] max-h-[90vh] overflow-y-auto">
+        <div className="hidescroll fixed inset-0 z-[151]  bg-opacity-30 backdrop-blur-lg flex items-center justify-center">
+          <div className="hidescroll bg-white text-black p-6 rounded-lg max-w-xl w-[90%] max-h-[90vh] overflow-y-auto">
             <h2 className="text-lg font-bold mb-4">
               {editing ? "Edit Brand" : "Add Brand"}
             </h2>
