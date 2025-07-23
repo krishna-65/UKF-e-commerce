@@ -9,7 +9,7 @@ import {
   getFeaturedBrands,
   getBrandsWithProducts
 } from '../controllers/brandController.js';
-import { protect, admin } from '../middleware/authMiddleware.js';
+
 
 const router = express.Router();
 
@@ -20,8 +20,8 @@ router.get('/with-products', getBrandsWithProducts);
 router.get('/:id', getBrandById);
 
 // Admin routes
-router.post('/', protect, admin, createBrand);
-router.put('/:id', protect, admin, updateBrand);
-router.delete('/:id', protect, admin, deleteBrand);
+router.post('/',   createBrand);
+router.put('/:id',  updateBrand);
+router.delete('/:id',   deleteBrand);
 
 export default router;

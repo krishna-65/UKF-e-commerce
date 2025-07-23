@@ -1,6 +1,7 @@
 import Order from '../models/Order.js';
 import Product from '../models/Product.js';
 import User from '../models/User.js';
+import Address from '../models/Address.js';
 import mongoose from 'mongoose';
 // import Order from "../models/Order.js";
 // import Product from "../models/Product.js";
@@ -200,7 +201,34 @@ export const stripeWebhooks = async (request, response)=>{
 // Create a new order
 export const createOrder = async (req, res) => {
   try {
-    const { userId, items, shippingAddress, billingAddress, paymentMethod, couponCode } = req.body;
+    const { 
+      userId, 
+      items, 
+      shippingAddress, 
+      billingAddress, 
+      paymentMethod, 
+      subtotal,
+      shippingFee,
+      tax,
+      total,
+      ...otherData 
+    } = req.body;
+
+    // Validate required fields
+    if (!userId || !items || !shippingAddress || !paymentMethod) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Missing required fields: userId, items, shippingAddress, paymentMethod' 
+      });
+    }
+
+    // Validate items array
+    if (!Array.isArray(items)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Items must be an array' 
+      });
+    }
 
     // Validate user
     const user = await User.findById(userId);
@@ -208,11 +236,37 @@ export const createOrder = async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
+    // Validate shipping address exists
+    const shippingAddr = await Address.findById(shippingAddress);
+    if (!shippingAddr) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Shipping address not found' 
+      });
+    }
+
+    // Validate billing address if provided
+    if (billingAddress) {
+      const billingAddr = await Address.findById(billingAddress);
+      if (!billingAddr) {
+        return res.status(404).json({ 
+          success: false, 
+          message: 'Billing address not found' 
+        });
+      }
+    }
+
     // Validate and prepare order items
-    let subtotal = 0;
     const orderItems = [];
     
     for (const item of items) {
+      if (!item.productId || !item.quantity || !item.name || !item.price) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Each item must contain productId, quantity, name, and price' 
+        });
+      }
+
       const product = await Product.findById(item.productId);
       if (!product) {
         return res.status(404).json({ 
@@ -228,49 +282,39 @@ export const createOrder = async (req, res) => {
         });
       }
 
-      const itemTotal = product.price * item.quantity;
-      subtotal += itemTotal;
-
       orderItems.push({
         product: product._id,
         quantity: item.quantity,
-        price: product.price,
-        name: product.name,
+        price: item.price,
+        name: item.name,
         image: product.images[0]?.url || ''
       });
     }
 
-    // Calculate totals
-    const shippingFee = subtotal > 5000 ? 0 : 100; // Free shipping above 5000
-    const tax = subtotal * 0.18; // 18% tax
-    let discount = 0;
-    
-    // Apply coupon if provided (would need coupon model)
-    // if (couponCode) {
-    //   const coupon = await Coupon.findOne({ code: couponCode });
-    //   if (coupon) {
-    //     discount = coupon.discountType === 'percentage' 
-    //       ? subtotal * (coupon.discountValue / 100)
-    //       : coupon.discountValue;
-    //   }
-    // }
-
-    const total = subtotal + shippingFee + tax - discount;
-
+    const orderId = `ORD-${new Date().getFullYear()}${(Date.now() % 1000000).toString().padStart(6, '0')}`;
+    // Check if orderId already exists
+    const existingOrder = await Order.findOne({ orderId });
+    if (existingOrder) {  
+      return res.status(400).json({
+        success: false, 
+        message: 'Order ID already exists, please try again'
+      });
+    }
     // Create order
     const order = new Order({
+      orderId,  
       user: userId,
       items: orderItems,
-      subtotal,
-      shippingFee,
-      tax,
-      discount,
-      total,
+      subtotal: subtotal || orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+      shippingFee: shippingFee || 0,
+      tax: tax || 0,
+      total: total || (subtotal + shippingFee + tax),
       shippingAddress,
       billingAddress: billingAddress || shippingAddress,
       paymentMethod,
-      currentStatus: paymentMethod === 'COD' ? 'Order Placed' : 'Payment Pending',
-      paymentStatus: paymentMethod === 'COD' ? 'Pending' : 'Pending'
+      currentStatus: 'Order Placed',
+      paymentStatus: 'Pending',
+      ...otherData
     });
 
     await order.save();
@@ -282,9 +326,6 @@ export const createOrder = async (req, res) => {
       });
     }
 
-    // Clear user's cart
-    await User.findByIdAndUpdate(userId, { $set: { cartItems: [] } });
-
     res.status(201).json({
       success: true,
       order,
@@ -292,13 +333,14 @@ export const createOrder = async (req, res) => {
     });
 
   } catch (error) {
+    console.error('Order creation error:', error);
     res.status(500).json({ 
       success: false, 
-      message: error.message 
+      message: error.message,
+      error: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
-};
-
+}
 // Get all orders (admin)
 export const getAllOrders = async (req, res) => {
   try {

@@ -2,7 +2,7 @@
  import mongoose from 'mongoose'
 import User from '../models/User.js';
 import Product from '../models/Product.js';
-import mongoose from 'mongoose';
+
 
 // Add to cart or update quantity
 export const addToCart = async (req, res) => {
