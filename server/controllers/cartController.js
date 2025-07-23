@@ -3,6 +3,7 @@
 import User from '../models/User.js';
 import Product from '../models/Product.js';
 
+
 // Add to cart or update quantity
 export const addToCart = async (req, res) => {
   try {
@@ -124,10 +125,13 @@ export const removeFromCart = async (req, res) => {
 };
 
 // Get cart items
+
+
 export const getCart = async (req, res) => {
   try {
     const userId = req.params.id;
 
+    // Validate user ID
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(400).json({ 
         success: false, 
@@ -135,11 +139,7 @@ export const getCart = async (req, res) => {
       });
     }
 
-    const user = await User.findById(userId)
-      .populate({
-        path: 'cartItems.product',
-        select: 'name price images stock'
-      });
+    const user = await User.findById(userId);
 
     if (!user) {
       return res.status(404).json({ 
@@ -148,16 +148,41 @@ export const getCart = async (req, res) => {
       });
     }
 
-    // Calculate total
-    const cartTotal = user.cartItems.reduce((total, item) => {
-      return total + (item.product.price * item.quantity);
-    }, 0);
+    // Get product details for products in cart
+    const products = await Product.find({
+      _id: { $in: user.cartItems.map(item => item.product) }
+    }).lean();
+
+    // Format images just like in getAllProducts
+    const formattedProducts = products.map(product => ({
+      ...product,
+      images: product.images?.map(img => {
+        // Handle string case
+        if (typeof img === 'string') {
+          return { url: img, isDefault: false };
+        }
+
+        // Handle broken image objects
+        if (img['0']) {
+          const url = Object.keys(img)
+            .filter(k => !isNaN(k))
+            .sort((a, b) => a - b)
+            .map(k => img[k])
+            .join('');
+          return { 
+            url, 
+            isDefault: img.isDefault || false,
+            _id: img._id 
+          };
+        }
+
+        return img;
+      }) || []
+    }));
 
     res.json({ 
       success: true,
-      cart: user.cartItems,
-      totalItems: user.cartItems.length,
-      cartTotal
+      cart: formattedProducts
     });
 
   } catch (error) {
@@ -167,6 +192,7 @@ export const getCart = async (req, res) => {
     });
   }
 };
+
 
 // Update cart item quantity
 export const updateCartItem = async (req, res) => {

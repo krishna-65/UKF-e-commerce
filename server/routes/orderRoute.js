@@ -9,13 +9,14 @@ import {
   getUserOrders,
   addTrackingInfo
 } from '../controllers/orderController.js';
+import { protect } from '../middlewares/authUser.js';
 
 
 const router = express.Router();
 
 // User routes
 router.post('/', createOrder);
-router.get('/my-orders',  getUserOrders);
+router.get('/my-orders',protect,  getUserOrders);
 router.get('/:id', getOrderById);
 router.put('/:id/cancel', cancelOrder);
 
