@@ -33,7 +33,7 @@ const productSchema = new mongoose.Schema({
   material: { type: String }, // e.g., Cotton, Polyester, etc.
   fabric: { type: String }, // More specific than material
   weight: { type: Number }, // In grams
-  fit: { type: String, enum: ['Slim', 'Regular', 'Oversized', 'Relaxed'] },
+  fit: { type: String, enum: ['Slim', 'Regular', 'Oversized', 'Relaxed'],},
   sleeveLength: { type: String, enum: ['Short', 'Half', 'Long', 'Sleeveless'] },
   pattern: { type: String }, // e.g., Striped, Printed, Solid, etc.
   occasion: { type: String }, // e.g., Casual, Formal, Party, etc.
