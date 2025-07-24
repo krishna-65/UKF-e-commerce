@@ -6,7 +6,7 @@ import { FaShoppingCart } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { setRole, setUserData, setToken } from "../../slices/authSlice";
 import toast from "react-hot-toast";
-import { NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import womensfashion from "../../assets/images/womens fashion.webp";
 import mensfashion from "../../assets/images/mensfashion.webp";
 import perfumes from "../../assets/images/perfumes.webp";
@@ -19,8 +19,7 @@ import { resetCart } from "../../slices/cartSlice";
 import { cartEndpoints } from "../../services/api";
 import { apiConnector } from "../../services/apiConnector";
 
-
-const {bulkCart} = cartEndpoints;
+const { bulkCart } = cartEndpoints;
 
 const Navbar = () => {
   const dispatch = useDispatch();
@@ -34,12 +33,12 @@ const Navbar = () => {
   const search = useSelector((state) => state.search.searchData);
 
   const cartItems = useSelector((state) => state.cart.totalItems);
-  const cart = useSelector(state => state.cart.cart);
+  const cart = useSelector((state) => state.cart.cart);
 
-   const user = useSelector(state=>state.auth.userData)
+  const user = useSelector((state) => state.auth.userData);
 
-   // Add loading state
-   const [isSavingCart, setIsSavingCart] = useState(false);
+  // Add loading state
+  const [isSavingCart, setIsSavingCart] = useState(false);
 
   // Improved saveCart function
   const saveCart = async () => {
@@ -47,22 +46,22 @@ const Navbar = () => {
 
     try {
       setIsSavingCart(true);
-      
-      const cartItems = cart.map(item => ({
+
+      const cartItems = cart.map((item) => ({
         productId: item._id, // Assuming product ID is directly on item
         quantity: item.quantity,
-        price: item.price
+        price: item.price,
       }));
 
-      console.log("the cart is : ",cart)
+      console.log("the cart is : ", cart);
 
       const response = await apiConnector(
-        "POST", 
-        `${bulkCart}${user._id}/bulk`, 
+        "POST",
+        `${bulkCart}${user._id}/bulk`,
         { items: cartItems }
       );
 
-      console.log("save cart response",response)
+      console.log("save cart response", response);
 
       if (!response.data.success) {
         throw new Error(response.data.message || "Failed to save cart");
@@ -79,12 +78,11 @@ const Navbar = () => {
 
   const logoutHandler = async () => {
     try {
-
-      if(user.accountType === "user"){
-      if (cart.length > 0) {
-        await saveCart(); // Wait for cart to be saved
+      if (user.accountType === "user") {
+        if (cart.length > 0) {
+          await saveCart(); // Wait for cart to be saved
+        }
       }
-    }
 
       // Clear local storage
       localStorage.removeItem("token");
@@ -215,96 +213,148 @@ const Navbar = () => {
               </NavLink>
               <div className="opacity-0 group-hover:opacity-100 w-[4vw] h-[1px] bg-[#FFD700]"></div>
             </li>
+
+            <li className="group flex flex-col justify-between">
+              <NavLink
+                to="/contactus"
+                className="h-[9vh] flex items-center justify-center w-[6vw] cursor-pointer"
+              >
+                Contact Us
+              </NavLink>
+              <div className="opacity-0 group-hover:opacity-100 w-[6vw] h-[1px] bg-[#FFD700]"></div>
+            </li>
           </ul>
         </div>
 
         <div className="flex gap-4 text-xl">
-          {
-            user?.accountType === 'user' && <div className=" relative">
-            <FaSearch onClick={() => setShowSearch(!showSearch)} />
-            {showSearch && (
-              <div className=" absolute  top-11  left-[-71vw] lg:left-[-1404px] z-[102] shadow-2xl w-[100vw] pb-10 bg-[#FFD700]">
-                {/* searchBar */}
-                <div className="w-[full] h-[13vh] broder border-b-2 shadow-lg flex justify-center items-center relative ">
-                  <div
-                    onClick={() => setShowSearch(false)}
-                    className="text-red-500 hidden  cursor-pointer absolute top-2 w-[25px] h-[25px] lg:flex justify-center items-center  right-5 border-4 border-red-500 font-bold  rounded-full"
-                  >
-                    x
-                  </div>
-                  <div className="flex gap-0 ">
-                    <input
-                      type="text"
-                      placeholder="Search..."
-                      onChange={(e) => setSearchBar(e.target.value)}
-                      className="bg-black h-[8vh]  pl-4 text-[#ffd700] placeholder:text-[#FFD700] lg:w-[50vw] border-black rounded-l-2xl"
-                    />
-                    <button
-                      className="bg-black h-[8vh] w-[15vw] lg:w-[5vw] flex justify-center items-center rounded-r-2xl "
-                      onClick={searchHandler}
+          {user?.accountType === "user" && (
+            <div className=" relative">
+              <FaSearch onClick={() => setShowSearch(!showSearch)} />
+              {showSearch && (
+                <div className=" absolute  top-11  left-[-71vw] lg:left-[-1404px] z-[102] shadow-2xl w-[100vw] pb-10 bg-[#FFD700]">
+                  {/* searchBar */}
+                  <div className="w-[full] h-[13vh] broder border-b-2 shadow-lg flex justify-center items-center relative ">
+                    <div
+                      onClick={() => setShowSearch(false)}
+                      className="text-red-500 hidden  cursor-pointer absolute top-2 w-[25px] h-[25px] lg:flex justify-center items-center  right-5 border-4 border-red-500 font-bold  rounded-full"
                     >
-                      <FaSearch />
-                    </button>
-                  </div>
-                </div>
-
-                {/* categories and new */}
-
-                <div className="text-black">
-                  <h2 className="w-[100vw] flex justify-center my-4  font-semibold lg:text-3xl">
-                    Popular Categories
-                  </h2>
-                  <div className="flex flex-col gap-5 lg:flex-row lg:justify-center lg:w-[100vw]">
-                    <div className="flex justify-around ">
-                      <div className="w-[40vw] lg:w-[20vw] flex flex-col items-center ">
-                        <div>
-                          <img
-                            src={womensfashion}
-                            alt="image1"
-                            className="rounded-2xl mb-2 shadow-2xl h-[25vh] lg:w-[23vh]"
-                          />
-                        </div>
-                        <div className="text-xs">Women's Fashion</div>
-                      </div>
-                      <div className="w-[40vw] lg:w-[20vw] flex flex-col items-center ">
-                        <div>
-                          <img
-                            src={mensfashion}
-                            alt="image2"
-                            className="rounded-2xl mb-2 shadow-2xl h-[25vh] lg:w-[23vh]"
-                          />
-                        </div>
-                        <div className="text-xs">Men's Fashion</div>
-                      </div>
+                      x
                     </div>
-                    <div className="flex justify-around">
-                      <div className="w-[40vw] lg:w-[20vw] flex flex-col items-center ">
-                        <div>
-                          <img
-                            src={perfumes}
-                            alt="image3"
-                            className="rounded-2xl mb-2 shadow-2xl h-[25vh]"
-                          />
-                        </div>
-                        <div className="text-xs">Perfumes</div>
-                      </div>
-                      <div className="w-[40vw] lg:w-[20vw] flex flex-col items-center ">
-                        <div>
-                          <img
-                            src={accessories}
-                            alt="image2"
-                            className="rounded-2xl mb-2 shadow-2xl h-[25vh]"
-                          />
-                        </div>
-                        <div className="text-xs">Accessories</div>
-                      </div>
+                    <div className="flex gap-0 ">
+                      <input
+                        type="text"
+                        placeholder="Search..."
+                        onChange={(e) => setSearchBar(e.target.value)}
+                        className="bg-black h-[8vh]  pl-4 text-[#ffd700] placeholder:text-[#FFD700] lg:w-[50vw] border-black rounded-l-2xl"
+                      />
+                      <button
+                        className="bg-black h-[8vh] w-[15vw] lg:w-[5vw] flex justify-center items-center rounded-r-2xl "
+                        onClick={searchHandler}
+                      >
+                        <FaSearch />
+                      </button>
                     </div>
                   </div>
+
+                  {/* categories and new */}
+
+                  <div className="text-black">
+                    <h2 className="w-[100vw] flex justify-center my-4  font-semibold lg:text-3xl">
+                      Popular Categories
+                    </h2>
+                    <div className="flex flex-col gap-5 lg:flex-row lg:justify-center lg:w-[100vw]">
+                      <div className="flex justify-around ">
+                        <div className="w-[40vw] lg:w-[20vw] flex flex-col items-center ">
+                          <Link to="/products" onClick={() =>
+                              dispatch(
+                                updateFilter({
+                                  type: "gender",
+                                  value: "Women",
+                                  checked: true,
+                                })
+                              )
+                            }>
+                            <img
+                              src={womensfashion}
+                              onClick={() => setShowSearch(false)}
+                              alt="image1"
+                              className="rounded-2xl mb-2 shadow-2xl h-[25vh] lg:w-[23vh]"
+                            />
+                          </Link>
+                          <div className="text-xs">Women's Fashion</div>
+                        </div>
+                        <div className="w-[40vw] lg:w-[20vw] flex flex-col items-center ">
+                          <Link to="/products" onClick={() =>
+                              dispatch(
+                                updateFilter({
+                                  type: "gender",
+                                  value: "Men",
+                                  checked: true,
+                                })
+                              )
+                            }>
+                            <img
+                              src={mensfashion}
+                              onClick={() => setShowSearch(false)}
+                              alt="image2"
+                              className="rounded-2xl mb-2 shadow-2xl h-[25vh] lg:w-[23vh]"
+                            />
+                          </Link>
+                          <div className="text-xs">Men's Fashion</div>
+                        </div>
+                      </div>
+                      <div className="flex justify-around">
+                        <div className="w-[40vw] lg:w-[20vw] flex flex-col items-center ">
+                          <Link
+                            to="/products"
+                            onClick={() =>
+                              dispatch(
+                                updateFilter({
+                                  type: "categories",
+                                  value: "Perfume",
+                                  checked: true,
+                                })
+                              )
+                            }
+                          >
+                            <img
+                              src={perfumes}
+                              alt="image3"
+                              onClick={() => setShowSearch(false)}
+                              className="rounded-2xl mb-2 shadow-2xl h-[25vh]"
+                            />
+                          </Link>
+                          <div className="text-xs">Perfumes</div>
+                        </div>
+                        <div className="w-[40vw] lg:w-[20vw] flex flex-col items-center ">
+                          <Link
+                          to="/products"
+                            onClick={() =>
+                              dispatch(
+                                updateFilter({
+                                  type: "categories",
+                                  value: "Belt",
+                                  checked: true,
+                                })
+                              )
+                            }
+                          >
+                            <img
+                              src={accessories}
+                              onClick={() => setShowSearch(false)}
+                              alt="image2"
+                              className="rounded-2xl mb-2 shadow-2xl h-[25vh]"
+                            />
+                          </Link>
+                          <div className="text-xs">Accessories</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-          }
+              )}
+            </div>
+          )}
 
           <div className="">
             {token ? (
@@ -321,7 +371,7 @@ const Navbar = () => {
             )}
           </div>
 
-          {user?.accountType === "user" && <CartSidebar /> }
+          {user?.accountType === "user" && <CartSidebar />}
         </div>
       </div>
 

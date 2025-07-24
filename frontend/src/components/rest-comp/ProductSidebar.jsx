@@ -124,7 +124,7 @@ const ProductSidebar = () => {
           {/* Gender */}
           <div>
             <h2 className="text-xl font-semibold mb-2">Gender</h2>
-            {["Men", "Women", "Unisex"].map((gender) => (
+            {["Men", "Women", "Unisex","Kids","Boys","Girls"].map((gender) => (
               <label key={gender} className="flex items-center mb-1">
                 <input
                   type="checkbox"
@@ -156,6 +156,27 @@ const ProductSidebar = () => {
                     className="mr-2"
                   />
                   {material}
+                </label>
+              )
+            )}
+          </div>
+
+          {/* Season */}
+          <div>
+            <h2 className="text-xl font-semibold mb-2">Season</h2>
+            {['Summer', 'Winter', 'Spring', 'Fall', 'All Season'].map(
+              (season) => (
+                <label key={season} className="flex items-center mb-1">
+                  <input
+                    type="checkbox"
+                    value={season}
+                    checked={filters.season.includes(season)}
+                    onChange={(e) =>
+                      handleCheckboxChange("season", season, e.target.checked)
+                    }
+                    className="mr-2"
+                  />
+                  {season}
                 </label>
               )
             )}

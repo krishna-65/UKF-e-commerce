@@ -7,7 +7,8 @@ const initialState = {
   material: [],
   color: [],
   size: [],
-  priceRanges: []
+  priceRanges: [],
+  season:[],
 };
 
 export const filterSlice = createSlice({

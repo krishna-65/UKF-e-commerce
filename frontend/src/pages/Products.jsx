@@ -6,13 +6,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { apiConnector } from "../services/apiConnector";
 import { setLoading } from "../slices/authSlice";
 import { toast } from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+
 
 const { getAllProduct } = productEndpoints;
 
 const Products = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -27,6 +26,7 @@ const Products = () => {
   const color = useSelector((state) => state.filters.color);
   const size = useSelector((state) => state.filters.size);
   const filters = useSelector((state) => state.filters);
+  const season = useSelector((state)=>state.filters.season);
   const search = useSelector((state) => state.search.searchData);
 
   const paginatedProducts = filteredProducts.slice(
@@ -63,6 +63,7 @@ const Products = () => {
       categories.length === 0 &&
       gender.length === 0 &&
       material.length === 0 &&
+      season.length === 0 &&
       color.length === 0 &&
       size.length === 0 &&
       filters.priceRanges.length === 0 &&
@@ -96,6 +97,9 @@ const Products = () => {
     if (size.length > 0) {
       filtered = filtered.filter((product) => size.includes(product.size));
     }
+    if (season.length > 0) {
+      filtered = filtered.filter((product) => season.includes(product.season));
+    }
     if (filters.priceRanges.length > 0) {
       filtered = filtered.filter((product) =>
         filters.priceRanges.some(
@@ -114,7 +118,7 @@ const Products = () => {
 
     setFilteredProducts(filtered);
     setCurrentPage(1);
-  }, [products, categories, gender, material, color, size, search, filters.priceRanges]);
+  }, [products, categories, gender,season, material, color, size, search, filters.priceRanges]);
 
   return (
     <div className="flex flex-col lg:flex-row bg-black text-[#FFD700] min-h-screen">

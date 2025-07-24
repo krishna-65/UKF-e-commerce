@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react'
 import shirt from '../assets/images/shirts.avif'
-import denim from '../assets/images/denim.jpg'
+import belt from '../assets/images/belt.avif'
 import tees from '../assets/images/tees.jpg'
 import pants from '../assets/images/pants.webp'
-import sweaters from '../assets/images/sweaters.jpeg'
-import outwear from '../assets/images/outwear.jpeg'
+import perfume from '../assets/images/Perfume.webp'
+import wallet from '../assets/images/wallet.jpg'
 import maninsuit from '../assets/images/maninsuit.jpg'
 import maninwinter from '../assets/images/maninwinter.avif'
 import maninsweater from '../assets/images/maninsweater.jpg'
@@ -13,12 +13,15 @@ import { PiPackage } from "react-icons/pi";
 import { PiRecycleThin } from "react-icons/pi";
 import { CiLocationOn } from "react-icons/ci";
 import { useDispatch } from 'react-redux'
-import { clearFilters } from '../slices/filterSlice'
+import { clearFilters, updateFilter } from '../slices/filterSlice'
+import { Link, useNavigate } from 'react-router-dom'
 
 
 const Home = () => {
 
     const dispatch= useDispatch();
+
+    const navigate = useNavigate()
 
 useEffect(()=>{
     dispatch(clearFilters());
@@ -61,54 +64,96 @@ useEffect(()=>{
         </div>
         <div className='lg:flex lg:gap-4'>
 
-                <div className='mt-4 cursor-pointer hover:scale-105 '>
-            <div className='w-[65vw] bg-yellow-500 rounded-3xl flex justify-center items-center h-[80vw] lg:h-[30vh] lg:w-[11vw] shadow-2xl'>
+                <Link to="/products" onClick={() =>
+                                          dispatch(
+                                            updateFilter({
+                                              type: "categories",
+                                              value: "Shirts",
+                                              checked: true,
+                                            })
+                                          )} className='mt-4 cursor-pointer hover:scale-105 '>
+            <div  className='w-[65vw] bg-yellow-500 rounded-3xl flex justify-center items-center h-[80vw] lg:h-[30vh] lg:w-[11vw] shadow-2xl'>
                 <img src={shirt} alt="shirt" className='w-[60vw] h-[75vw] lg:h-[28vh] lg:w-[10vw] rounded-3xl' />
             </div>
-            <div className='flex justify-center mt-2 text-xl text-slate-700 '>
+            <div  className='flex justify-center mt-2 text-xl text-slate-700 '>
                 Shirts
             </div>
-        </div>
-         <div className='mt-4 cursor-pointer hover:scale-105'>
+        </Link>
+         <Link to="/products" onClick={() =>
+                                          dispatch(
+                                            updateFilter({
+                                              type: "categories",
+                                              value: "T-Shirts",
+                                              checked: true,
+                                            })
+                                          )} className='mt-4 cursor-pointer hover:scale-105'>
             <div className='w-[65vw] bg-yellow-500 rounded-3xl flex justify-center items-center h-[80vw] lg:h-[30vh] lg:w-[11vw] shadow-2xl'>
                 <img src={tees} alt="shirt" className='w-[60vw] h-[75vw] lg:h-[28vh] lg:w-[10vw] rounded-3xl' />
             </div>
             <div className='w-full flex justify-center mt-2 text-xl text-slate-700 '>
                 Tees
             </div>
-        </div>
-         <div className='mt-4 cursor-pointer hover:scale-105'>
+        </Link>
+         <Link to="/products" onClick={() =>
+                                          dispatch(
+                                            updateFilter({
+                                              type: "categories",
+                                              value: "Belt",
+                                              checked: true,
+                                            })
+                                          )} className='mt-4 cursor-pointer hover:scale-105'>
             <div className='w-[65vw] bg-yellow-500 rounded-3xl flex justify-center items-center h-[80vw] lg:h-[30vh] lg:w-[11vw] shadow-2xl'>
-                <img src={denim} alt="shirt" className='w-[60vw] h-[75vw] lg:h-[28vh] lg:w-[10vw] rounded-3xl' />
+                <img src={belt} alt="shirt" className='w-[60vw] h-[75vw] lg:h-[28vh] lg:w-[10vw] rounded-3xl' />
             </div>
             <div className='w-full flex justify-center mt-2 text-xl text-slate-700 '>
-                Denim
+                Belts
             </div>
-        </div>
-         <div className='mt-4 cursor-pointer hover:scale-105'>
+        </Link>
+         <Link to="/products" onClick={() =>
+                                          dispatch(
+                                            updateFilter({
+                                              type: "categories",
+                                              value: "Pants",
+                                              checked: true,
+                                            })
+                                          )} className='mt-4 cursor-pointer hover:scale-105'>
             <div className='w-[65vw] bg-yellow-500 rounded-3xl flex justify-center items-center h-[80vw] lg:h-[30vh] lg:w-[11vw] shadow-2xl'>
                 <img src={pants} alt="shirt" className='w-[60vw] h-[75vw] lg:h-[28vh] lg:w-[10vw] rounded-3xl' />
             </div>
             <div className='w-full flex justify-center mt-2 text-xl text-slate-700 '>
                 Pants
             </div>
-        </div>
-         <div className='mt-4 cursor-pointer hover:scale-105'>
+        </Link>
+         <Link to="/products" onClick={() =>
+                                          dispatch(
+                                            updateFilter({
+                                              type: "categories",
+                                              value: "Perfume",
+                                              checked: true,
+                                            })
+                                          )} className='mt-4 cursor-pointer hover:scale-105'>
             <div className='w-[65vw] bg-yellow-500 rounded-3xl flex justify-center items-center h-[80vw] lg:h-[30vh] lg:w-[11vw] shadow-2xl'>
-                <img src={sweaters} alt="shirt" className='w-[60vw] h-[75vw] lg:h-[28vh] lg:w-[10vw] rounded-3xl' />
+                <img src={perfume} alt="shirt" className='w-[60vw] h-[75vw] lg:h-[28vh] lg:w-[10vw] rounded-3xl' />
             </div>
             <div className='w-full flex justify-center mt-2 text-xl text-slate-700 '>
-                Sweaters
+                Perfumes
             </div>
-        </div>
-         <div className='mt-4 cursor-pointer hover:scale-105'>
+        </Link>
+         <Link to="/products" onClick={() =>
+                                          dispatch(
+                                            updateFilter({
+                                              type: "categories",
+                                              value: "Wallet",
+                                              checked: true,
+                                            })
+                                          )} className='mt-4 cursor-pointer hover:scale-105'>
             <div className='w-[65vw] bg-yellow-500 rounded-3xl flex justify-center items-center h-[80vw] lg:h-[30vh] lg:w-[11vw] shadow-2xl'>
-                <img src={outwear} alt="shirt" className='w-[60vw] h-[75vw] lg:h-[28vh] lg:w-[10vw] rounded-3xl' />
+                <img src={wallet} alt="shirt" className='w-[60vw] h-[75vw] lg:h-[28vh] lg:w-[10vw] rounded-3xl' />
             </div>
             <div className='w-full flex justify-center mt-2 text-xl text-slate-700 '>
-                Outwear
+                Wallet
             </div>
-        </div>
+        </Link>
 
         </div>
     </div>
@@ -157,7 +202,7 @@ useEffect(()=>{
             <div className='text-white text-2xl'>
                 Read about us
             </div>
-            <button className='w-[70vw] lg:w-[15vw] h-[7vh] mt-2 rounded-full text-xl bg-white'>
+            <button onClick={()=>navigate('/about')} className='w-[70vw] lg:w-[15vw] h-[7vh] mt-2 rounded-full text-xl bg-white'>
                 Learn More
             </button>
 

@@ -111,7 +111,7 @@ const AddProduct = () => {
     const term = searchTerm.toLowerCase();
     if (Array.isArray(products)) {
       const filteredProducts = products.filter((prod) =>
-        `${prod.name} ${prod.stock} ${prod.sold} ${prod.category?.name} ${prod.brand}`
+        `${prod.name} ${prod.stock} ${prod.sold} ${prod.category?.name} ${prod.brand?.name}`
           .toLowerCase()
           .includes(term)
       );

@@ -13,6 +13,7 @@ export default function Sidebar() {
     { name: 'View Users', path: '/admindashboard/viewusers' },
     { name: 'Manage Categories', path: '/admindashboard/addcategory' },
     { name: 'Manage Brands', path: '/admindashboard/addbrands' },
+    { name: 'Manage Orders', path: '/admindashboard/manageorders'}
   ];
 
   const dispatch = useDispatch();
