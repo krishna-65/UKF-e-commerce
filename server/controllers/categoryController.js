@@ -47,10 +47,10 @@ export const getCategoryById = async (req, res) => {
 // Update category
 export const updateCategory = async (req, res) => {
     try {
-        const { name, description } = req.body;
+        const { name, description ,status} = req.body;
         const updated = await Category.findByIdAndUpdate(
             req.params.id,
-            { name, description },
+            { name, description ,status},
             { new: true }
         );
         if (!updated) {
@@ -68,7 +68,8 @@ export const deleteCategory = async (req, res) => {
     const  categoryId = req.params.id;
 
     // Step 1: Find the category
-    const category = await Category.findById(categoryId);
+  
+      const category = await Category.findById(categoryId);
     if (!category) {
       return res.status(404).json({ success: false, message: 'Category not found' });
     }
@@ -86,3 +87,34 @@ export const deleteCategory = async (req, res) => {
   }
 };
 
+
+
+export const activeInactive = async (req, res) => {
+  try {
+    const { data } = req.body; // should be either 'active' or 'inactive'
+
+    // ✅ Fix the logic: reject if not one of the allowed values
+    if (data !== 'active' && data !== 'inactive') {
+      return res.status(400).json({ success: false, message: 'Status must be either active or inactive' });
+    }
+
+    const { categoryId } = req.params;
+
+    const category = await Category.findById(categoryId);
+    if (!category) {
+      return res.status(404).json({ success: false, message: 'Category not found' });
+    }
+
+    // ✅ Set status and save
+    category.status = data;
+    await category.save();
+
+    return res.status(200).json({
+      success: true,
+      message: `Category marked as ${data} successfully`,
+    });
+
+  } catch (error) {
+    return res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+  }
+};

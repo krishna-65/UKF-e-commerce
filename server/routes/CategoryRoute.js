@@ -1,5 +1,6 @@
 import express from "express";
 import {
+    activeInactive,
     createCategory,
     deleteCategory,
     getAllCategories,
@@ -15,5 +16,7 @@ router.get("/", getAllCategories);
 router.get("/:id", getCategoryById);
 router.put("/:id", updateCategory);
 router.delete("/:id", deleteCategory);
+router.patch('/status/:categoryId', activeInactive);
+
 
 export default router;
