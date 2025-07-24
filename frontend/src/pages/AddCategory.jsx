@@ -5,7 +5,8 @@ import { setLoading } from "../slices/authSlice";
 import { apiConnector } from "../services/apiConnector";
 import toast from "react-hot-toast";
 
-const { createCategory, getAllCategory, updateCategory } = categoryEndpoints;
+const { createCategory, getAllCategory, updateCategory, deleteCategory } =
+  categoryEndpoints;
 
 const AddCategory = () => {
   const loading = useSelector((state) => state.auth.loading);
@@ -25,6 +26,7 @@ const AddCategory = () => {
     try {
       dispatch(setLoading(true));
       const res = await apiConnector("GET", getAllCategory);
+      console.log(res)
       setCategories(res.data);
       toast.success("All Categories fetched successfully!");
     } catch (err) {
@@ -68,13 +70,31 @@ const AddCategory = () => {
       setShowEditModal(false);
       getAllCategories();
       setEditData({
-    id: "",
-    name: "",
-    description: "",
-  })
+        id: "",
+        name: "",
+        description: "",
+      });
     } catch (err) {
       console.log(err);
       toast.error("Failed to update category");
+    }
+  };
+
+  const toggleStatus = async (id, currentStatus) => {
+    try {
+      dispatch(setLoading(true));
+      const updatedStatus = currentStatus === "active" ? "inactive" : "active";
+      const res = await apiConnector("DELETE", `${updateCategory}/${id}`, {
+        status: updatedStatus,
+      });
+      console.log("the response of making it inactive is : ", res);
+      toast.success(`Category marked as ${updatedStatus}`);
+      getAllCategories();
+    } catch (err) {
+      console.log(err);
+      toast.error("Failed to update status");
+    } finally {
+      dispatch(setLoading(false));
     }
   };
 
@@ -94,16 +114,18 @@ const AddCategory = () => {
 
       {/* Category Table */}
       {loading ? (
-       <div className="w-full h-[50vh] flex justify-center items-center">
-         <div className="spinner"></div>
-       </div>
+        <div className="w-full h-[50vh] flex justify-center items-center">
+          <div className="spinner"></div>
+        </div>
       ) : (
         <table className="w-full text-black bg-white rounded-lg overflow-hidden shadow-lg">
           <thead className="bg-[#FFD770]">
             <tr>
               <th className="py-2 px-4 text-left">Sr. No.</th>
               <th className="py-2 px-4 text-left">Name</th>
-              <th className="py-2 px-4 text-left hidden lg:table-cell">Description</th>
+              <th className="py-2 px-4 text-left hidden lg:table-cell">
+                Description
+              </th>
               <th className="py-2 px-4 text-left">Action</th>
             </tr>
           </thead>
@@ -115,7 +137,7 @@ const AddCategory = () => {
                 <td className="py-2 px-4 hidden lg:table-cell">
                   {cat.description.substr(0, 30)}...
                 </td>
-                <td className="py-2 px-4">
+                <td className="py-2 px-4 flex gap-2 flex-wrap">
                   <button
                     onClick={() => {
                       setEditData({
@@ -128,6 +150,16 @@ const AddCategory = () => {
                     className="bg-[#FFD770] text-black px-3 py-1 rounded hover:brightness-110 transition"
                   >
                     Edit
+                  </button>
+                  <button
+                    onClick={() => toggleStatus(cat._id, cat.status)}
+                    className={`px-3 py-1 rounded transition ${
+                      cat.status === "active"
+                        ? "bg-red-600 text-white hover:bg-red-700"
+                        : "bg-green-500 text-white hover:bg-green-600"
+                    }`}
+                  >
+                    {cat.status === "active" ? "Turn Inactive" : "Turn Active"}
                   </button>
                 </td>
               </tr>

@@ -18,6 +18,7 @@ export const categoryEndpoints = {
   getAllCategory : BASE_URL + "/api/category/",
   getCategory : BASE_URL + "/api/category/",
   updateCategory : BASE_URL + "/api/category/",
+  deleteCtegory : BASE_URL + "/api/category/"
 }
 
 //product endpoints

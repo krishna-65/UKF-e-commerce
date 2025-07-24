@@ -75,7 +75,7 @@ export const deleteCategory = async (req, res) => {
 
     // Step 2: Find all products associated with this category
    category.status = 'inactive'; // Soft delete category
-
+ await category.save();
     return res.status(200).json({ success: true, message: 'Category deleted successfully' });
   } catch (error) {
     console.error('Error deleting category:', error);
