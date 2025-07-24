@@ -28,11 +28,8 @@ const productSchema = new mongoose.Schema({
   brand: { type: mongoose.Schema.Types.ObjectId, ref: 'Brand' }, // Reference to Brand model
   size: {
     type: String,
-<<<<<<< HEAD
     enum: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '4XL', '5XL', 'One Size',''],
     
-=======
->>>>>>> 44b3b613831d1d42317fd8109965459c0f12f462
   },
   color: { type: String, required: true },
   material: { type: String }, // e.g., Cotton, Polyester, etc.
