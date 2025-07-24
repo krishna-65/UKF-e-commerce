@@ -5,7 +5,7 @@ import { setLoading } from "../slices/authSlice";
 import { apiConnector } from "../services/apiConnector";
 import toast from "react-hot-toast";
 
-const { createCategory, getAllCategory, updateCategory, deleteCategory } =
+const { createCategory, getAllCategory, updateCategory, activeInactiveCategory } =
   categoryEndpoints;
 
 const AddCategory = () => {
@@ -84,8 +84,8 @@ const AddCategory = () => {
     try {
       dispatch(setLoading(true));
       const updatedStatus = currentStatus === "active" ? "inactive" : "active";
-      const res = await apiConnector("DELETE", `${updateCategory}/${id}`, {
-        status: updatedStatus,
+      const res = await apiConnector("PATCH", `${activeInactiveCategory}${id}`, {
+        data: updatedStatus,
       });
       console.log("the response of making it inactive is : ", res);
       toast.success(`Category marked as ${updatedStatus}`);

@@ -1,5 +1,6 @@
 
 
+
 const BASE_URL = "http://localhost:4000"
 
 // AUTH ENDPOINTS
@@ -18,7 +19,8 @@ export const categoryEndpoints = {
   getAllCategory : BASE_URL + "/api/category/",
   getCategory : BASE_URL + "/api/category/",
   updateCategory : BASE_URL + "/api/category/",
-  deleteCtegory : BASE_URL + "/api/category/"
+  deleteCtegory : BASE_URL + "/api/category/",
+  activeInactiveCategory : BASE_URL + "/api/category/status/"
 }
 
 //product endpoints
