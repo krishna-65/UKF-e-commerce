@@ -102,7 +102,7 @@ const ProductSidebar = () => {
           <div>
             <h2 className="text-xl font-semibold mb-2">Categories</h2>
             {categories.length > 0 ? (
-              categories.map((cat) => (
+              categories.filter((cat) => cat.status === "active").map((cat) => (
                 <label key={cat._id} className="flex items-center mb-1">
                   <input
                     type="checkbox"

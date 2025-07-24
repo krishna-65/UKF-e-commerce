@@ -24,7 +24,7 @@ export const createCategory = async (req, res) => {
 // Get all categories
 export const getAllCategories = async (req, res) => {
     try {
-        const categories = await Category.find({ status: 'active' });
+        const categories = await Category.find({  });
         res.status(200).json(categories);
     } catch (error) {
         res.status(500).json({ message: "Server error", error: error.message });
