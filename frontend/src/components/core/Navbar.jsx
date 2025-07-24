@@ -139,7 +139,7 @@ const Navbar = () => {
                   dispatch(
                     updateFilter({
                       type: "gender",
-                      value: "Male",
+                      value: "Men",
                       checked: true,
                     })
                   );
@@ -157,7 +157,7 @@ const Navbar = () => {
                   dispatch(
                     updateFilter({
                       type: "gender",
-                      value: "Female",
+                      value: "Women",
                       checked: true,
                     })
                   )
