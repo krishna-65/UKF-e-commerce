@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { apiConnector } from "../services/apiConnector";
 import { addressEndpoints, orderEndpoints } from "../services/api";
 import toast from "react-hot-toast";
+import { motion } from "framer-motion";
 
 const CreateOrder = () => {
   const userId = useSelector(state => state.auth.userData?._id);
@@ -13,6 +14,7 @@ const CreateOrder = () => {
   const [showModal, setShowModal] = useState(false);
   const [addingAddress, setAddingAddress] = useState(false);
   const [notes, setNotes] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("COD");
 
   const [formData, setFormData] = useState({
     recipientName: "",
@@ -37,7 +39,7 @@ const CreateOrder = () => {
         if (defaultAddr) setSelectedAddress(defaultAddr._id);
       }
     } catch (error) {
-        console.log("Error while fetching addresses",error)
+      console.log("Error while fetching addresses", error);
       toast.error("Failed to load addresses");
     }
   };
@@ -65,8 +67,8 @@ const CreateOrder = () => {
         isDefault: false
       });
       fetchAddresses();
-    } catch (error){
-        console.error("Failed to add address:", error);
+    } catch (error) {
+      console.error("Failed to add address:", error);
       toast.error("Failed to add address");
     } finally {
       setAddingAddress(false);
@@ -87,17 +89,15 @@ const CreateOrder = () => {
 
     const payload = {
       userId,
-      items: [
-        {
-          productId: product._id,
-          quantity: 1,
-          name: product.name,
-          price: product.price
-        }
-      ],
+      items: [{
+        productId: product._id,
+        quantity: 1,
+        name: product.name,
+        price: product.price
+      }],
       shippingAddress: selectedAddress,
       billingAddress: selectedAddress,
-      paymentMethod: "COD",
+      paymentMethod,
       subtotal,
       shippingFee,
       tax,
@@ -110,7 +110,7 @@ const CreateOrder = () => {
       const res = await apiConnector("POST", orderEndpoints.createOrder, payload);
       if (res.data.success) {
         toast.success("Order placed successfully");
-        // Navigate to order confirmation if needed
+        // Navigate or reset as needed
       }
     } catch (err) {
       toast.error(err.response?.data?.message || "Order failed");
@@ -122,12 +122,27 @@ const CreateOrder = () => {
   }, [userId]);
 
   return (
-    <div className="bg-black text-[#FFD700] min-h-screen p-6 font-sans">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <motion.div
+      className="bg-black text-[#FFD700] min-h-screen p-6 font-sans"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <motion.div
+        className="max-w-6xl mx-auto space-y-6"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
         <h1 className="text-2xl font-bold">Confirm Your Order</h1>
 
         {/* Product Summary */}
-        <div className="bg-[#1a1a1a] p-4 rounded-lg flex items-center gap-4">
+        <motion.div
+          className="bg-[#1a1a1a] p-4 rounded-lg flex items-center gap-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
           <img
             src={product?.images?.[0]?.url}
             alt="Product"
@@ -137,7 +152,7 @@ const CreateOrder = () => {
             <h2 className="font-semibold text-lg">{product?.name}</h2>
             <p>Price: ₹{product?.price}</p>
           </div>
-        </div>
+        </motion.div>
 
         {/* Address Selection */}
         <div>
@@ -147,9 +162,11 @@ const CreateOrder = () => {
           ) : (
             <div className="space-y-3">
               {addresses.map(addr => (
-                <label
+                <motion.label
                   key={addr._id}
                   className="flex gap-2 items-start p-3 border border-[#FFD700] rounded cursor-pointer hover:bg-[#111]"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
                 >
                   <input
                     type="radio"
@@ -163,7 +180,7 @@ const CreateOrder = () => {
                     <div>{addr.country}</div>
                     <div>Phone: {addr.phone}</div>
                   </div>
-                </label>
+                </motion.label>
               ))}
             </div>
           )}
@@ -185,27 +202,54 @@ const CreateOrder = () => {
           />
         </div>
 
+        {/* Payment Method */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <label className="block font-semibold mb-2">Choose Payment Method</label>
+          <select
+            value={paymentMethod}
+            onChange={(e) => setPaymentMethod(e.target.value)}
+            className="w-full p-2 mb-4 border rounded bg-[#111] text-[#FFD700]"
+          >
+            <option value="COD">Cash on Delivery</option>
+            <option value="UPI">UPI</option>
+            <option value="Debit Card">Debit Card</option>
+            <option value="Credit Card">Credit Card</option>
+            <option value="Wallet">Wallet</option>
+          </select>
+        </motion.div>
+
         {/* Place Order */}
         <div className="mt-6">
-          <button
+          <motion.button
             onClick={handlePlaceOrder}
             disabled={!selectedAddress}
             className="w-full bg-[#FFD700] text-black font-bold py-3 rounded hover:brightness-110 disabled:opacity-50"
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.95 }}
           >
             Place Order
-          </button>
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Add Address Modal */}
+      {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0  bg-opacity-60 backdrop-blur-sm flex justify-center items-center z-50">
-          <div className="hidescroll mt-28 bg-white text-black p-6 rounded-lg w-[90%] max-w-lg overflow-y-auto max-h-[70vh]">
-            <h2 className="text-xl font-bold mb-4">Add New Address</h2>
+        <div className="fixed inset-0 bg-opacity-60 backdrop-blur-sm flex justify-center items-center z-50">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.3 }}
+            className="hidescroll mt-28 bg-white text-black p-6 rounded-lg w-[90%] max-w-lg overflow-y-auto max-h-[70vh]"
+          >
+                        <h2 className="text-xl font-bold mb-4">Add New Address</h2>
             {[
               "recipientName", "street", "city", "state",
               "postalCode", "country", "phone", "landmark", "instructions"
-            ].map(key => (
+            ].map((key) => (
               <input
                 key={key}
                 type="text"
@@ -249,10 +293,10 @@ const CreateOrder = () => {
                 {addingAddress ? "Saving..." : "Save"}
               </button>
             </div>
-          </div>
+          </motion.div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };
 
