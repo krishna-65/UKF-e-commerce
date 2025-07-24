@@ -1,3 +1,5 @@
+
+
 const BASE_URL = "http://localhost:4000"
 
 // AUTH ENDPOINTS
@@ -49,4 +51,26 @@ export const brandEndpoints = {
   getBrandsWithProducts : BASE_URL + "/api/brand/with-products",
   getBrandById : BASE_URL + "/api/brand/",
    deleteBrand : BASE_URL +  "/api/brand/",
+}
+
+//address endpoints
+
+export const addressEndpoints = {
+  createAddress : BASE_URL + "/api/address/",
+  getUserAddress : BASE_URL + "/api/address/user/",
+  updateAddress : BASE_URL + "/api/address/",
+  deleteAddress : BASE_URL + "/api/address/",
+  setDefaultAddress : BASE_URL + "/api/address/"
+}
+
+//orders endpoints
+
+export const orderEndpoints = {
+  createOrder : BASE_URL + "/api/order/",
+  getUserOrders : BASE_URL + "/api/order/my-orders",
+  getOrderById : BASE_URL + "/api/order/",
+  cancelOrder : BASE_URL + "/api/order/",
+  getAllOrders : BASE_URL + "/api/order/",
+  updateOrderStatus : BASE_URL + "/api/order/",
+  addTrackingInfo : BASE_URL + "/api/order/"
 }

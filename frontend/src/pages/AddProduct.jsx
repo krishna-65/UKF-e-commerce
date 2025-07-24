@@ -359,7 +359,7 @@ const AddProduct = () => {
 
       {(showAddModal || showEditModal) && (
         <div className="fixed z-[151] inset-0 backdrop-blur-2xl bg-opacity-30 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg max-w-md w-[90%] overflow-y-auto max-h-[90vh] text-black">
+          <div className="bg-white hidecursor p-6 rounded-lg max-w-md w-[90%] overflow-y-auto max-h-[90vh] text-black">
             <h3 className="text-xl font-semibold mb-4">
               {showAddModal ? "Add Product" : "Edit Product"}
             </h3>
@@ -372,16 +372,13 @@ const AddProduct = () => {
               "comparePrice",
               "costPerItem",
               "stock",
-              "size",
+
               "color",
               "material",
               "fabric",
-              "fit",
-              "sleeveLength",
+
               "pattern",
               "occasion",
-              "season",
-              "gender",
             ].map((key) => (
               <input
                 key={key}
@@ -400,6 +397,112 @@ const AddProduct = () => {
                 className="mb-3 w-full p-2 border rounded"
               />
             ))}
+
+            {/* ENUM DROPDOWNS */}
+            <select
+              value={formData.size}
+              onChange={(e) =>
+                setFormData({ ...formData, size: e.target.value })
+              }
+              className="mb-3 w-full p-2 border rounded"
+            >
+              <option value="">Select Size</option>
+              {[
+                "XS",
+                "S",
+                "M",
+                "L",
+                "XL",
+                "XXL",
+                "XXXL",
+                "4XL",
+                "5XL",
+                "One Size",
+              ].map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={formData.fit}
+              onChange={(e) =>
+                setFormData({ ...formData, fit: e.target.value })
+              }
+              className="mb-3 w-full p-2 border rounded"
+            >
+              <option value="">Select Fit</option>
+              {["Slim", "Regular", "Oversized", "Relaxed"].map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={formData.sleeveLength}
+              onChange={(e) =>
+                setFormData({ ...formData, sleeveLength: e.target.value })
+              }
+              className="mb-3 w-full p-2 border rounded"
+            >
+              <option value="">Select Sleeve Length</option>
+              {["Short", "Half", "Long", "Sleeveless"].map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={formData.season}
+              onChange={(e) =>
+                setFormData({ ...formData, season: e.target.value })
+              }
+              className="mb-3 w-full p-2 border rounded"
+            >
+              <option value="">Select Season</option>
+              {["Summer", "Winter", "Spring", "Fall", "All Season"].map(
+                (opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                )
+              )}
+            </select>
+
+            <select
+              value={formData.gender}
+              onChange={(e) =>
+                setFormData({ ...formData, gender: e.target.value })
+              }
+              className="mb-3 w-full p-2 border rounded"
+            >
+              <option value="">Select Gender</option>
+              {["Men", "Women", "Unisex", "Kids", "Boys", "Girls"].map(
+                (opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                )
+              )}
+            </select>
+
+            {/* <select
+              value={formData.status}
+              onChange={(e) =>
+                setFormData({ ...formData, status: e.target.value })
+              }
+              className="mb-3 w-full p-2 border rounded"
+            >
+              <option value="">Select Status</option>
+              {["draft", "active", "archived"].map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </select> */}
 
             {/* Brands */}
             <select
@@ -471,7 +574,7 @@ const AddProduct = () => {
               )
             )}
 
-            {/* Lookbook Images */}
+            {/* Lookbook Images
             <label className="block mt-4 mb-2 font-semibold">
               Lookbook Images (URLs)
             </label>
@@ -488,7 +591,7 @@ const AddProduct = () => {
                 }}
                 className="mb-2 w-full p-2 border rounded"
               />
-            ))}
+            ))} */}
 
             {/* Image Upload */}
             <div className="mb-4">

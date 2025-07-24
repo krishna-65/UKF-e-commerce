@@ -28,19 +28,19 @@ const productSchema = new mongoose.Schema({
   brand: { type: mongoose.Schema.Types.ObjectId, ref: 'Brand' }, // Reference to Brand model
   size: {
     type: String,
-    enum: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '4XL', '5XL', 'One Size'],
+    enum: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '4XL', '5XL', 'One Size',''],
     
   },
   color: { type: String, required: true },
   material: { type: String }, // e.g., Cotton, Polyester, etc.
   fabric: { type: String }, // More specific than material
   weight: { type: Number }, // In grams
-  fit: { type: String, enum: ['Slim', 'Regular', 'Oversized', 'Relaxed'] },
-  sleeveLength: { type: String, enum: ['Short', 'Half', 'Long', 'Sleeveless'] },
+  fit: { type: String, enum: ['Slim', 'Regular', 'Oversized', 'Relaxed',''] },
+  sleeveLength: { type: String, enum: ['Short', 'Half', 'Long', 'Sleeveless',''] },
   pattern: { type: String }, // e.g., Striped, Printed, Solid, etc.
   occasion: { type: String }, // e.g., Casual, Formal, Party, etc.
-  season: { type: String, enum: ['Summer', 'Winter', 'Spring', 'Fall', 'All Season'] },
-  gender: { type: String, enum: ['Men', 'Women', 'Unisex', 'Kids', 'Boys', 'Girls'] },
+  season: { type: String, enum: ['Summer', 'Winter', 'Spring', 'Fall', 'All Season',''] },
+  gender: { type: String, enum: ['Men', 'Women', 'Unisex', 'Kids', 'Boys', 'Girls',''] },
   ageGroup: { type: String }, // For kids clothing
   
   // Media

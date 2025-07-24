@@ -2,10 +2,23 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../slices/cartSlice";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function ProductDetail() {
   const product = useSelector((state) => state.product.productData);
   const images = product?.images || [];
+
+  const navigate = useNavigate();
+
+  const buyNowHandler = () => {
+    if (userRole !== "user") {
+      toast.error("Please log in as a valid user!");
+      return;
+    }
+
+    // dispatch({ type: "SET_ORDER_PRODUCT", payload: product }); // optional
+    navigate("/create-order");
+  };
 
   const userRole = useSelector((state) => state.auth.role);
   const dispatch = useDispatch();
@@ -70,13 +83,17 @@ export default function ProductDetail() {
 
         {/* Product Info */}
         <div className="space-y-4">
-          <h1 className="text-3xl font-bold">{product?.name || "Product Name"}</h1>
+          <h1 className="text-3xl font-bold">
+            {product?.name || "Product Name"}
+          </h1>
 
           <div className="flex items-center gap-3 text-sm">
             <span className="font-semibold text-[#ecba49]">
               ★ {product?.ratings?.average?.toFixed(1) || "0.0"}
             </span>
-            <span className="text-gray-400">({product?.reviews?.length || 0} reviews)</span>
+            <span className="text-gray-400">
+              ({product?.reviews?.length || 0} reviews)
+            </span>
             <span className="bg-yellow-600 text-black px-2 py-1 rounded text-xs font-bold">
               UKF's Pick
             </span>
@@ -90,14 +107,17 @@ export default function ProductDetail() {
               <span className="text-2xl font-bold">₹{product?.price}</span>
             </div>
             <div className="text-gray-400 line-through">
-              M.R.P.: ₹{product?.comparePrice || Math.round(product?.price * 1.25)}
+              M.R.P.: ₹
+              {product?.comparePrice || Math.round(product?.price * 1.25)}
             </div>
             <div className="text-sm text-gray-400">Inclusive of all taxes</div>
           </div>
 
           <div className="flex items-center gap-2">
             <input type="checkbox" id="coupon" className="accent-[#ecba49]" />
-            <label htmlFor="coupon" className="text-sm">Apply 3% coupon</label>
+            <label htmlFor="coupon" className="text-sm">
+              Apply 3% coupon
+            </label>
           </div>
 
           <div className="bg-[#1a1a1a] p-4 rounded space-y-2 text-sm">
@@ -117,12 +137,25 @@ export default function ProductDetail() {
 
           {/* Details */}
           <div className="grid grid-cols-2 gap-3 mt-4 text-sm">
-            <div><strong>Brand:</strong> {product?.brand?.name || "N/A"}</div>
-            <div><strong>Category:</strong> {product?.category?.name || "Uncategorized"}</div>
-            <div><strong>Material:</strong> {product?.material || "—"}</div>
-            <div><strong>Gender:</strong> {product?.gender || "Unisex"}</div>
-            <div><strong>Color:</strong> {product?.color || "—"}</div>
-            <div><strong>Size:</strong> {product?.size || "—"}</div>
+            <div>
+              <strong>Brand:</strong> {product?.brand?.name || "N/A"}
+            </div>
+            <div>
+              <strong>Category:</strong>{" "}
+              {product?.category?.name || "Uncategorized"}
+            </div>
+            <div>
+              <strong>Material:</strong> {product?.material || "—"}
+            </div>
+            <div>
+              <strong>Gender:</strong> {product?.gender || "Unisex"}
+            </div>
+            <div>
+              <strong>Color:</strong> {product?.color || "—"}
+            </div>
+            <div>
+              <strong>Size:</strong> {product?.size || "—"}
+            </div>
           </div>
 
           {/* Actions */}
@@ -134,7 +167,10 @@ export default function ProductDetail() {
             >
               {isAddingToCart ? "Adding..." : "Add to Cart"}
             </button>
-            <button className="border border-[#ecba49] px-6 py-2 rounded font-semibold hover:bg-[#ecba49] hover:text-black transition-all">
+            <button
+              onClick={buyNowHandler}
+              className="border border-[#ecba49] px-6 py-2 rounded font-semibold hover:bg-[#ecba49] hover:text-black transition-all"
+            >
               Buy Now
             </button>
           </div>
