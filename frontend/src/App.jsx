@@ -16,6 +16,7 @@ import AboutUs from './pages/AboutUs'
 import Products from './pages/Products'
 import ProductDetail from './pages/ProductDetail'
 import Brands from './pages/Addbrand'
+import CreateOrder from './pages/CreateOrder'
 
 
 const App = () => {
@@ -45,6 +46,7 @@ const App = () => {
         <Route path="viewusers" element={<ViewUsers />} />
       </Route>
 
+      <Route path="create-order" element={<CreateOrder/>}/>
       <Route path="/products" element={<Products/>}/>
       <Route path="/productdetail" element={<ProductDetail/>}/>
       </Routes>
