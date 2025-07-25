@@ -265,7 +265,9 @@ const Navbar = () => {
                     <div className="flex flex-col gap-5 lg:flex-row lg:justify-center lg:w-[100vw]">
                       <div className="flex justify-around ">
                         <div className="w-[40vw] lg:w-[20vw] flex flex-col items-center ">
-                          <Link to="/products" onClick={() =>
+                          <Link
+                            to="/products"
+                            onClick={() =>
                               dispatch(
                                 updateFilter({
                                   type: "gender",
@@ -273,7 +275,8 @@ const Navbar = () => {
                                   checked: true,
                                 })
                               )
-                            }>
+                            }
+                          >
                             <img
                               src={womensfashion}
                               onClick={() => setShowSearch(false)}
@@ -284,7 +287,9 @@ const Navbar = () => {
                           <div className="text-xs">Women's Fashion</div>
                         </div>
                         <div className="w-[40vw] lg:w-[20vw] flex flex-col items-center ">
-                          <Link to="/products" onClick={() =>
+                          <Link
+                            to="/products"
+                            onClick={() =>
                               dispatch(
                                 updateFilter({
                                   type: "gender",
@@ -292,7 +297,8 @@ const Navbar = () => {
                                   checked: true,
                                 })
                               )
-                            }>
+                            }
+                          >
                             <img
                               src={mensfashion}
                               onClick={() => setShowSearch(false)}
@@ -328,7 +334,7 @@ const Navbar = () => {
                         </div>
                         <div className="w-[40vw] lg:w-[20vw] flex flex-col items-center ">
                           <Link
-                          to="/products"
+                            to="/products"
                             onClick={() =>
                               dispatch(
                                 updateFilter({
@@ -356,17 +362,29 @@ const Navbar = () => {
             </div>
           )}
 
-          <div className="">
+          <div className="relative">
             {token ? (
-              <div onClick={logoutHandler} className="peer cursor-pointer">
-                <IoIosLogOut />
+              <div className="cursor-pointer relative group">
+                <FaUser className="text-[#FFD700]" />
+
+                <div className="absolute right-[-60px] mt-2 w-40 bg-black border border-[#FFD700]/30 rounded-md shadow-lg text-[#FFD700] opacity-0 group-hover:opacity-100 transition duration-300 z-10">
+                  <button
+                    onClick={() => navigate("/profile")}
+                    className="w-full text-left px-4 py-2 flex justify-center hover:bg-[#FFD700] hover:text-black transition duration-200"
+                  >
+                    Profile
+                  </button>
+                  <button
+                    onClick={logoutHandler}
+                    className="w-full text-left px-4 py-2 flex justify-center hover:bg-red-500 hover:text-white transition duration-200"
+                  >
+                    Logout
+                  </button>
+                </div>
               </div>
             ) : (
-              <div
-                onClick={() => navigate("/")}
-                className="peer cursor-pointer"
-              >
-                <FaUser />
+              <div onClick={() => navigate("/")} className="cursor-pointer">
+                <FaUser className="text-[#FFD700]" />
               </div>
             )}
           </div>
