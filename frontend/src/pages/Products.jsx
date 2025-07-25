@@ -143,13 +143,14 @@ const Products = () => {
   }, [filteredProducts, loading]);
 
   return (
-    <div className="flex flex-col lg:flex-row bg-black text-[#FFD700] min-h-screen overflow-hidden">
+    <div className="flex flex-col lg:flex-row bg-black text-[#FFD700] min-h-screen">
       {/* Animated Sidebar */}
-      <div className={`transition-all duration-700 ease-out ${animateFilters ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'}`}>
+      <div className={`relative z-50 transition-all duration-700 ease-out ${animateFilters ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'}`}>
         <ProductSidebar />
       </div>
 
-      <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
+      {/* Main Content - Products */}
+      <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8 relative z-0">
         {/* Animated Header */}
         <h1 className={`text-2xl font-bold mb-6 transition-all duration-800 hover:text-yellow-300 hover:scale-105 cursor-default ${isVisible ? 'translate-y-0 opacity-100' : '-translate-y-8 opacity-0'}`}>
           Explore Products

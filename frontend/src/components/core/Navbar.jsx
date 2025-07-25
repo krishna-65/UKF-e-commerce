@@ -22,6 +22,8 @@ import { apiConnector } from "../../services/apiConnector";
 const { bulkCart } = cartEndpoints;
 
 const Navbar = () => {
+  // Add new state for profile dropdown
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -114,8 +116,8 @@ const Navbar = () => {
   };
 
   return (
-    <div className="fixed top-0 w-full z-100">
-      <div className="bg-black h-[10vh] text-[#FFD700] flex items-center justify-between px-3 lg:px-10 ">
+    <div className="fixed top-0 w-full z-[50]">
+      <div className="bg-black h-[10vh] text-[#FFD700] flex items-center justify-between px-3 lg:px-10">
         <img
           src={logo}
           className="w-[10vh] ml-10 cursor-pointer lg:ml-0"
@@ -123,7 +125,7 @@ const Navbar = () => {
           alt="UKF-Outlets"
         />
 
-        <div className="hidden opacity-0 lg:opacity-100 lg:flex">
+        <div className="hidden opacity-0 lg:opacity-100 lg:flex z-[91]">
           <ul className="flex gap-5">
             <li className="group flex flex-col justify-between relative">
               <NavLink
@@ -226,7 +228,7 @@ const Navbar = () => {
           </ul>
         </div>
 
-        <div className="flex gap-4 text-xl">
+        <div className="flex gap-4 text-xl z-[91]">
           {user?.accountType === "user" && (
             <div className=" relative">
               <FaSearch onClick={() => setShowSearch(!showSearch)} />
@@ -364,23 +366,34 @@ const Navbar = () => {
 
           <div className="relative">
             {token ? (
-              <div className="cursor-pointer relative group">
-                <FaUser className="text-[#FFD700]" />
+              <div className="cursor-pointer relative">
+                <FaUser
+                  className="text-[#FFD700]"
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                />
 
-                <div className="absolute right-[-60px]  mt-2 w-40 bg-black border border-[#FFD700]/30 rounded-md shadow-lg text-[#FFD700] opacity-0 group-hover:opacity-100 transition duration-300 z-10">
-                  <button
-                    onClick={() => navigate("/profile")}
-                    className="w-full text-left px-4 py-2 flex justify-center hover:bg-[#FFD700] hover:text-black transition duration-200"
-                  >
-                    Profile
-                  </button>
-                  <button
-                    onClick={logoutHandler}
-                    className="w-full text-left px-4 py-2 flex justify-center hover:bg-red-500 hover:text-white transition duration-200"
-                  >
-                    Logout
-                  </button>
-                </div>
+                {showProfileMenu && (
+                  <div className="absolute right-[-60px] mt-2 w-40 bg-black border border-[#FFD700]/30 rounded-md shadow-lg text-[#FFD700] z-[92]">
+                    <button
+                      onClick={() => {
+                        navigate("/profile");
+                        setShowProfileMenu(false);
+                      }}
+                      className="w-full text-left px-4 py-2 flex justify-center hover:bg-[#FFD700] hover:text-black transition duration-200"
+                    >
+                      Profile
+                    </button>
+                    <button
+                      onClick={() => {
+                        logoutHandler();
+                        setShowProfileMenu(false);
+                      }}
+                      className="w-full text-left px-4 py-2 flex justify-center hover:bg-red-500 hover:text-white transition duration-200"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <div onClick={() => navigate("/")} className="cursor-pointer">
@@ -393,7 +406,7 @@ const Navbar = () => {
         </div>
       </div>
 
-      <div className="hidden opacity-0 lg:flex lg:opacity-100 h-[7vh] w-[100vw] bg-[#FFD700] text-black justify-center">
+      <div className="hidden opacity-0 lg:flex lg:opacity-100 h-[7vh] w-[100vw] bg-[#FFD700] text-black justify-center z-[49]">
         <ul className="flex items-center gap-5">
           <li className="hover:scale-105 cursor-pointer">Holiday Gifting</li>
           <li className="hover:scale-105 cursor-pointer">New Arrivals</li>

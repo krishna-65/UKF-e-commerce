@@ -59,7 +59,7 @@ const CartSidebar = () => {
         
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-[#FFD700] border-opacity-30">
-          <h2 className="text-xl font-bold">Your Cart</h2>
+          <h2 className="text-xl font-bold ml-8">Your Cart</h2>
           <button 
             onClick={() => setIsOpen(false)}
             className="text-[#FFD700] hover:text-white text-xl p-1"

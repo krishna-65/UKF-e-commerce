@@ -74,25 +74,33 @@ const ProductSidebar = () => {
     <>
       {/* Hamburger for small screens */}
       <button
-        className="lg:hidden fixed top-4 left-4 z-150 cursor-pointer text-[#FFD700] bg-black p-2 rounded focus:outline-none"
+        className="lg:hidden fixed top-[-55px] left-4 z-[100] cursor-pointer text-[#FFD700] bg-black p-2 rounded focus:outline-none"
         onClick={() => setIsOpen(!isOpen)}
       >
         ☰
       </button>
 
+      {/* Overlay for mobile */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-[70] lg:hidden"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <div
-        className={`fixed top-0 left-0 lg:static h-screen w-64 bg-black text-[#FFD700] transform ${
+        className={`fixed top-0 left-0 z-[80] lg:relative hidescroll lg:z-0 h-screen w-64 bg-black text-[#FFD700] transform ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        } product-sidebar transition-transform duration-300 ease-in-out lg:translate-x-0 z-40 overflow-y-auto shadow-lg`}
+        } lg:translate-x-0 transition-transform duration-300 ease-in-out overflow-y-auto shadow-lg`}
       >
         {/* Close button on mobile */}
-        <div className="lg:hidden flex justify-end p-4">
+        <div className="lg:hidden flex justify-end p-4 sticky top-0 bg-black">
           <button
             onClick={() => setIsOpen(false)}
-            className="text-[#FFD700] hover:text-white cursor-pointer text-3xl font-bold bg-transparent rounded-full w-8 h-8 flex items-center justify-center hover:bg-[#FFD700] hover:bg-opacity-20 transition-all"
+            className="text-[#FFD700] hover:text-white cursor-pointer text-xl font-bold bg-transparent rounded-full w-8 h-8 flex items-center justify-center hover:bg-[#FFD700] hover:bg-opacity-20 transition-all"
           >
-            close me
+            ×
           </button>
         </div>
 
@@ -124,7 +132,7 @@ const ProductSidebar = () => {
           {/* Gender */}
           <div>
             <h2 className="text-xl font-semibold mb-2">Gender</h2>
-            {["Men", "Women", "Unisex","Kids","Boys","Girls"].map((gender) => (
+            {["Men", "Women", "Unisex", "Kids", "Boys", "Girls"].map((gender) => (
               <label key={gender} className="flex items-center mb-1">
                 <input
                   type="checkbox"
@@ -164,7 +172,7 @@ const ProductSidebar = () => {
           {/* Season */}
           <div>
             <h2 className="text-xl font-semibold mb-2">Season</h2>
-            {['Summer', 'Winter', 'Spring', 'Fall', 'All Season'].map(
+            {["Summer", "Winter", "Spring", "Fall", "All Season"].map(
               (season) => (
                 <label key={season} className="flex items-center mb-1">
                   <input
