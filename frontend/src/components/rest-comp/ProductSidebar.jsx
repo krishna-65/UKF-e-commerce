@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { categoryEndpoints } from "../../services/api";
 import { useSelector, useDispatch } from "react-redux";
 import { updateFilter } from "../../slices/filterSlice";
+import { setIsOpen } from "../../slices/productSlice";
 
 const { getAllCategory } = categoryEndpoints;
 
@@ -24,7 +25,8 @@ const priceRanges = [
 
 const ProductSidebar = () => {
   const filters = useSelector((state) => state.filters);
-  const [isOpen, setIsOpen] = useState(false);
+  const isOpen  = useSelector(state => state.product.isOpen)
+
   const [categories, setCategories] = useState([]);
   const dispatch = useDispatch();
 
@@ -72,19 +74,13 @@ const ProductSidebar = () => {
 
   return (
     <>
-      {/* Hamburger for small screens */}
-      <button
-        className="lg:hidden fixed top-[-55px] left-4 z-[100] cursor-pointer text-[#FFD700] bg-black p-2 rounded focus:outline-none"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        ☰
-      </button>
+      
 
       {/* Overlay for mobile */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-[70] lg:hidden"
-          onClick={() => setIsOpen(false)}
+          onClick={() => dispatch(setIsOpen())}
         />
       )}
 
@@ -97,7 +93,7 @@ const ProductSidebar = () => {
         {/* Close button on mobile */}
         <div className="lg:hidden flex justify-end p-4 sticky top-0 bg-black">
           <button
-            onClick={() => setIsOpen(false)}
+            onClick={() => dispatch(setIsOpen())}
             className="text-[#FFD700] hover:text-white cursor-pointer text-xl font-bold bg-transparent rounded-full w-8 h-8 flex items-center justify-center hover:bg-[#FFD700] hover:bg-opacity-20 transition-all"
           >
             ×

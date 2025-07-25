@@ -18,6 +18,7 @@ import { IoIosLogOut } from "react-icons/io";
 import { resetCart } from "../../slices/cartSlice";
 import { cartEndpoints } from "../../services/api";
 import { apiConnector } from "../../services/apiConnector";
+import { setIsOpen } from "../../slices/productSlice";
 
 const { bulkCart } = cartEndpoints;
 
@@ -78,6 +79,8 @@ const Navbar = () => {
     }
   };
 
+
+
   const logoutHandler = async () => {
     try {
       if (user.accountType === "user") {
@@ -116,8 +119,15 @@ const Navbar = () => {
   };
 
   return (
-    <div className="fixed top-0 w-full z-[50]">
-      <div className="bg-black h-[10vh] text-[#FFD700] flex items-center justify-between px-3 lg:px-10">
+    <div className="fixed top-0 w-full z-[150]">
+      <div className="bg-black relative h-[10vh] text-[#FFD700] flex items-center justify-between px-3 lg:px-10">
+        {/* Hamburger for small screens */}
+      <button
+        className="lg:hidden fixed top-4 left-4 z-[200] cursor-pointer text-[#FFD700] bg-black p-2 rounded focus:outline-none"
+        onClick={() => dispatch(setIsOpen())}
+      >
+        ☰
+      </button>
         <img
           src={logo}
           className="w-[10vh] ml-10 cursor-pointer lg:ml-0"

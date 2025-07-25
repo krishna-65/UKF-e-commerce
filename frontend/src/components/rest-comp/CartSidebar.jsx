@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { FaShoppingCart, FaTimes, FaPlus, FaMinus, FaTrash } from 'react-icons/fa';
 import { useSelector, useDispatch } from 'react-redux';
 import { addToCart, decreaseItemQuantity, removeFromCart } from '../../slices/cartSlice';
+import { useNavigate } from 'react-router-dom';
+import { setProductData } from '../../slices/productSlice';
 
 const CartSidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,7 +14,14 @@ const CartSidebar = () => {
   const totalItems = useSelector(state => state.cart.totalItems || 0);
   const total = useSelector(state => state.cart.total || 0)
   
+ const navigate = useNavigate();
 
+
+  const handleClick = (product) => {
+    dispatch(setProductData(product));
+    navigate("/productdetail");
+    setIsOpen(false);
+  };
 
   
   const displayItems = cart ;
@@ -75,7 +84,7 @@ const CartSidebar = () => {
             {/* Cart Items */}
             <div className="space-y-4 mb-6">
               {displayItems.map((item) => (
-                <div key={item.id} className="flex gap-3 p-4 bg-gray-900 bg-opacity-70 rounded-lg border border-[#FFD700] border-opacity-20">
+                <div key={item.id} onClick={()=>handleClick(item)} className="flex gap-3 p-4 cursor-pointer bg-gray-900 bg-opacity-70 rounded-lg border border-[#FFD700] border-opacity-20">
                   <img 
                     src={item.images?.[0]?.url} 
                     alt={item.name}
