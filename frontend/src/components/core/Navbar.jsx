@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {  useState } from "react";
 import logo from "../../assets/images/LOGO.jpg";
 import { FaSearch } from "react-icons/fa";
 import { FaUser } from "react-icons/fa";
@@ -32,9 +32,9 @@ const Navbar = () => {
   const [searchBar, setSearchBar] = useState("");
 
   const token = useSelector((state) => state.auth.token);
-  const search = useSelector((state) => state.search.searchData);
 
-  const cartItems = useSelector((state) => state.cart.totalItems);
+
+ 
   const cart = useSelector((state) => state.cart.cart);
 
   const user = useSelector((state) => state.auth.userData);

@@ -79,3 +79,10 @@ export const orderEndpoints = {
   updateOrderStatus : BASE_URL + "/api/order/",
   addTrackingInfo : BASE_URL + "/api/order/"
 }
+
+//payment endpoints
+
+export const paymentEndpoints = {
+  createPayment : BASE_URL + "/api/payment/create-order",
+  verifyPayment : BASE_URL + "/api/payment/verify-payment"
+}
