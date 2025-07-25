@@ -132,8 +132,6 @@ export const getProfile = async(req, res) =>{
         const user = await User.findById(userId).select("-password");
         const orders = await Order.find({ user: userId })
             .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit)
             .populate('items.product');
 
         if (!user) {
