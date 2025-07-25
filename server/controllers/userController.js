@@ -2,6 +2,7 @@ import User from "../models/User.js";
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import Order from "../models/Order.js";
+import {uploadImageToCloudinary} from '../utils/imageUploader.js'
 
 // Register User : /api/user/register
 export const register = async (req, res)=>{
@@ -123,6 +124,45 @@ export const updateProfile = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+export const updatePicture = async (req,res)=>{
+    try{
+        const userId = req.params.id; // from route param
+    const {updatePicture} = req.files;
+
+        if(!updatePicture){
+            console.log("did not get the image")
+            return res.json({
+                success:false,
+                message:"did not get picture "
+            }) 
+        }
+
+        const image = await uploadImageToCloudinary(updatePicture, "UKF-Products");
+
+
+
+
+    const updatedUser = await User.findByIdAndUpdate(userId, {image:image.secure_url}, { new: true });
+
+    if (!updatedUser) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    res.json({
+      success: true,
+      message: "Profile Picture updated successfully",
+      user: updatedUser,
+    });
+    }catch(error){
+        console.log(error);
+        return res.status(500).json({
+            success:false,
+            message:error.message
+        })
+    }
+}
 
 
 

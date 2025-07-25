@@ -10,8 +10,8 @@ export const endpoints = {
   FORGET_PASSWORD : BASE_URL + "/api/auth/forgot-password",
   RESET_PASSWORD : BASE_URL + "/api/auth/reset-password/",
   updateProfile : BASE_URL + "/api/user/update/",
-  getProfile: BASE_URL + "/api/user/profile/"
-  
+  getProfile: BASE_URL + "/api/user/profile/",
+  updatePicture : BASE_URL + "/api/user/updatePicture/",
 }
 
 //category endpoints
