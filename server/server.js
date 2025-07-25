@@ -13,6 +13,7 @@ import orderRouter from './routes/orderRoute.js';
 import categoryRouter from "./routes/CategoryRoute.js"
 import fileUpload from "express-fileupload";
 import brandRouter from './routes/BrandRoutes.js';
+import paymentRouter from './routes/paymentRoute.js';
 import { stripeWebhooks } from './controllers/orderController.js';
 
 const app = express();
@@ -48,6 +49,7 @@ app.use('/api/address', addressRouter)
 app.use('/api/order', orderRouter)
 app.use('/api/category', categoryRouter)
 app.use('/api/brand', brandRouter);
+app.use('/api/payment', paymentRouter);
 
 
 app.listen(port, ()=>{
