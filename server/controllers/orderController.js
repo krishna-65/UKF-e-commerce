@@ -487,7 +487,9 @@ export const updateOrderStatus = async (req, res) => {
 // Cancel order (user)
 export const cancelOrder = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id);
+    const id = req.params.id;
+    
+    const order = await Order.findById(id);
     if (!order) {
       return res.status(404).json({ 
         success: false, 
@@ -495,13 +497,7 @@ export const cancelOrder = async (req, res) => {
       });
     }
 
-    // Check if user is the owner
-    if (order.user.toString() !== req.user.id) {
-      return res.status(403).json({ 
-        success: false, 
-        message: 'Not authorized to cancel this order' 
-      });
-    }
+   
 
     // Check if order can be cancelled
     if (!['Order Placed', 'Payment Pending', 'Payment Received'].includes(order.currentStatus)) {
@@ -515,7 +511,6 @@ export const cancelOrder = async (req, res) => {
     order.currentStatus = 'Cancelled';
     order.statusHistory.push({
       status: 'Cancelled',
-      changedBy: req.user.id,
       note: 'Cancelled by customer'
     });
 
