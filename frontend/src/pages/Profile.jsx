@@ -359,8 +359,8 @@ const token = useSelector((state)=>state.auth.token)
                     )}
                 </div>
                 {selectedOrder && (
-                    <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-                        <div className="bg-[#1a1a1a] rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto border border-[#ecba49]/30 animate-scale-in">
+                    <div className="fixed inset-0  flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+                        <div className="bg-[#1a1a1a] mt-32 hidescroll rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto border border-[#ecba49]/30 animate-scale-in">
                             <div className="flex justify-between items-center mb-6">
                                 <h2 className="text-2xl font-bold text-[#ecba49]">Order Details</h2>
                                 <button onClick={() => setSelectedOrder(null)} className="p-2 hover:bg-red-600 rounded transition-all duration-300 hover:scale-110"><X size={20} /></button>
