@@ -28,6 +28,19 @@ const userSchema = new mongoose.Schema({
     image:{type:String},
     accountType: {type: String, default: 'user'},
      cartItems: [cartItemSchema],
+       profile: {
+        address: { type: String, default: '' },
+        city: { type: String, default: '' },
+        state: { type: String, default: '' },
+        zipCode: { type: String, default: '' },
+        country: { type: String, default: '' },
+        age: { type: Number, min: 0 },
+        gender: { type: String, enum: ['Male', 'Female', 'Other'], default: 'Other' },
+        dateOfBirth: { type: Date },
+        bio: { type: String, default: '' },
+        occupation: { type: String, default: '' },
+        interests: [{ type: String }]
+    }
 }, {minimize: false})
 
 const User = mongoose.models.user || mongoose.model('user', userSchema)
