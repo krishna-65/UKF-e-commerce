@@ -6,8 +6,6 @@ import { addressEndpoints, orderEndpoints, paymentEndpoints } from "../services/
 import toast from "react-hot-toast";
 import { motion } from "framer-motion";
 import { resetCart } from "../slices/cartSlice";
-// Import your cart actions - adjust the import path as needed
-
 
 const CreateOrder = () => {
   const dispatch = useDispatch();
@@ -16,16 +14,16 @@ const CreateOrder = () => {
   const userId = useSelector(state => state.auth.userData?._id);
   const product = useSelector(state => state.product.productData);
   const user = useSelector(state => state.auth.userData);
-  const cartItems = useSelector(state => state.cart.items); // Get cart items
+  const cartItems = useSelector(state => state.cart.cart || []); // Updated to use cart array
+  const cartTotal = useSelector(state => state.cart.total || 0);
 
-  
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [addingAddress, setAddingAddress] = useState(false);
   const [notes, setNotes] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("COD");
-  const [isFromCart, setIsFromCart] = useState(false); // Track if order is from cart
+  const [isFromCart, setIsFromCart] = useState(false);
 
   const [formData, setFormData] = useState({
     recipientName: "",
@@ -122,26 +120,71 @@ const CreateOrder = () => {
     }
   };
 
-  const handlePlaceOrder = async () => {
-    if (!selectedAddress || !product) {
-      toast.error("Select address and product");
-      return;
+  // Calculate order totals
+  const calculateOrderTotals = () => {
+    if (isFromCart && cartItems.length > 0) {
+      // For cart orders, use cart total and calculate additional fees
+      const subtotal = cartTotal;
+      const shippingFee = 50; // You might want to calculate this based on cart items
+      const tax = Math.round(subtotal * 0.05);
+      const discount = 0;
+      const total = subtotal + shippingFee + tax;
+      
+      return { subtotal, shippingFee, tax, discount, total };
+    } else if (product) {
+      // For single product orders
+      const subtotal = product.price;
+      const shippingFee = 50;
+      const tax = Math.round(subtotal * 0.05);
+      const discount = 0;
+      const total = subtotal + shippingFee + tax;
+      
+      return { subtotal, shippingFee, tax, discount, total };
     }
+    
+    return { subtotal: 0, shippingFee: 0, tax: 0, discount: 0, total: 0 };
+  };
 
-    const subtotal = product.price;
-    const shippingFee = 50;
-    const tax = Math.round(subtotal * 0.05);
-    const discount = 0;
-    const total = subtotal + shippingFee + tax;
-
-    const orderPayload = {
-      userId,
-      items: [{
+  // Prepare order items
+  const prepareOrderItems = () => {
+    if (isFromCart && cartItems.length > 0) {
+      // For cart orders, map all cart items
+      return cartItems.map(item => ({
+        productId: item._id || item.id,
+        quantity: item.quantity || 1,
+        name: item.name,
+        price: item.price
+      }));
+    } else if (product) {
+      // For single product orders
+      return [{
         productId: product._id,
         quantity: 1,
         name: product.name,
         price: product.price
-      }],
+      }];
+    }
+    
+    return [];
+  };
+
+  const handlePlaceOrder = async () => {
+    if (!selectedAddress) {
+      toast.error("Please select a shipping address");
+      return;
+    }
+
+    const orderItems = prepareOrderItems();
+    if (orderItems.length === 0) {
+      toast.error("No items to order");
+      return;
+    }
+
+    const { subtotal, shippingFee, tax, discount, total } = calculateOrderTotals();
+
+    const orderPayload = {
+      userId,
+      items: orderItems,
       shippingAddress: selectedAddress,
       billingAddress: selectedAddress,
       paymentMethod,
@@ -150,7 +193,8 @@ const CreateOrder = () => {
       tax,
       discount,
       total,
-      notes
+      notes,
+      isFromCart // Flag to indicate if this is a cart order
     };
 
     if (paymentMethod === "COD") {
@@ -158,7 +202,7 @@ const CreateOrder = () => {
       try {
         const res = await apiConnector("POST", orderEndpoints.createOrder, orderPayload);
         if (res.data.success) {
-          handleOrderSuccess(); // Handle success with navigation and cleanup
+          handleOrderSuccess();
         }
       } catch (err) {
         toast.error(err.response?.data?.message || "Order failed");
@@ -177,13 +221,12 @@ const CreateOrder = () => {
         const { order } = rpOrderRes.data;
 
         // Step 2: Launch Razorpay checkout
-        console.log(import.meta.env.VITE_RAZORPAY_KEY);
         const options = {
-          key: import.meta.env.VITE_RAZORPAY_KEY, // store in .env
+          key: import.meta.env.VITE_RAZORPAY_KEY,
           amount: order.amount,
           currency: order.currency,
           name: "UKF E-Commerce",
-          description: "Order payment",
+          description: isFromCart ? `Payment for ${orderItems.length} items` : "Order payment",
           order_id: order.id,
           handler: async (response) => {
             // Step 3: Verify payment
@@ -196,7 +239,7 @@ const CreateOrder = () => {
                   paymentId: response.razorpay_payment_id,
                 });
                 if (finalRes.data.success) {
-                  handleOrderSuccess(); // Handle success with navigation and cleanup
+                  handleOrderSuccess();
                 }
               } else {
                 toast.error("Payment verification failed");
@@ -224,7 +267,7 @@ const CreateOrder = () => {
     }
   };
 
-  // Check if current product is from cart and set the flag
+  // Check if current order is from cart
   useEffect(() => {
     if (userId) fetchAddresses();
     
@@ -235,31 +278,30 @@ const CreateOrder = () => {
     // Method 2: Check via location state
     const locationState = location.state;
     
-    // Method 3: Check if the current product exists in cart
-    let productInCart = false;
-    if (product && cartItems && cartItems.length > 0) {
-      productInCart = cartItems.some(item => 
-        item.productId === product._id || 
-        item._id === product._id ||
-        item.id === product._id
-      );
-    }
+    // Method 3: Check if we have cart items and no single product
+    const hasCartItems = cartItems && cartItems.length > 0;
+    const hasProduct = product && Object.keys(product).length > 0;
     
-    // Set isFromCart based on any of the above methods
+    // Set isFromCart based on the methods
     const fromCartFlag = fromCart === 'true' || 
                         locationState?.fromCart === true || 
-                        productInCart;
+                        (hasCartItems && !hasProduct);
     
     setIsFromCart(fromCartFlag);
     
     console.log('Order source detection:', {
       fromCartParam: fromCart,
       locationState: locationState?.fromCart,
-      productInCart,
+      hasCartItems,
+      hasProduct,
       finalDecision: fromCartFlag
     });
     
   }, [userId, product, cartItems, location]);
+
+  // Get items to display
+  const itemsToDisplay = isFromCart ? cartItems : (product ? [product] : []);
+  const { subtotal, shippingFee, tax, total } = calculateOrderTotals();
 
   return (
     <motion.div
@@ -274,23 +316,57 @@ const CreateOrder = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <h1 className="text-2xl font-bold">Confirm Your Order</h1>
+        <h1 className="text-2xl font-bold">
+          Confirm Your Order {isFromCart && `(${itemsToDisplay.length} items)`}
+        </h1>
 
-        {/* Product Summary */}
+        {/* Order Summary */}
         <motion.div
-          className="bg-[#1a1a1a] p-4 rounded-lg flex items-center gap-4"
+          className="bg-[#1a1a1a] p-4 rounded-lg space-y-4"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <img
-            src={product?.images?.[0]?.url}
-            alt="Product"
-            className="w-20 h-20 object-cover rounded"
-          />
-          <div>
-            <h2 className="font-semibold text-lg">{product?.name}</h2>
-            <p>Price: ₹{product?.price}</p>
+          <h2 className="text-lg font-semibold mb-4">Order Items</h2>
+          {itemsToDisplay.map((item, index) => (
+            <div key={item._id || item.id || index} className="flex items-center gap-4 p-3 border-b border-gray-700 last:border-b-0">
+              <img
+                src={item?.images?.[0]?.url}
+                alt="Product"
+                className="w-16 h-16 object-cover rounded"
+              />
+              <div className="flex-1">
+                <h3 className="font-semibold">{item?.name}</h3>
+                <p className="text-sm text-gray-400">
+                  Price: ₹{item?.price} {isFromCart && `× ${item?.quantity || 1}`}
+                </p>
+                {isFromCart && (
+                  <p className="text-sm font-semibold">
+                    Subtotal: ₹{(item?.price * (item?.quantity || 1))}
+                  </p>
+                )}
+              </div>
+            </div>
+          ))}
+          
+          {/* Order Total */}
+          <div className="border-t border-gray-700 pt-4 space-y-2">
+            <div className="flex justify-between">
+              <span>Subtotal:</span>
+              <span>₹{subtotal}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Shipping:</span>
+              <span>₹{shippingFee}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Tax (5%):</span>
+              <span>₹{tax}</span>
+            </div>
+            <div className="flex justify-between text-lg font-bold border-t border-gray-700 pt-2">
+              <span>Total:</span>
+              <span>₹{total}</span>
+            </div>
           </div>
         </motion.div>
 
@@ -366,17 +442,17 @@ const CreateOrder = () => {
         <div className="mt-6">
           <motion.button
             onClick={handlePlaceOrder}
-            disabled={!selectedAddress}
+            disabled={!selectedAddress || itemsToDisplay.length === 0}
             className="w-full bg-[#FFD700] text-black font-bold py-3 rounded hover:brightness-110 disabled:opacity-50"
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.95 }}
           >
-            Place Order
+            Place Order - ₹{total}
           </motion.button>
         </div>
       </motion.div>
 
-      {/* Modal */}
+      {/* Modal for adding address - keeping the same as before */}
       {showModal && (
         <div className="fixed inset-0 bg-opacity-60 backdrop-blur-sm flex justify-center items-center z-50">
           <motion.div

@@ -18,6 +18,7 @@ const ManageOrders = () => {
     try {
       dispatch(setLoading(true));
       const res = await apiConnector("GET", `${getAllOrders}?page=${page}&limit=10`);
+      console.log(res);
       if (res.data.success) {
         setOrders(res.data.orders);
         setTotalPages(res.data.pages);
@@ -41,7 +42,7 @@ const ManageOrders = () => {
   };
 
   return (
-    <div className="manage-orders  text-[#FFD700] lg:w-[calc(100vw-256px)] min-h-screen p-6">
+    <div className="manage-orders hidescroll  text-[#FFD700] lg:w-[calc(100vw-256px)] overflow-y-scroll h-screen p-6">
       <h2 className="text-2xl font-bold mb-4">Manage Orders</h2>
 
       {loading ? (
