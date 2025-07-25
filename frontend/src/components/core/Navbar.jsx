@@ -367,7 +367,7 @@ const Navbar = () => {
               <div className="cursor-pointer relative group">
                 <FaUser className="text-[#FFD700]" />
 
-                <div className="absolute right-[-60px] mt-2 w-40 bg-black border border-[#FFD700]/30 rounded-md shadow-lg text-[#FFD700] opacity-0 group-hover:opacity-100 transition duration-300 z-10">
+                <div className="absolute right-[-60px]  mt-2 w-40 bg-black border border-[#FFD700]/30 rounded-md shadow-lg text-[#FFD700] opacity-0 group-hover:opacity-100 transition duration-300 z-10">
                   <button
                     onClick={() => navigate("/profile")}
                     className="w-full text-left px-4 py-2 flex justify-center hover:bg-[#FFD700] hover:text-black transition duration-200"
