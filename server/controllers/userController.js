@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import Order from "../models/Order.js";
 
 // Register User : /api/user/register
 export const register = async (req, res)=>{
@@ -123,7 +124,24 @@ export const updateProfile = async (req, res) => {
   }
 };
 
-export const addToCart  = async (req,res) =>{
-    const {productId} = req.body;
-      const userId = req.params.id; 
+
+
+export const getProfile = async(req, res) =>{
+    try {
+        const userId = req.params.id; // from route param
+        const user = await User.findById(userId).select("-password");
+        const orders = await Order.find({ user: userId })
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .populate('items.product');
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        res.json({ success: true, user, orders });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
 }
