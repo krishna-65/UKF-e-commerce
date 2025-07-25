@@ -12,7 +12,7 @@ import addressRouter from './routes/addressRoute.js';
 import orderRouter from './routes/orderRoute.js';
 import categoryRouter from "./routes/CategoryRoute.js"
 import fileUpload from "express-fileupload";
-import brandRouter from './routes/BrandRoutes.js';
+import brandRouter from './routes/brandRoutes.js';
 import paymentRouter from './routes/paymentRoute.js';
 import { stripeWebhooks } from './controllers/orderController.js';
 
