@@ -21,6 +21,7 @@ import ManageOrders from "./pages/ManageOrders";
 import OpenRoute from "./components/core/OpenRoute";
 import PrivateRoute from "./components/core/PrivateRoute";
 import ContactUs from "./pages/ContactUs";
+import Profile from "./pages/Profile";
 
 const App = () => {
   return (
@@ -56,6 +57,7 @@ const App = () => {
           <Route path="/productdetail" element={<ProductDetail />} />
           <Route path="/create-order" element={<CreateOrder />} />
           <Route path="/contactus" element={<ContactUs/>}/>
+          <Route path="/profile" element={<Profile/>}/>
 
           {/* Private Admin Routes */}
           <Route
