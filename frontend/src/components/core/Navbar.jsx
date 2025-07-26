@@ -1,4 +1,4 @@
-import React, {  useState } from "react";
+import React, { useState } from "react";
 import logo from "../../assets/images/LOGO.jpg";
 import { FaSearch } from "react-icons/fa";
 import { FaUser } from "react-icons/fa";
@@ -34,34 +34,31 @@ const Navbar = () => {
 
   const token = useSelector((state) => state.auth.token);
 
-
- 
   const cart = useSelector((state) => state.cart.cart);
 
   const user = useSelector((state) => state.auth.userData);
+
+  const role = useSelector((state) => state.auth.role);
 
   // Add loading state
   const [isSavingCart, setIsSavingCart] = useState(false);
 
   // Improved saveCart function
   const saveCart = async () => {
-    if (!user?._id || cart.length === 0) return;
+    if (!user?._id) return;
 
+    setIsSavingCart(true);
     try {
-      setIsSavingCart(true);
-
       const cartItems = cart.map((item) => ({
-        productId: item._id, // Assuming product ID is directly on item
+        productId: item._id,
         quantity: item.quantity,
         price: item.price,
       }));
 
-      console.log("the cart is : ", cart);
-
       const response = await apiConnector(
         "POST",
         `${bulkCart}${user._id}/bulk`,
-        { items: cartItems }
+        { items: cartItems } // This will be { items: [] } if cart is empty
       );
 
       console.log("save cart response", response);
@@ -79,14 +76,12 @@ const Navbar = () => {
     }
   };
 
-
-
   const logoutHandler = async () => {
     try {
       if (user.accountType === "user") {
-        if (cart.length > 0) {
+        
           await saveCart(); // Wait for cart to be saved
-        }
+        
       }
 
       // Clear local storage
@@ -122,12 +117,12 @@ const Navbar = () => {
     <div className="fixed top-0 w-full z-[150]">
       <div className="bg-black relative h-[10vh] text-[#FFD700] flex items-center justify-between px-3 lg:px-10">
         {/* Hamburger for small screens */}
-      <button
-        className="lg:hidden fixed top-4 left-4 z-[200] cursor-pointer text-[#FFD700] bg-black p-2 rounded focus:outline-none"
-        onClick={() => dispatch(setIsOpen())}
-      >
-        ☰
-      </button>
+        <button
+          className="lg:hidden fixed top-4 left-4 z-[200] cursor-pointer text-[#FFD700] bg-black p-2 rounded focus:outline-none"
+          onClick={() => dispatch(setIsOpen())}
+        >
+          ☰
+        </button>
         <img
           src={logo}
           className="w-[10vh] ml-10 cursor-pointer lg:ml-0"
@@ -383,8 +378,8 @@ const Navbar = () => {
                 />
 
                 {showProfileMenu && (
-                  <div className="absolute right-[-60px] mt-2 w-40 bg-black border border-[#FFD700]/30 rounded-md shadow-lg text-[#FFD700] z-[92]">
-                    <button
+                  <div className="absolute right-[-40px]  mt-2 w-40 bg-black border border-[#FFD700]/30 rounded-md shadow-lg text-[#FFD700] z-[92]">
+                    { role === 'user' && <button
                       onClick={() => {
                         navigate("/profile");
                         setShowProfileMenu(false);
@@ -392,7 +387,20 @@ const Navbar = () => {
                       className="w-full text-left px-4 py-2 flex justify-center hover:bg-[#FFD700] hover:text-black transition duration-200"
                     >
                       Profile
+                    </button>}
+                    {
+                        role === "admin" && (
+                          <button
+                      onClick={() => {
+                        navigate('/admindashboard')
+                        setShowProfileMenu(false);
+                      }}
+                      className="w-full text-left px-4 py-2 flex justify-center hover:bg-[#FFD700] hover:text-white transition duration-200"
+                    >
+                      Dashboard
                     </button>
+                        )
+                    }
                     <button
                       onClick={() => {
                         logoutHandler();
