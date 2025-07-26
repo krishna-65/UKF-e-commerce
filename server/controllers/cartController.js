@@ -334,65 +334,63 @@ export const bulkAddToCart = async (req, res) => {
       });
     }
 
-    // Validate input format
-    if (!Array.isArray(items) || items.length === 0) {
+    // Check items is an array
+    if (!Array.isArray(items)) {
       return res.status(400).json({
         success: false,
-        message: "Items must be a non-empty array",
+        message: "Items must be an array",
       });
     }
 
-    // Clear existing cart items first
+    // Clear existing cart
     user.cartItems = [];
 
-    // Validate and add new items
-    const validatedItems = [];
-    for (const item of items) {
-      if (!item?.productId || !item?.quantity) {
-        return res.status(400).json({
-          success: false,
-          message: "Each item must have productId and quantity",
+    // If items array is not empty, validate and add items
+    if (items.length > 0) {
+      for (const item of items) {
+        if (!item?.productId || !item?.quantity) {
+          return res.status(400).json({
+            success: false,
+            message: "Each item must have productId and quantity",
+          });
+        }
+
+        const product = await Product.findById(item.productId);
+        if (!product) {
+          return res.status(404).json({
+            success: false,
+            message: `Product not found: ${item.productId}`,
+          });
+        }
+
+        if (typeof item.quantity !== "number" || item.quantity < 1) {
+          return res.status(400).json({
+            success: false,
+            message: `Invalid quantity for product ${product.name}`,
+          });
+        }
+
+        if (product.stock < item.quantity) {
+          return res.status(400).json({
+            success: false,
+            message: `Insufficient stock for ${product.name}`,
+          });
+        }
+
+        user.cartItems.push({
+          product: product._id,
+          quantity: item.quantity,
+          addedAt: new Date(),
         });
       }
-
-      const product = await Product.findById(item.productId);
-      if (!product) {
-        return res.status(404).json({
-          success: false,
-          message: `Product not found: ${item.productId}`,
-        });
-      }
-
-      if (typeof item.quantity !== "number" || item.quantity < 1) {
-        return res.status(400).json({
-          success: false,
-          message: `Invalid quantity for product ${product.name}`,
-        });
-      }
-
-      if (product.stock < item.quantity) {
-        return res.status(400).json({
-          success: false,
-          message: `Insufficient stock for ${product.name}`,
-        });
-      }
-
-      // Add new item to cart
-      user.cartItems.push({
-        product: product._id,
-        quantity: item.quantity,
-        addedAt: new Date(),
-      });
     }
 
-    // Save updated cart
+    // Save updated cart (even if it's empty)
     await user.save();
 
     // Populate cart items for response
     const populatedUser = await User.findById(userId).populate({
-      path: "cartItems.product",
-      select: "name price images stock",
-    });
+      path: "cartItems.product"});
 
     // Calculate totals
     const cartTotal = populatedUser.cartItems.reduce(
@@ -414,3 +412,4 @@ export const bulkAddToCart = async (req, res) => {
     });
   }
 };
+

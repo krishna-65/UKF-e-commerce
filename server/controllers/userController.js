@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import Order from "../models/Order.js";
 import {uploadImageToCloudinary} from '../utils/imageUploader.js'
-
+import twilio from 'twilio';
 // Register User : /api/user/register
 export const register = async (req, res)=>{
     try {
@@ -183,3 +183,71 @@ export const getProfile = async(req, res) =>{
         res.status(500).json({ success: false, message: error.message });
     }
 }
+
+
+
+
+const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+
+export const sendOTPToPhone = async (phone, otp) => {
+  try {
+    const message = await client.messages.create({
+      body: `Your OTP is ${otp}. It will expire in 10 minutes.`,
+      from: process.env.TWILIO_PHONE_NUMBER,
+      to: `+91${phone}` // assumes Indian number, customize if needed
+    });
+    console.log("OTP sent:", message.sid);
+    return true;
+  } catch (error) {
+    console.error("Twilio error:", error);
+    throw new Error('Failed to send OTP');
+  }
+};
+
+
+
+
+export const forgotPassword = async (req, res) => {
+  try {
+    const { phone } = req.body;
+
+    // const user = await User.findOne({ phone });
+    // if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+
+    // user.otp = otp;
+    // user.otpExpires = expiry;
+    // await user.save();
+
+    await sendOTPToPhone(phone, otp);
+
+    res.json({ success: true, message: 'OTP sent to your phone' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  try {
+    const { phone, otp, newPassword } = req.body;
+
+    const user = await User.findOne({ phone });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    if (user.otp !== otp || new Date() > user.otpExpires) {
+      return res.status(400).json({ message: 'Invalid or expired OTP' });
+    }
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+    user.password = hashed;
+    user.otp = null;
+    user.otpExpires = null;
+    await user.save();
+
+    res.json({ success: true, message: 'Password reset successful' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
