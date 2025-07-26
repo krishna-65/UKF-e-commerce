@@ -149,13 +149,16 @@ const CreateOrder = () => {
   const prepareOrderItems = () => {
     if (isFromCart && cartItems.length > 0) {
       // For cart orders, map all cart items
-      return cartItems.map(item => ({
-        productId: item._id || item.id,
-        quantity: item.quantity || 1,
-        name: item.name,
-        price: item.price
-      }));
-    } else if (product) {
+      
+  return cartItems.map(item => ({
+    product: item._id,
+    quantity: item.quantity,
+    price: item.price,
+    name: item.name,
+    image: item.image,
+    razorpayOrderId: razorpay_order_id, // ✅ Inject here
+  }));
+} else if (product) {
       // For single product orders
       return [{
         productId: product._id,
@@ -168,104 +171,136 @@ const CreateOrder = () => {
     return [];
   };
 
-  const handlePlaceOrder = async () => {
-    if (!selectedAddress) {
-      toast.error("Please select a shipping address");
-      return;
-    }
+ const handlePlaceOrder = async () => {
+  if (!selectedAddress) {
+    toast.error("Please select a shipping address");
+    return;
+  }
 
-    const orderItems = prepareOrderItems();
-    if (orderItems.length === 0) {
-      toast.error("No items to order");
-      return;
-    }
+  const orderItems = prepareOrderItems();
+  if (orderItems.length === 0) {
+    toast.error("No items to order");
+    return;
+  }
 
-    const { subtotal, shippingFee, tax, discount, total } = calculateOrderTotals();
+  const { subtotal, shippingFee, tax, discount, total } = calculateOrderTotals();
 
-    const orderPayload = {
-      userId,
-      items: orderItems,
-      shippingAddress: selectedAddress,
-      billingAddress: selectedAddress,
-      paymentMethod,
-      subtotal,
-      shippingFee,
-      tax,
-      discount,
-      total,
-      notes,
-      isFromCart // Flag to indicate if this is a cart order
-    };
-
-    if (paymentMethod === "COD") {
-      // COD: place order directly
-      try {
-        const res = await apiConnector("POST", orderEndpoints.createOrder, orderPayload);
-        if (res.data.success) {
-          handleOrderSuccess();
-        }
-      } catch (err) {
-        toast.error(err.response?.data?.message || "Order failed");
-      }
-    } else {
-      // Razorpay flow
-      try {
-        // Step 1: Create Razorpay order
-        const rpOrderRes = await apiConnector("POST", paymentEndpoints.createPayment, {
-          amount: total,
-          receipt: `order_${Date.now()}`,
-        });
-
-        if (!rpOrderRes.data.success) throw new Error("Payment gateway error");
-
-        const { order } = rpOrderRes.data;
-
-        // Step 2: Launch Razorpay checkout
-        const options = {
-          key: import.meta.env.VITE_RAZORPAY_KEY,
-          amount: order.amount,
-          currency: order.currency,
-          name: "UKF E-Commerce",
-          description: isFromCart ? `Payment for ${orderItems.length} items` : "Order payment",
-          order_id: order.id,
-          handler: async (response) => {
-            // Step 3: Verify payment
-            try {
-              const verifyRes = await apiConnector("POST", paymentEndpoints.verifyPayment, response);
-              if (verifyRes.data.success) {
-                // Step 4: Place final order
-                const finalRes = await apiConnector("POST", orderEndpoints.createOrder, {
-                  ...orderPayload,
-                  paymentId: response.razorpay_payment_id,
-                });
-                if (finalRes.data.success) {
-                  handleOrderSuccess();
-                }
-              } else {
-                toast.error("Payment verification failed");
-              }
-            } catch (error) {
-              console.log(error);
-              toast.error("Error verifying payment");
-            }
-          },
-          prefill: {
-            name: user.name,
-            email: user.email,
-            contact: user.phone,
-          },
-          theme: {
-            color: "#FFD700",
-          },
-        };
-
-        const rzp = new window.Razorpay(options);
-        rzp.open();
-      } catch (error) {
-        toast.error(error.message || "Payment initiation failed");
-      }
-    }
+  const baseOrderPayload = {
+    userId,
+    items: orderItems,
+    shippingAddress: selectedAddress,
+    billingAddress: selectedAddress,
+    paymentMethod,
+    subtotal,
+    shippingFee,
+    tax,
+    discount,
+    total,
+    notes,
+    isFromCart,
   };
+
+  if (paymentMethod === "COD") {
+    try {
+      const res = await apiConnector("POST", orderEndpoints.createOrder, {
+        ...baseOrderPayload,
+        currentStatus: "Order Placed",
+        paymentStatus: "Pending",
+      });
+
+      if (res.data.success) {
+        handleOrderSuccess();
+      } else {
+        toast.error(res.data.message || "Order placement failed");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Order placement failed");
+    }
+  } else {
+    try {
+      const rpOrderRes = await apiConnector("POST", paymentEndpoints.createPayment, {
+        amount: total,
+        receipt: `order_${Date.now()}`,
+      });
+
+      if (!rpOrderRes.data.success) throw new Error("Payment gateway error");
+
+      const { order } = rpOrderRes.data;
+
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY,
+        amount: order.amount,
+        currency: order.currency,
+        name: "UKF E-Commerce",
+        description: isFromCart ? `Payment for ${orderItems.length} items` : "Order payment",
+        order_id: order.id,
+        handler: async (response) => {
+          const { razorpay_payment_id, razorpay_order_id } = response;
+
+          try {
+            const verifyRes = await apiConnector("POST", paymentEndpoints.verifyPayment, response);
+
+            const orderPayload = {
+              ...baseOrderPayload,
+              paymentId: razorpay_payment_id,
+              razorpayOrderId: razorpay_order_id,
+              paymentStatus: verifyRes.data.success ? "Completed" : "Failed",
+              currentStatus: verifyRes.data.success ? "Payment Received" : "Payment Pending",
+            };
+
+            const finalRes = await apiConnector("POST", orderEndpoints.createOrder, orderPayload);
+
+            if (finalRes.data.success) {
+              handleOrderSuccess();
+            } else {
+              toast.error(finalRes.data.message || "Order creation failed");
+            }
+          } catch (error) {
+            console.error("Verification error:", error);
+
+            const fallbackPayload = {
+              ...baseOrderPayload,
+              paymentId: razorpay_payment_id,
+              razorpayOrderId: razorpay_order_id,
+              paymentStatus: "Failed",
+              currentStatus: "Payment Pending",
+            };
+
+            try {
+              const failRes = await apiConnector("POST", orderEndpoints.createOrder, fallbackPayload);
+
+              if (failRes.data.success) {
+                toast.error("Payment verification failed. Order placed with pending payment.");
+              } else {
+                toast.error(failRes.data.message || "Fallback order creation failed");
+              }
+            } catch (fallbackErr) {
+              console.error("Fallback order error:", fallbackErr);
+              toast.error("Order creation failed after payment verification error");
+            }
+          }
+        },
+        prefill: {
+          name: user.name,
+          email: user.email,
+          contact: user.phone,
+        },
+        theme: {
+          color: "#FFD700",
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (error) {
+      console.error("Razorpay error:", error);
+      toast.error(error.message || "Payment initiation failed");
+    }
+  }
+};
+
+
+
 
   // Check if current order is from cart
   useEffect(() => {

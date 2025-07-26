@@ -149,7 +149,8 @@ const AdminDashboard = () => {
       month: formatPeriodLabel(data.date),
       products: data.products,
       revenue: data.revenue,
-      orders: Math.floor(data.products * 0.8) // Estimate orders as 80% of products
+      user:data.user,
+      orders: data.totalOrders // Estimate orders as 80% of products
     }));
 
     setMonthlyData(formattedData);
@@ -190,7 +191,7 @@ const AdminDashboard = () => {
 
   // Process category data for pie chart
   const getCategoryData = () => {
-    console.log("Category data:", stats.category);
+   
     
     if (!stats.category || stats.category.length === 0) {
       console.log("No category data available");
@@ -198,9 +199,9 @@ const AdminDashboard = () => {
     }
     
     const colors = ['#FFD700', '#FFA500', '#FF8C00', '#FF7F50', '#FFB347'];
-    return stats.category.map((cat, index) => ({
+    return stats.category.filter((cat)=>cat.status === 'active').map((cat, index) => ({
       name: cat.name || 'Unknown Category',
-      value: cat.count || 0, // Assuming your backend sends a count
+      value: cat.count || 1, // Assuming your backend sends a count
       color: colors[index % colors.length]
     }));
   };
@@ -310,17 +311,17 @@ const AdminDashboard = () => {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard title="Total Users" value={stats.totalUsers} icon={Users} change={12} />
-          <StatCard title="Total Orders" value={stats.totalOrders} icon={ShoppingBag} change={8} />
-          <StatCard title="Total Revenue" value={`$${stats.totalRevenue?.toLocaleString() || 0}`} icon={DollarSign} change={15} />
-          <StatCard title="Products" value={stats.totalProducts} icon={Package} change={5} />
+          <StatCard title="Total Users" value={stats.totalUsers} icon={Users}  />
+          <StatCard title="Total Orders" value={stats.totalOrders} icon={ShoppingBag} />
+          <StatCard title="Total Revenue" value={`₹${stats.totalRevenue?.toLocaleString() || 0}`} icon={DollarSign}  />
+          <StatCard title="Products" value={stats.totalProducts} icon={Package} />
         </div>
 
         {/* Additional Stats Row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <StatCard title="Items Sold" value={stats.totalItemsSold} icon={TrendingUp} change={10} />
-          <StatCard title="Total Stock" value={stats.totalStock} icon={Package} change={-2} />
-          <StatCard title="Out of Stock" value={stats.outOfStock} icon={Package} change={-5} />
+          <StatCard title="Items Sold" value={stats.totalItemsSold} icon={TrendingUp}  />
+          <StatCard title="Total Stock" value={stats.totalStock} icon={Package}  />
+          <StatCard title="Out of Stock" value={stats.outOfStock} icon={Package}  />
         </div>
 
         {/* Charts Row 1 */}
@@ -473,7 +474,7 @@ const AdminDashboard = () => {
                         </div>
                       </td>
                       <td className="py-4 text-gray-300">{product.stock || 0}</td>
-                      <td className="py-4 text-green-400">${(product.price || 0).toLocaleString()}</td>
+                      <td className="py-4 text-green-400">₹{(product.price || 0).toLocaleString()}</td>
                       <td className="py-4 text-gray-300">{product.category?.name || 'N/A'}</td>
                       <td className="py-4">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
