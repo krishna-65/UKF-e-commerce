@@ -1,4 +1,6 @@
 import User from "../models/User.js";
+import Product from "../models/Product.js";
+import Category from "../models/Category.js";
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import Order from "../models/Order.js";
@@ -249,5 +251,84 @@ export const resetPassword = async (req, res) => {
     res.json({ success: true, message: 'Password reset successful' });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+export const getAdminDashboardStats = async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments();
+    const totalProducts = await Product.countDocuments();
+    const totalOrders = await Order.countDocuments({ status: "completed" });
+
+    // Get all completed orders
+    const completedOrders = await Order.find({ status: "completed" });
+
+    // Calculate total revenue and total items sold
+    let totalRevenue = 0;
+    let totalItemsSold = 0;
+
+    completedOrders.forEach((order) => {
+      totalRevenue += order.totalAmount; // assuming there's a field called totalAmount
+      order.items.forEach((item) => {
+        totalItemsSold += item.quantity;
+      });
+    });
+
+    // Get top 5 best selling products
+    const allProductSales = {};
+
+    completedOrders.forEach((order) => {
+      order.items.forEach((item) => {
+        const id = item.product.toString();
+        if (!allProductSales[id]) {
+          allProductSales[id] = 0;
+        }
+        allProductSales[id] += item.quantity;
+      });
+    });
+
+    const sortedProductSales = Object.entries(allProductSales)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+
+    const topProducts = await Promise.all(
+      sortedProductSales.map(async ([productId, quantitySold]) => {
+        const product = await Product.findById(productId).select("name price images");
+        return {
+          ...product._doc,
+          quantitySold,
+        };
+      })
+    );
+
+    // Total stock and out-of-stock count
+    const products = await Product.find().populate('category');
+    const category = await Category.find();
+    const totalStock = products.reduce((sum, product) => sum + product.stock, 0);
+    const outOfStock = products.filter((product) => product.stock === 0).length;
+
+    res.status(200).json({
+      success: true,
+      stats: {
+        totalUsers,
+        totalProducts,
+        totalOrders,
+        totalRevenue,
+        totalItemsSold,
+            category,
+        totalStock,
+        outOfStock,
+        products,
+        topProducts,
+    
+      },
+    });
+  } catch (error) {
+    console.error("Dashboard stats error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch dashboard stats",
+      error: error.message,
+    });
   }
 };
