@@ -332,3 +332,52 @@ export const getAdminDashboardStats = async (req, res) => {
     });
   }
 };
+
+
+export const getUsers = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+ 
+
+
+    const totalUsers = await User.countDocuments({ accountType: "user" });
+
+    const users = await User.find({ accountType: "user" })
+      .skip(skip)
+      .limit(limit)
+      .populate("cartItems.product", "name price images")
+      .lean(); // lean() for faster queries and to allow modifying the result
+
+    // Add totalOrders and totalSpent for each user
+    const enrichedUsers = await Promise.all(
+      users.map(async (user) => {
+        const userOrders = await Order.find({ user: user._id, status: "completed" });
+        const totalOrders = userOrders.length;
+        const totalSpent = userOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+
+        return {
+          ...user,
+          totalOrders,
+          totalSpent,
+        };
+      })
+    );
+
+    res.status(200).json({
+      success: true,
+      totalUsers,
+      currentPage: page,
+      totalPages: Math.ceil(totalUsers / limit),
+      users: enrichedUsers,
+    });
+  } catch (error) {
+    console.error("Get users error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch users",
+    });
+  }
+};
+
