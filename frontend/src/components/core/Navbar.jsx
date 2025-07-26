@@ -1,4 +1,4 @@
-import React, {  useState } from "react";
+import React, { useState } from "react";
 import logo from "../../assets/images/LOGO.jpg";
 import { FaSearch } from "react-icons/fa";
 import { FaUser } from "react-icons/fa";
@@ -34,8 +34,6 @@ const Navbar = () => {
 
   const token = useSelector((state) => state.auth.token);
 
-
- 
   const cart = useSelector((state) => state.cart.cart);
 
   const user = useSelector((state) => state.auth.userData);
@@ -45,23 +43,20 @@ const Navbar = () => {
 
   // Improved saveCart function
   const saveCart = async () => {
-    if (!user?._id || cart.length === 0) return;
+    if (!user?._id) return;
 
+    setIsSavingCart(true);
     try {
-      setIsSavingCart(true);
-
       const cartItems = cart.map((item) => ({
-        productId: item._id, // Assuming product ID is directly on item
+        productId: item._id,
         quantity: item.quantity,
         price: item.price,
       }));
 
-      console.log("the cart is : ", cart);
-
       const response = await apiConnector(
         "POST",
         `${bulkCart}${user._id}/bulk`,
-        { items: cartItems }
+        { items: cartItems } // This will be { items: [] } if cart is empty
       );
 
       console.log("save cart response", response);
@@ -78,8 +73,6 @@ const Navbar = () => {
       setIsSavingCart(false);
     }
   };
-
-
 
   const logoutHandler = async () => {
     try {
@@ -122,12 +115,12 @@ const Navbar = () => {
     <div className="fixed top-0 w-full z-[150]">
       <div className="bg-black relative h-[10vh] text-[#FFD700] flex items-center justify-between px-3 lg:px-10">
         {/* Hamburger for small screens */}
-      <button
-        className="lg:hidden fixed top-4 left-4 z-[200] cursor-pointer text-[#FFD700] bg-black p-2 rounded focus:outline-none"
-        onClick={() => dispatch(setIsOpen())}
-      >
-        ☰
-      </button>
+        <button
+          className="lg:hidden fixed top-4 left-4 z-[200] cursor-pointer text-[#FFD700] bg-black p-2 rounded focus:outline-none"
+          onClick={() => dispatch(setIsOpen())}
+        >
+          ☰
+        </button>
         <img
           src={logo}
           className="w-[10vh] ml-10 cursor-pointer lg:ml-0"

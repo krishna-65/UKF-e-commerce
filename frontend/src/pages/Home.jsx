@@ -69,7 +69,7 @@ const Home = () => {
                         Get peak comfy check <br />
                         with new winter essentials.
                     </div>
-                    <button className={`w-[120px] h-[40px] bg-white rounded-2xl font-semibold shadow-2xl lg:w-[250px] lg:h-[45px] lg:text-2xl text-yellow-500 transition-all duration-1000 delay-700 hover:scale-110 hover:shadow-xl hover:bg-yellow-50 active:scale-95 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
+                    <button onClick={()=>navigate('/products')} className={`w-[120px] h-[40px] cursor-pointer bg-white rounded-2xl font-semibold shadow-2xl lg:w-[250px] lg:h-[45px] lg:text-2xl text-yellow-500 transition-all duration-1000 delay-700 hover:scale-110 hover:shadow-xl hover:bg-yellow-50 active:scale-95 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
                         SHOP NOW
                     </button>
                 </div>
