@@ -38,6 +38,8 @@ const Navbar = () => {
 
   const user = useSelector((state) => state.auth.userData);
 
+  const role = useSelector((state) => state.auth.role);
+
   // Add loading state
   const [isSavingCart, setIsSavingCart] = useState(false);
 
@@ -77,9 +79,9 @@ const Navbar = () => {
   const logoutHandler = async () => {
     try {
       if (user.accountType === "user") {
-        if (cart.length > 0) {
+        
           await saveCart(); // Wait for cart to be saved
-        }
+        
       }
 
       // Clear local storage
@@ -376,8 +378,8 @@ const Navbar = () => {
                 />
 
                 {showProfileMenu && (
-                  <div className="absolute right-[-60px] mt-2 w-40 bg-black border border-[#FFD700]/30 rounded-md shadow-lg text-[#FFD700] z-[92]">
-                    <button
+                  <div className="absolute right-[-40px]  mt-2 w-40 bg-black border border-[#FFD700]/30 rounded-md shadow-lg text-[#FFD700] z-[92]">
+                    { role === 'user' && <button
                       onClick={() => {
                         navigate("/profile");
                         setShowProfileMenu(false);
@@ -385,7 +387,20 @@ const Navbar = () => {
                       className="w-full text-left px-4 py-2 flex justify-center hover:bg-[#FFD700] hover:text-black transition duration-200"
                     >
                       Profile
+                    </button>}
+                    {
+                        role === "admin" && (
+                          <button
+                      onClick={() => {
+                        navigate('/admindashboard')
+                        setShowProfileMenu(false);
+                      }}
+                      className="w-full text-left px-4 py-2 flex justify-center hover:bg-[#FFD700] hover:text-white transition duration-200"
+                    >
+                      Dashboard
                     </button>
+                        )
+                    }
                     <button
                       onClick={() => {
                         logoutHandler();
