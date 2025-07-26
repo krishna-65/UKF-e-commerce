@@ -258,17 +258,17 @@ export const getAdminDashboardStats = async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
     const totalProducts = await Product.countDocuments();
-    const totalOrders = await Order.countDocuments({ status: "completed" });
+    const totalOrders = await Order.countDocuments();
 
     // Get all completed orders
-    const completedOrders = await Order.find({ status: "completed" });
+    const completedOrders = await Order.find({ currentStatus: "Delivered" });
 
     // Calculate total revenue and total items sold
     let totalRevenue = 0;
     let totalItemsSold = 0;
 
     completedOrders.forEach((order) => {
-      totalRevenue += order.totalAmount; // assuming there's a field called totalAmount
+      totalRevenue += order.total; // assuming there's a field called totalAmount
       order.items.forEach((item) => {
         totalItemsSold += item.quantity;
       });
