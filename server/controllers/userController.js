@@ -316,6 +316,7 @@ export const getAdminDashboardStats = async (req, res) => {
         totalRevenue,
         totalItemsSold,
             category,
+            completedOrders,
         totalStock,
         outOfStock,
         products,
