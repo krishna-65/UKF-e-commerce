@@ -22,6 +22,7 @@ import OpenRoute from "./components/core/OpenRoute";
 import PrivateRoute from "./components/core/PrivateRoute";
 import ContactUs from "./pages/ContactUs";
 import Profile from "./pages/Profile";
+import UserRoute from "./components/core/UserRoute";
 
 const App = () => {
   return (
@@ -55,9 +56,25 @@ const App = () => {
           <Route path="/about" element={<AboutUs />} />
           <Route path="/products" element={<Products />} />
           <Route path="/productdetail" element={<ProductDetail />} />
-          <Route path="/create-order" element={<CreateOrder />} />
-          <Route path="/contactus" element={<ContactUs/>}/>
-          <Route path="/profile" element={<Profile/>}/>
+
+          <Route
+            path="/create-order"
+            element={
+              <UserRoute>
+                <CreateOrder />
+              </UserRoute>
+            }
+          />
+          <Route path="/contactus" element={<ContactUs />} />
+
+          <Route
+            path="/profile"
+            element={
+              <UserRoute>
+                <Profile />
+              </UserRoute>
+            }
+          />
 
           {/* Private Admin Routes */}
           <Route
