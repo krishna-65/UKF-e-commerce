@@ -12,7 +12,8 @@ export const endpoints = {
   updateProfile : BASE_URL + "/api/user/update/",
   getProfile: BASE_URL + "/api/user/profile/",
   updatePicture : BASE_URL + "/api/user/updatePicture/",
-  adminDashboard : BASE_URL + "/api/user/admin-dashboard"
+  adminDashboard : BASE_URL + "/api/user/admin-dashboard",
+  getUser : BASE_URL + "/api/user/getuser"
 }
 
 //category endpoints

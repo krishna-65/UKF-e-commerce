@@ -238,7 +238,7 @@ const Navbar = () => {
             <div className=" relative">
               <FaSearch onClick={() => setShowSearch(!showSearch)} />
               {showSearch && (
-                <div className=" absolute  top-11  left-[-71vw] lg:left-[-1404px] z-[102] shadow-2xl w-[100vw] pb-10 bg-[#FFD700]">
+                <div className=" absolute  top-11  left-[-71vw] lg:left-[-93vw] z-[102] shadow-2xl w-[100vw] pb-10 bg-[#FFD700]">
                   {/* searchBar */}
                   <div className="w-[full] h-[13vh] broder border-b-2 shadow-lg flex justify-center items-center relative ">
                     <div

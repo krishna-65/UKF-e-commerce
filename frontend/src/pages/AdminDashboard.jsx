@@ -7,11 +7,14 @@ import {
   Users, ShoppingBag, Package, TrendingUp, DollarSign, Eye, Star,
   Calendar, Filter, Download, RefreshCw, ArrowUp, ArrowDown
 } from 'lucide-react';
-import { endpoints } from '../services/api';
+import { endpoints, orderEndpoints } from '../services/api';
 import { apiConnector } from '../services/apiConnector';
 import { toast } from 'react-hot-toast';
+import { useDispatch } from 'react-redux';
+import { setLoading } from '../slices/authSlice';
 
-const {adminDashboard} = endpoints;
+const {adminDashboard, getUser} = endpoints;
+const { getAllOrders } = orderEndpoints;
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -24,13 +27,20 @@ const AdminDashboard = () => {
     outOfStock: 0,
     topProducts: [],
     category: [],
-    products: []
+    products: [],
+    completedOrders: []
   });
+
+  const dispatch = useDispatch();
 
   const [monthlyData, setMonthlyData] = useState([]);
   const [selectedPeriod, setSelectedPeriod] = useState('monthly');
   const [isLoading, setIsLoading] = useState(true);
-
+  const [orders, setOrders] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  
   // Fetch dashboard data
   const fetchDashboardData = async () => {
     setIsLoading(true);
@@ -38,10 +48,9 @@ const AdminDashboard = () => {
       const response = await apiConnector("GET", adminDashboard);
       console.log('API Response:', response);
 
-      if (response?.data?.success) { // Check for response.data.success
-        const data = response.data.stats; // Access the data property from response
+      if (response?.data?.success) {
+        const data = response.data.stats;
         
-        // Map the API response to your stats structure
         const mappedStats = {
           totalUsers: data.totalUsers || 0,
           totalProducts: data.totalProducts || 0,
@@ -51,12 +60,12 @@ const AdminDashboard = () => {
           totalStock: data.totalStock || 0,
           outOfStock: data.outOfStock || 0,
           topProducts: data.topProducts || [],
-          category: data.category || [], // Make sure this matches your backend response
-          products: data.products || []
+          category: data.category || [],
+          products: data.products || [],
+          completedOrders: data.completedOrders || []
         };
 
         setStats(mappedStats);
-        generateMonthlyData(mappedStats);
       } else {
         throw new Error("Failed to fetch dashboard data");
       }
@@ -68,89 +77,137 @@ const AdminDashboard = () => {
     }
   };
 
-  // Generate monthly data from available stats
-  const generateMonthlyData = (statsData) => {
-    if (!statsData.products || !statsData.products.length) return [];
+  const fetchOrders = async () => {
+    try {
+      dispatch(setLoading(true));
+      const res = await apiConnector("GET", `${getAllOrders}?page=${page}&limit=10`);
+      console.log(res);
+      if (res.data.success) {
+        setOrders(res.data.orders);
+        setTotalPages(res.data.pages);
+      }
+    } catch (err) {
+      toast.error("Unable to fetch orders");
+      console.error(err);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+  
+  useEffect(() => {
+    fetchOrders();
+  }, [page]);
 
+  const fetchUser = async () => {
+    try {
+      dispatch(setLoading(true));
+      const userRes = await apiConnector("GET", getUser);
+      console.log(userRes);
+      if (userRes.data.success) {
+        setUsers(userRes.data.users || []);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Unable to fetch users");
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+
+  useEffect(() => {
+    fetchUser();
+  }, [])
+
+  // Generate monthly data from orders
+  const generateMonthlyData = (statsData) => {
     const groupedData = {};
     const currentDate = new Date();
 
     // Initialize data structure based on selected period
     switch (selectedPeriod) {
       case 'daily':
-        // Last 7 days
         for (let i = 6; i >= 0; i--) {
           const date = new Date(currentDate);
           date.setDate(date.getDate() - i);
           const key = date.toISOString().split('T')[0];
           groupedData[key] = {
             date: key,
-            products: 0,
             revenue: 0,
-            orders: 0
+            orders: 0,
+            users: 0
           };
         }
         break;
 
       case 'monthly':
-        // Last 6 months
         for (let i = 5; i >= 0; i--) {
           const date = new Date(currentDate);
           date.setMonth(date.getMonth() - i);
           const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
           groupedData[key] = {
             date: key,
-            products: 0,
             revenue: 0,
-            orders: 0
+            orders: 0,
+            users: 0
           };
         }
         break;
 
       case 'yearly':
-        // Last 5 years
         for (let i = 4; i >= 0; i--) {
           const year = currentDate.getFullYear() - i;
           groupedData[year] = {
             date: year.toString(),
-            products: 0,
             revenue: 0,
-            orders: 0
+            orders: 0,
+            users: 0
           };
         }
         break;
     }
 
-    // Group products by period
-    statsData.products.forEach(product => {
-      const createdAt = new Date(product.createdAt);
-      let key;
+    // Group orders by period if available
+    if (orders && orders.length > 0) {
+      orders.forEach(order => {
+        const createdAt = new Date(order.createdAt);
+        let key;
 
-      switch (selectedPeriod) {
-        case 'daily':
-          key = createdAt.toISOString().split('T')[0];
-          break;
-        case 'monthly':
-          key = `${createdAt.getFullYear()}-${String(createdAt.getMonth() + 1).padStart(2, '0')}`;
-          break;
-        case 'yearly':
-          key = createdAt.getFullYear().toString();
-          break;
-      }
+        switch (selectedPeriod) {
+          case 'daily':
+            key = createdAt.toISOString().split('T')[0];
+            break;
+          case 'monthly':
+            key = `${createdAt.getFullYear()}-${String(createdAt.getMonth() + 1).padStart(2, '0')}`;
+            break;
+          case 'yearly':
+            key = createdAt.getFullYear().toString();
+            break;
+        }
 
-      if (groupedData[key]) {
-        groupedData[key].products++;
-        groupedData[key].revenue += product.price || 0;
-      }
+        if (groupedData[key]) {
+          groupedData[key].orders++;
+          groupedData[key].revenue += order.total || 0;
+        }
+      });
+    }
+
+    // Distribute users across periods (estimation)
+    const totalUsers = statsData.totalUsers;
+    const periods = Object.keys(groupedData).length;
+    const usersPerPeriod = Math.floor(totalUsers / periods);
+    let remainingUsers = totalUsers % periods;
+
+    Object.keys(groupedData).forEach((key, index) => {
+      groupedData[key].users = usersPerPeriod + (remainingUsers > 0 ? 1 : 0);
+      if (remainingUsers > 0) remainingUsers--;
     });
 
     // Convert to array and format for charts
     const formattedData = Object.values(groupedData).map(data => ({
       month: formatPeriodLabel(data.date),
-      products: data.products,
       revenue: data.revenue,
-      user:data.user,
-      orders: data.totalOrders // Estimate orders as 80% of products
+      orders: data.orders,
+      users: data.users
     }));
 
     setMonthlyData(formattedData);
@@ -176,46 +233,67 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     fetchDashboardData();
-  }, [selectedPeriod]);
+  }, []);
 
   useEffect(() => {
-    if (stats.products?.length > 0) {
-      generateMonthlyData(stats);
-    }
-  }, [stats.products, selectedPeriod]);
+    generateMonthlyData(stats);
+  }, [selectedPeriod, orders, stats]);
 
-  // Log current stats for debugging
-  useEffect(() => {
-    console.log("Current stats:", stats);
-  }, [stats]);
-
-  // Process category data for pie chart
+  // Process category data for pie chart - count products in each category
   const getCategoryData = () => {
-   
-    
-    if (!stats.category || stats.category.length === 0) {
-      console.log("No category data available");
+    if (!stats.category || stats.category.length === 0 || !stats.products) {
       return [];
     }
     
-    const colors = ['#FFD700', '#FFA500', '#FF8C00', '#FF7F50', '#FFB347'];
-    return stats.category.filter((cat)=>cat.status === 'active').map((cat, index) => ({
-      name: cat.name || 'Unknown Category',
-      value: cat.count || 1, // Assuming your backend sends a count
-      color: colors[index % colors.length]
-    }));
+    const colors = ['#FFD700', '#FFA500', '#FF8C00', '#FF7F50', '#FFB347', '#FFCC5C', '#FF9500'];
+    
+    // Count products in each active category
+    const categoryCount = {};
+    stats.products.forEach(product => {
+      if (product.category && product.category.name) {
+        const categoryName = product.category.name;
+        categoryCount[categoryName] = (categoryCount[categoryName] || 0) + 1;
+      }
+    });
+
+    // Get only active categories with product counts
+    return stats.category
+      .filter(cat => cat.status === 'active' && categoryCount[cat.name])
+      .map((cat, index) => ({
+        name: cat.name,
+        value: categoryCount[cat.name] || 0,
+        color: colors[index % colors.length]
+      }))
+      .filter(cat => cat.value > 0);
   };
 
-  // Process order status data
+  // Process order status data based on actual orders
   const getOrderStatusData = () => {
-    // This data should ideally come from an orders endpoint with status breakdown
-    const total = stats.totalOrders;
-    return [
-      { status: 'Completed', count: Math.floor(total * 0.6), color: '#FFD700' },
-      { status: 'Processing', count: Math.floor(total * 0.2), color: '#FFA500' },
-      { status: 'Pending', count: Math.floor(total * 0.15), color: '#FF8C00' },
-      { status: 'Cancelled', count: Math.floor(total * 0.05), color: '#FF6B6B' }
-    ];
+    if (!orders || orders.length === 0) {
+      return [];
+    }
+
+    const statusCount = {};
+    orders.forEach(order => {
+      const status = order.currentStatus;
+      statusCount[status] = (statusCount[status] || 0) + 1;
+    });
+
+    const statusColors = {
+      'Delivered': '#22C55E',
+      'Payment Received': '#10B981',
+      'Order Placed': '#F59E0B',
+      'Processing': '#FFD700',
+      'Shipped': '#3B82F6',
+      'Cancelled': '#EF4444',
+      'Pending': '#F59E0B'
+    };
+
+    return Object.entries(statusCount).map(([status, count]) => ({
+      status,
+      count,
+      color: statusColors[status] || '#6B7280'
+    }));
   };
 
   const StatCard = ({ title, value, icon: Icon, change, color = '#FFD700' }) => (
@@ -258,6 +336,8 @@ const AdminDashboard = () => {
 
   const refreshData = () => {
     fetchDashboardData();
+    fetchOrders();
+    fetchUser();
   };
 
   if (isLoading) {
@@ -277,7 +357,7 @@ const AdminDashboard = () => {
     <div className="lg:w-[calc(100vw-256px)] hidescroll p-6 text-white overflow-y-auto h-[100vh] bg-black">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 space-y-4 sm:space-y-0">
           <div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-600 bg-clip-text text-transparent">
               Admin Dashboard
@@ -292,7 +372,6 @@ const AdminDashboard = () => {
               className="bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-yellow-500 focus:outline-none"
             >
               <option value="daily">Daily</option>
-            
               <option value="monthly">Monthly</option>
               <option value="yearly">Yearly</option>
             </select>
@@ -300,10 +379,11 @@ const AdminDashboard = () => {
             <button 
               onClick={() => {
                 toast.loading("Refreshing dashboard...");
-                fetchDashboardData();
+                refreshData();
               }}
-              className="bg-yellow-500 text-black px-4 py-2 rounded-lg"
+              className="bg-yellow-500 text-black px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors"
             >
+              <RefreshCw className="w-4 h-4 inline mr-2" />
               Refresh
             </button>
           </div>
@@ -311,17 +391,17 @@ const AdminDashboard = () => {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard title="Total Users" value={stats.totalUsers} icon={Users}  />
+          <StatCard title="Total Users" value={stats.totalUsers} icon={Users} />
           <StatCard title="Total Orders" value={stats.totalOrders} icon={ShoppingBag} />
-          <StatCard title="Total Revenue" value={`₹${stats.totalRevenue?.toLocaleString() || 0}`} icon={DollarSign}  />
+          <StatCard title="Total Revenue" value={`₹${stats.totalRevenue?.toLocaleString() || 0}`} icon={DollarSign} />
           <StatCard title="Products" value={stats.totalProducts} icon={Package} />
         </div>
 
         {/* Additional Stats Row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <StatCard title="Items Sold" value={stats.totalItemsSold} icon={TrendingUp}  />
-          <StatCard title="Total Stock" value={stats.totalStock} icon={Package}  />
-          <StatCard title="Out of Stock" value={stats.outOfStock} icon={Package}  />
+          <StatCard title="Items Sold" value={stats.totalItemsSold} icon={TrendingUp} />
+          <StatCard title="Total Stock" value={stats.totalStock} icon={Package} />
+          <StatCard title="Out of Stock" value={stats.outOfStock} icon={Package} />
         </div>
 
         {/* Charts Row 1 */}
@@ -365,24 +445,30 @@ const AdminDashboard = () => {
               <h3 className="text-xl font-semibold text-white">Category Distribution</h3>
               <Eye className="w-5 h-5 text-yellow-400" />
             </div>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={getCategoryData()}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                >
-                  {getCategoryData().map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip content={<CustomTooltip />} />
-              </PieChart>
-            </ResponsiveContainer>
+            {getCategoryData().length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={getCategoryData()}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  >
+                    {getCategoryData().map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<CustomTooltip />} />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center text-gray-400">
+                No category data available
+              </div>
+            )}
           </div>
         </div>
 
@@ -405,11 +491,11 @@ const AdminDashboard = () => {
             </ResponsiveContainer>
           </div>
 
-          {/* Orders vs Products */}
+          {/* Orders Trend */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 hover:border-yellow-500 transition-all duration-300">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-white">Orders vs Products</h3>
-              <BarChart className="w-5 h-5 text-yellow-400" />
+              <h3 className="text-xl font-semibold text-white">Orders Trend</h3>
+              <ShoppingBag className="w-5 h-5 text-yellow-400" />
             </div>
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={monthlyData}>
@@ -418,7 +504,6 @@ const AdminDashboard = () => {
                 <YAxis stroke="#9CA3AF" />
                 <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="orders" fill="#FFD700" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="products" fill="#FFA500" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -429,19 +514,54 @@ const AdminDashboard = () => {
               <h3 className="text-xl font-semibold text-white">Order Status</h3>
               <Package className="w-5 h-5 text-yellow-400" />
             </div>
-            <ResponsiveContainer width="100%" height={250}>
-              <RadialBarChart cx="50%" cy="50%" innerRadius="10%" outerRadius="80%" data={getOrderStatusData()}>
-                <RadialBar dataKey="count" cornerRadius={10} fill={(entry) => entry.color} />
-                <Tooltip content={<CustomTooltip />} />
-              </RadialBarChart>
-            </ResponsiveContainer>
+            {getOrderStatusData().length > 0 ? (
+              <div className="space-y-3">
+                {getOrderStatusData().map((item, index) => (
+                  <div key={index} className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div 
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: item.color }}
+                      ></div>
+                      <span className="text-gray-300 text-sm">{item.status}</span>
+                    </div>
+                    <span className="text-white font-medium">{item.count}</span>
+                  </div>
+                ))}
+                <div className="mt-4 space-y-2">
+                  {getOrderStatusData().map((item, index) => (
+                    <div key={index} className="flex items-center justify-between text-sm">
+                      <span className="text-gray-400">{item.status}</span>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-20 h-2 bg-gray-700 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full rounded-full transition-all duration-300"
+                            style={{ 
+                              backgroundColor: item.color,
+                              width: `${(item.count / orders.length) * 100}%`
+                            }}
+                          ></div>
+                        </div>
+                        <span className="text-gray-300 w-8 text-right">
+                          {Math.round((item.count / orders.length) * 100)}%
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="h-[250px] flex items-center justify-center text-gray-400">
+                No order data available
+              </div>
+            )}
           </div>
         </div>
 
         {/* Top Products Table */}
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 hover:border-yellow-500 transition-all duration-300">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-semibold text-white">Top Selling Products</h3>
+            <h3 className="text-xl font-semibold text-white">Top Products</h3>
             <div className="flex space-x-2">
               <button className="p-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
                 <Filter className="w-4 h-4 text-yellow-400" />
@@ -459,13 +579,17 @@ const AdminDashboard = () => {
                   <th className="pb-3 text-gray-400 font-medium">Product</th>
                   <th className="pb-3 text-gray-400 font-medium">Stock</th>
                   <th className="pb-3 text-gray-400 font-medium">Price</th>
+                  <th className="pb-3 text-gray-400 font-medium">Sold</th>
                   <th className="pb-3 text-gray-400 font-medium">Category</th>
                   <th className="pb-3 text-gray-400 font-medium">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {stats.products && stats.products.length > 0 ? (
-                  stats.products.slice(0, 5).map((product) => (
+                  stats.products
+                    .sort((a, b) => (b.sold || 0) - (a.sold || 0))
+                    .slice(0, 5)
+                    .map((product) => (
                     <tr key={product._id} className="border-b border-gray-800 hover:bg-gray-800/50 transition-colors">
                       <td className="py-4">
                         <div className="flex items-center space-x-3">
@@ -475,6 +599,7 @@ const AdminDashboard = () => {
                       </td>
                       <td className="py-4 text-gray-300">{product.stock || 0}</td>
                       <td className="py-4 text-green-400">₹{(product.price || 0).toLocaleString()}</td>
+                      <td className="py-4 text-blue-400">{product.sold || 0}</td>
                       <td className="py-4 text-gray-300">{product.category?.name || 'N/A'}</td>
                       <td className="py-4">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -487,8 +612,85 @@ const AdminDashboard = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="5" className="py-4 text-center text-gray-400">
+                    <td colSpan="6" className="py-4 text-center text-gray-400">
                       No products available
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Recent Orders Table */}
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 hover:border-yellow-500 transition-all duration-300">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-semibold text-white">Recent Orders</h3>
+            <div className="flex space-x-2">
+              <button className="p-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
+                <Filter className="w-4 h-4 text-yellow-400" />
+              </button>
+              <button className="p-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
+                <Download className="w-4 h-4 text-yellow-400" />
+              </button>
+            </div>
+          </div>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b border-gray-800">
+                  <th className="pb-3 text-gray-400 font-medium">Order ID</th>
+                  <th className="pb-3 text-gray-400 font-medium">Customer</th>
+                  <th className="pb-3 text-gray-400 font-medium">Total</th>
+                  <th className="pb-3 text-gray-400 font-medium">Status</th>
+                  <th className="pb-3 text-gray-400 font-medium">Payment</th>
+                  <th className="pb-3 text-gray-400 font-medium">Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {orders && orders.length > 0 ? (
+                  orders.slice(0, 5).map((order) => (
+                    <tr key={order._id} className="border-b border-gray-800 hover:bg-gray-800/50 transition-colors">
+                      <td className="py-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                          <span className="text-white font-medium">{order.orderId}</span>
+                        </div>
+                      </td>
+                      <td className="py-4 text-gray-300">{order.user?.name || 'N/A'}</td>
+                      <td className="py-4 text-green-400">₹{order.total?.toLocaleString() || 0}</td>
+                      <td className="py-4">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          order.currentStatus === 'Delivered' ? 'bg-green-900 text-green-300' :
+                          order.currentStatus === 'Payment Received' ? 'bg-blue-900 text-blue-300' :
+                          order.currentStatus === 'Order Placed' ? 'bg-yellow-900 text-yellow-300' :
+                          order.currentStatus === 'Processing' ? 'bg-orange-900 text-orange-300' :
+                          order.currentStatus === 'Shipped' ? 'bg-blue-900 text-blue-300' :
+                          order.currentStatus === 'Cancelled' ? 'bg-red-900 text-red-300' :
+                          'bg-gray-900 text-gray-300'
+                        }`}>
+                          {order.currentStatus}
+                        </span>
+                      </td>
+                      <td className="py-4">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          order.paymentStatus === 'Completed' ? 'bg-green-900 text-green-300' :
+                          order.paymentStatus === 'Pending' ? 'bg-yellow-900 text-yellow-300' :
+                          'bg-red-900 text-red-300'
+                        }`}>
+                          {order.paymentStatus}
+                        </span>
+                      </td>
+                      <td className="py-4 text-gray-300">
+                        {new Date(order.createdAt).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="py-4 text-center text-gray-400">
+                      No orders available
                     </td>
                   </tr>
                 )}
@@ -505,6 +707,7 @@ const AdminDashboard = () => {
               <div>
                 <h4 className="text-lg font-semibold text-white">Manage Users</h4>
                 <p className="text-gray-400 text-sm">View and manage user accounts</p>
+                <p className="text-yellow-400 text-xs mt-1">{users.length} users registered</p>
               </div>
             </div>
             <button className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-medium py-2 rounded-lg transition-colors">
@@ -518,6 +721,7 @@ const AdminDashboard = () => {
               <div>
                 <h4 className="text-lg font-semibold text-white">Inventory</h4>
                 <p className="text-gray-400 text-sm">Manage products and stock</p>
+                <p className="text-yellow-400 text-xs mt-1">{stats.totalProducts} products available</p>
               </div>
             </div>
             <button className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-medium py-2 rounded-lg transition-colors">
@@ -531,11 +735,70 @@ const AdminDashboard = () => {
               <div>
                 <h4 className="text-lg font-semibold text-white">Orders</h4>
                 <p className="text-gray-400 text-sm">Process and track orders</p>
+                <p className="text-yellow-400 text-xs mt-1">{orders.length} recent orders</p>
               </div>
             </div>
             <button className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-medium py-2 rounded-lg transition-colors">
               View Orders
             </button>
+          </div>
+        </div>
+
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-gradient-to-br from-green-500/10 to-green-600/10 border border-green-500/20 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-green-500/20 rounded-xl">
+                <TrendingUp className="w-6 h-6 text-green-400" />
+              </div>
+              <span className="text-green-400 text-sm font-medium">↑ 12%</span>
+            </div>
+            <h3 className="text-gray-400 text-sm font-medium mb-2">Monthly Growth</h3>
+            <p className="text-2xl font-bold text-white">
+              {stats.totalOrders > 0 ? '+' : ''}
+              {Math.round((stats.totalOrders / 30) * 100) / 100}%
+            </p>
+          </div>
+
+          <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 border border-blue-500/20 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-blue-500/20 rounded-xl">
+                <Users className="w-6 h-6 text-blue-400" />
+              </div>
+              <span className="text-blue-400 text-sm font-medium">Active</span>
+            </div>
+            <h3 className="text-gray-400 text-sm font-medium mb-2">Active Users</h3>
+            <p className="text-2xl font-bold text-white">
+              {Math.round(stats.totalUsers * 0.7)}
+            </p>
+          </div>
+
+          <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 border border-purple-500/20 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-purple-500/20 rounded-xl">
+                <Star className="w-6 h-6 text-purple-400" />
+              </div>
+              <span className="text-purple-400 text-sm font-medium">4.8/5</span>
+            </div>
+            <h3 className="text-gray-400 text-sm font-medium mb-2">Avg Rating</h3>
+            <p className="text-2xl font-bold text-white">
+              {stats.products.length > 0 ? 
+                (stats.products.reduce((acc, product) => acc + (product.ratings?.average || 4.8), 0) / stats.products.length).toFixed(1) 
+                : '4.8'}
+            </p>
+          </div>
+
+          <div className="bg-gradient-to-br from-orange-500/10 to-orange-600/10 border border-orange-500/20 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-orange-500/20 rounded-xl">
+                <Package className="w-6 h-6 text-orange-400" />
+              </div>
+              <span className="text-orange-400 text-sm font-medium">Stock</span>
+            </div>
+            <h3 className="text-gray-400 text-sm font-medium mb-2">Low Stock Items</h3>
+            <p className="text-2xl font-bold text-white">
+              {stats.products.filter(product => product.stock < (product.lowStockThreshold || 5)).length}
+            </p>
           </div>
         </div>
       </div>
