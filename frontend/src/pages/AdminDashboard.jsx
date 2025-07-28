@@ -12,6 +12,7 @@ import { apiConnector } from '../services/apiConnector';
 import { toast } from 'react-hot-toast';
 import { useDispatch, useSelector } from 'react-redux';
 import { setLoading } from '../slices/authSlice';
+import { useNavigate } from 'react-router-dom';
 
 const {adminDashboard, getUserNoPagination} = endpoints;
 const { allOrdersWithoutPagination } = orderEndpoints;
@@ -30,6 +31,8 @@ const AdminDashboard = () => {
     products: [],
     completedOrders: []
   });
+
+  const navigate = useNavigate()
 
   const dispatch = useDispatch();
   const token = useSelector(state => state.auth.token)
@@ -714,7 +717,7 @@ const AdminDashboard = () => {
                 <p className="text-yellow-400 text-xs mt-1">{users.length} users registered</p>
               </div>
             </div>
-            <button className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-medium py-2 rounded-lg transition-colors">
+            <button onClick={()=> navigate('/admindashboard/viewusers')} className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-medium py-2 rounded-lg transition-colors">
               View Users
             </button>
           </div>
@@ -728,7 +731,7 @@ const AdminDashboard = () => {
                 <p className="text-yellow-400 text-xs mt-1">{stats.totalProducts} products available</p>
               </div>
             </div>
-            <button className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-medium py-2 rounded-lg transition-colors">
+            <button onClick={()=> navigate('/admindashboard/addproduct')} className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-medium py-2 rounded-lg transition-colors">
               Manage Inventory
             </button>
           </div>
@@ -742,7 +745,7 @@ const AdminDashboard = () => {
                 <p className="text-yellow-400 text-xs mt-1">{orders.length} recent orders</p>
               </div>
             </div>
-            <button className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-medium py-2 rounded-lg transition-colors">
+            <button onClick={()=> navigate('/admindashboard/manageorders')} className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-medium py-2 rounded-lg transition-colors">
               View Orders
             </button>
           </div>
@@ -773,7 +776,7 @@ const AdminDashboard = () => {
             </div>
             <h3 className="text-gray-400 text-sm font-medium mb-2">Active Users</h3>
             <p className="text-2xl font-bold text-white">
-              {Math.round(stats.totalUsers * 0.7)}
+              {Math.round(stats.totalUsers )}
             </p>
           </div>
 
@@ -782,13 +785,13 @@ const AdminDashboard = () => {
               <div className="p-3 bg-purple-500/20 rounded-xl">
                 <Star className="w-6 h-6 text-purple-400" />
               </div>
-              <span className="text-purple-400 text-sm font-medium">4.8/5</span>
+              <span className="text-purple-400 text-sm font-medium">0/5</span>
             </div>
             <h3 className="text-gray-400 text-sm font-medium mb-2">Avg Rating</h3>
             <p className="text-2xl font-bold text-white">
               {stats.products.length > 0 ? 
-                (stats.products.reduce((acc, product) => acc + (product.ratings?.average || 4.8), 0) / stats.products.length).toFixed(1) 
-                : '4.8'}
+                (stats.products.reduce((acc, product) => acc + (product.ratings?.average || 0), 0) / stats.products.length).toFixed(1) 
+                : '0'}
             </p>
           </div>
 

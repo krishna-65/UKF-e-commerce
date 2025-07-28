@@ -81,7 +81,7 @@ export const orderEndpoints = {
   getAllOrders : BASE_URL + "/api/order/",
   updateOrderStatus : BASE_URL + "/api/order/",
   addTrackingInfo : BASE_URL + "/api/order/",
-  allOrdersWithoutPagination : BASE_URL + "/api/order/allorders"
+  allOrdersWithoutPagination : BASE_URL + "/api/order/orders/allorders"
 }
 
 //payment endpoints

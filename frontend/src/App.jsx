@@ -23,6 +23,7 @@ import PrivateRoute from "./components/core/PrivateRoute";
 import ContactUs from "./pages/ContactUs";
 import Profile from "./pages/Profile";
 import UserRoute from "./components/core/UserRoute";
+import TechSupport from "./pages/TechSupport";
 
 const App = () => {
   return (
@@ -85,12 +86,14 @@ const App = () => {
               </PrivateRoute>
             }
           >
+            
             <Route index element={<AdminDashboard />} />
             <Route path="addproduct" element={<AddProduct />} />
             <Route path="manageorders" element={<ManageOrders />} />
             <Route path="addcategory" element={<AddCategory />} />
             <Route path="addbrands" element={<Brands />} />
             <Route path="viewusers" element={<ViewUsers />} />
+            <Route path='techsupport' element={<TechSupport/>}/>
           </Route>
         </Routes>
       </div>

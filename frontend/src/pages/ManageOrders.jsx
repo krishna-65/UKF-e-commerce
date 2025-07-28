@@ -5,7 +5,11 @@ import { orderEndpoints } from "../services/api";
 import { setLoading } from "../slices/authSlice";
 import toast from "react-hot-toast";
 
-const { getAllOrders } = orderEndpoints;
+const {
+  getAllOrders,
+  updateOrderStatus,
+  addTrackingInfo,
+} = orderEndpoints;
 
 const ManageOrders = () => {
   const dispatch = useDispatch();
@@ -13,12 +17,16 @@ const ManageOrders = () => {
   const [orders, setOrders] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [newStatus, setNewStatus] = useState("");
+  const [newPaymentStatus, setNewPaymentStatus] = useState("");
 
   const fetchOrders = async () => {
     try {
       dispatch(setLoading(true));
       const res = await apiConnector("GET", `${getAllOrders}?page=${page}&limit=10`);
-      console.log(res);
       if (res.data.success) {
         setOrders(res.data.orders);
         setTotalPages(res.data.pages);
@@ -32,17 +40,48 @@ const ManageOrders = () => {
     }
   };
 
-  useEffect(() => {
-    fetchOrders();
-  }, [page]);
-
   const handlePageChange = (p) => {
     setPage(p);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const handleStatusUpdate = async () => {
+    try {
+      await apiConnector("PUT", `${updateOrderStatus}${selectedOrder._id}/status`, {
+        status: newStatus,
+        note: "Updated via admin panel",
+      });
+      toast.success("Order status updated!");
+      fetchOrders();
+      setShowStatusModal(false);
+      setNewStatus("");
+    } catch (error) {
+      toast.error("Failed to update status");
+      console.error(error);
+    }
+  };
+
+  const handlePaymentUpdate = async () => {
+    try {
+      await apiConnector("PUT", `${addTrackingInfo}${selectedOrder._id}/tracking`, {
+        paymentStatus: newPaymentStatus,
+      });
+      toast.success("Payment status updated!");
+      fetchOrders();
+      setShowPaymentModal(false);
+      setNewPaymentStatus("");
+    } catch (error) {
+      toast.error("Failed to update payment status");
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchOrders();
+  }, [page]);
+
   return (
-    <div className="manage-orders hidescroll  text-[#FFD700] lg:w-[calc(100vw-256px)] overflow-y-scroll h-screen p-6">
+    <div className="manage-orders hidescroll text-[#FFD700] lg:w-[calc(100vw-256px)] overflow-y-scroll h-screen p-6">
       <h2 className="text-2xl font-bold mb-4">Manage Orders</h2>
 
       {loading ? (
@@ -62,6 +101,7 @@ const ManageOrders = () => {
                   <th className="px-4 py-2 text-left">Status</th>
                   <th className="px-4 py-2 text-left">Payment</th>
                   <th className="px-4 py-2 text-left">Placed On</th>
+                  <th className="px-4 py-2 text-left">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -69,7 +109,8 @@ const ManageOrders = () => {
                   <tr key={order._id} className="border-t border-gray-200 hover:bg-[#f9f9f9]">
                     <td className="px-4 py-2 font-semibold">{order.orderId}</td>
                     <td className="px-4 py-2">
-                      {order.user?.name}<br />
+                      {order.user?.name}
+                      <br />
                       <span className="text-sm text-gray-500">{order.user?.email}</span>
                     </td>
                     <td className="px-4 py-2">{order.items.length} item(s)</td>
@@ -77,8 +118,31 @@ const ManageOrders = () => {
                     <td className="px-4 py-2">{order.currentStatus}</td>
                     <td className="px-4 py-2">{order.paymentStatus}</td>
                     <td className="px-4 py-2">
-                      {new Date(order.createdAt).toLocaleDateString()} <br />
+                      {new Date(order.createdAt).toLocaleDateString()}
+                      <br />
                       <span className="text-xs text-gray-400">{new Date(order.createdAt).toLocaleTimeString()}</span>
+                    </td>
+                    <td className="px-4 py-2">
+                      <button
+                        className="mr-2 px-2 py-1 bg-blue-600 text-white rounded text-sm"
+                        onClick={() => {
+                          setSelectedOrder(order);
+                          setShowStatusModal(true);
+                          setNewStatus("");
+                        }}
+                      >
+                        Update Status
+                      </button>
+                      <button
+                        className="px-2 py-1 bg-green-600 text-white rounded text-sm"
+                        onClick={() => {
+                          setSelectedOrder(order);
+                          setShowPaymentModal(true);
+                          setNewPaymentStatus("");
+                        }}
+                      >
+                        Update Payment
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -103,6 +167,79 @@ const ManageOrders = () => {
             ))}
           </div>
         </>
+      )}
+
+      {/* Status Modal */}
+      {showStatusModal && selectedOrder && (
+        <div className="fixed inset-0 backdrop-blur-3xl bg-opacity-40 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg w-[400px] text-black">
+            <h3 className="text-xl font-bold mb-4">
+              Update Status: {selectedOrder.orderId}
+            </h3>
+            <select
+              className="w-full mb-4 p-2 border rounded"
+              value={newStatus}
+              onChange={(e) => setNewStatus(e.target.value)}
+            >
+              <option value="" disabled>Select new status</option>
+              <option value="Processing">Processing</option>
+              <option value="Shipped">Shipped</option>
+              <option value="Delivered">Delivered</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowStatusModal(false)}
+                className="px-4 py-2 bg-gray-300 rounded"
+              >
+                Close
+              </button>
+              <button
+                onClick={handleStatusUpdate}
+                disabled={!newStatus}
+                className="px-4 py-2 bg-[#FFD700] text-black font-semibold rounded"
+              >
+                Update
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Payment Modal */}
+      {showPaymentModal && selectedOrder && (
+        <div className="fixed inset-0 backdrop-blur-3xl bg-opacity-40 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg w-[400px] text-black">
+            <h3 className="text-xl font-bold mb-4">
+              Update Payment: {selectedOrder.orderId}
+            </h3>
+            <select
+              className="w-full mb-4 p-2 border rounded"
+              value={newPaymentStatus}
+              onChange={(e) => setNewPaymentStatus(e.target.value)}
+            >
+              <option value="" disabled>Select payment status</option>
+              <option value="Pending">Pending</option>
+              <option value="Completed">Completed</option>
+                            <option value="Refunded">Refunded</option>
+            </select>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowPaymentModal(false)}
+                className="px-4 py-2 bg-gray-300 rounded"
+              >
+                Close
+              </button>
+              <button
+                onClick={handlePaymentUpdate}
+                disabled={!newPaymentStatus}
+                className="px-4 py-2 bg-[#FFD700] text-black font-semibold rounded"
+              >
+                Update
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
