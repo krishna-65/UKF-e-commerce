@@ -1,48 +1,42 @@
+// middleware/authMiddleware.js
 import jwt from 'jsonwebtoken';
+import User from '../models/User.js';
 
-const authUser = async (req, res, next)=>{
-    const {token} = req.cookies;
-
-    if(!token){
-        return res.json({ success: false, message: 'Not Authorized' });
-    }
-
-    try {
-        const tokenDecode = jwt.verify(token, process.env.JWT_SECRET)
-        if(tokenDecode.id){
-            req.body.userId = tokenDecode.id;
-        }else{
-            return res.json({ success: false, message: 'Not Authorized' });
-        }
-        next();
-
-    } catch (error) {
-        res.json({ success: false, message: error.message });
-    }
-}
-
-export default authUser;
-
-
-import User from "../models/User.js";
 
 export const protect = async (req, res, next) => {
   let token;
 
-  if (
-    req.headers.authorization && 
-    req.headers.authorization.startsWith('Bearer')
-  ) {
+  // Check Authorization header
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     try {
       token = req.headers.authorization.split(' ')[1];
 
+      // Decode token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = await User.findById(decoded.id).select('-password'); // attach user to request
+
+      // Attach user to request
+      req.user = await User.findById(decoded.id).select('-password');
+      
+      if (!req.user) {
+       return res.status(401).json({ message: 'User not found' });
+      }
+
       next();
-    } catch (error) {
-      res.status(401).json({ success: false, message: 'Not authorized, token failed' });
+    } catch (err) {
+      console.log(err)
+      return res.status(401).json({ message: 'Not authorized, token failed' });
     }
   } else {
-    res.status(401).json({ success: false, message: 'Not authorized, no token' });
+    return res.status(401).json({ message: 'Not authorized, no token' });
   }
+};
+
+
+export const restrictTo = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(new AppError('You do not have permission to perform this action', 403));
+    }
+    next();
+  };
 };
