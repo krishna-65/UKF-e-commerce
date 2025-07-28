@@ -14,6 +14,7 @@ import categoryRouter from "./routes/CategoryRoute.js"
 import fileUpload from "express-fileupload";
 import brandRouter from './routes/brandRoutes.js';
 import paymentRouter from './routes/paymentRoute.js';
+import reviewRouter from './routes/reviewRoute.js';
 import { stripeWebhooks } from './controllers/orderController.js';
 
 const app = express();
@@ -50,6 +51,7 @@ app.use('/api/order', orderRouter)
 app.use('/api/category', categoryRouter)
 app.use('/api/brand', brandRouter);
 app.use('/api/payment', paymentRouter);
+app.use('/api/review', reviewRouter);
 
 
 app.listen(port, ()=>{

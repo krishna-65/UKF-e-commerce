@@ -7,9 +7,11 @@ import {
   updateOrderStatus,
   cancelOrder,
   getUserOrders,
-  addTrackingInfo
+  addTrackingInfo,
+  getUserOrdersNoPagination,
+  getAllOrdersNoPagination
 } from '../controllers/orderController.js';
-import { protect } from '../middlewares/authUser.js';
+import { protect, restrictTo } from '../middlewares/authUser.js';
 
 
 const router = express.Router();
@@ -24,6 +26,10 @@ router.put('/:id/cancel', cancelOrder);
 router.get('/', getAllOrders);
 router.put('/:id/status', updateOrderStatus);
 router.put('/:id/tracking',  addTrackingInfo);
+
+//No Pagination routes
+router.get('/user', protect,restrictTo("user","admin"), getUserOrdersNoPagination);
+router.get('allorders', getAllOrdersNoPagination)
 
 export default router;
 

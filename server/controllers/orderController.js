@@ -622,3 +622,44 @@ export const addTrackingInfo = async (req, res) => {
     });
   }
 };
+
+export const getAllOrdersNoPagination = async (req, res) => {
+  try {
+    const orders = await Order.find()
+      .sort({ createdAt: -1 })
+      .populate('user', 'name email phone')
+      .populate('shippingAddress')
+      .populate('billingAddress')
+      .populate('items.product', 'name price images');
+
+    res.json({
+      success: true,
+      total: orders.length,
+      orders,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const getUserOrdersNoPagination = async (req, res) => {
+  try {
+    const orders = await Order.find({ user: req.user._id })
+      .sort({ createdAt: -1 })
+      .populate('items.product');
+
+    res.json({
+      success: true,
+      total: orders.length,
+      orders,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
