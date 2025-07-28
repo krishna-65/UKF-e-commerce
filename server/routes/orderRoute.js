@@ -29,7 +29,7 @@ router.put('/:id/tracking',  addTrackingInfo);
 
 //No Pagination routes
 router.get('/user', protect,restrictTo("user","admin"), getUserOrdersNoPagination);
-router.get('allorders', getAllOrdersNoPagination)
+router.get('/allorders', protect, restrictTo("admin"), getAllOrdersNoPagination);
 
 export default router;
 
