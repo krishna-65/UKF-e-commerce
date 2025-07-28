@@ -627,10 +627,10 @@ export const getAllOrdersNoPagination = async (req, res) => {
   try {
     const orders = await Order.find()
       .sort({ createdAt: -1 })
-      .populate('user', 'name email phone')
+      .populate('user')
       .populate('shippingAddress')
       .populate('billingAddress')
-      .populate('items.product', 'name price images');
+      .populate('items.product');
 
     res.json({
       success: true,
