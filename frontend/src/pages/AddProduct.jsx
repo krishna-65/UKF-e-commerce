@@ -358,9 +358,9 @@ const AddProduct = () => {
       )}
 
       {(showAddModal || showEditModal) && (
-        <div className="fixed z-[151] inset-0 backdrop-blur-2xl bg-opacity-30 flex justify-center items-center">
-          <div className="bg-white hidecursor p-6 rounded-lg max-w-md w-[90%] overflow-y-auto max-h-[90vh] text-black">
-            <h3 className="text-xl font-semibold mb-4">
+        <div className="fixed z-[151] inset-0 bg-black/80 backdrop-blur-md flex justify-center items-center">
+          <div className="bg-[#111] text-[#FFD770] p-6 rounded-xl max-w-2xl w-[90%] hidescroll max-h-[90vh] overflow-y-auto shadow-[0_0_20px_rgba(255,215,112,0.3)] animate-fade-in border border-[#FFD770]/30 transition-all duration-300">
+            <h3 className="text-2xl font-bold mb-6 text-center uppercase">
               {showAddModal ? "Add Product" : "Edit Product"}
             </h3>
 
@@ -372,11 +372,9 @@ const AddProduct = () => {
               "comparePrice",
               "costPerItem",
               "stock",
-
               "color",
               "material",
               "fabric",
-
               "pattern",
               "occasion",
             ].map((key) => (
@@ -394,115 +392,70 @@ const AddProduct = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, [key]: e.target.value })
                 }
-                className="mb-3 w-full p-2 border rounded"
+                className="mb-4 w-full px-3 py-2 bg-black/30 text-[#FFD770] border border-[#FFD770]/40 rounded-md placeholder:text-[#FFD770]/60 focus:outline-none focus:border-[#FFD770]/80"
               />
             ))}
 
-            {/* ENUM DROPDOWNS */}
-            <select
-              value={formData.size}
-              onChange={(e) =>
-                setFormData({ ...formData, size: e.target.value })
-              }
-              className="mb-3 w-full p-2 border rounded"
-            >
-              <option value="">Select Size</option>
-              {[
-                "XS",
-                "S",
-                "M",
-                "L",
-                "XL",
-                "XXL",
-                "XXXL",
-                "4XL",
-                "5XL",
-                "One Size",
-              ].map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
-                </option>
-              ))}
-            </select>
-
-            <select
-              value={formData.fit}
-              onChange={(e) =>
-                setFormData({ ...formData, fit: e.target.value })
-              }
-              className="mb-3 w-full p-2 border rounded"
-            >
-              <option value="">Select Fit</option>
-              {["Slim", "Regular", "Oversized", "Relaxed"].map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
-                </option>
-              ))}
-            </select>
-
-            <select
-              value={formData.sleeveLength}
-              onChange={(e) =>
-                setFormData({ ...formData, sleeveLength: e.target.value })
-              }
-              className="mb-3 w-full p-2 border rounded"
-            >
-              <option value="">Select Sleeve Length</option>
-              {["Short", "Half", "Long", "Sleeveless"].map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
-                </option>
-              ))}
-            </select>
-
-            <select
-              value={formData.season}
-              onChange={(e) =>
-                setFormData({ ...formData, season: e.target.value })
-              }
-              className="mb-3 w-full p-2 border rounded"
-            >
-              <option value="">Select Season</option>
-              {["Summer", "Winter", "Spring", "Fall", "All Season"].map(
-                (opt) => (
+            {/* Dropdowns */}
+            {[
+              {
+                label: "Size",
+                value: formData.size,
+                options: [
+                  "XS",
+                  "S",
+                  "M",
+                  "L",
+                  "XL",
+                  "XXL",
+                  "XXXL",
+                  "4XL",
+                  "5XL",
+                  "One Size",
+                ],
+                key: "size",
+              },
+              {
+                label: "Fit",
+                value: formData.fit,
+                options: ["Slim", "Regular", "Oversized", "Relaxed"],
+                key: "fit",
+              },
+              {
+                label: "Sleeve Length",
+                value: formData.sleeveLength,
+                options: ["Short", "Half", "Long", "Sleeveless"],
+                key: "sleeveLength",
+              },
+              {
+                label: "Season",
+                value: formData.season,
+                options: ["Summer", "Winter", "Spring", "Fall", "All Season"],
+                key: "season",
+              },
+              {
+                label: "Gender",
+                value: formData.gender,
+                options: ["Men", "Women", "Unisex", "Kids", "Boys", "Girls"],
+                key: "gender",
+              },
+            ].map((dropdown) => (
+              <select
+                key={dropdown.key}
+                value={dropdown.value}
+                onChange={(e) =>
+                  setFormData({ ...formData, [dropdown.key]: e.target.value })
+                }
+                className="mb-4 w-full px-3 py-2 bg-black/30 text-[#FFD770] border border-[#FFD770]/40 rounded-md focus:outline-none"
+              >
+                <option value="">Select {dropdown.label}</option>
+                {dropdown.options.map((opt) => (
                   <option key={opt} value={opt}>
                     {opt}
                   </option>
-                )
-              )}
-            </select>
-
-            <select
-              value={formData.gender}
-              onChange={(e) =>
-                setFormData({ ...formData, gender: e.target.value })
-              }
-              className="mb-3 w-full p-2 border rounded"
-            >
-              <option value="">Select Gender</option>
-              {["Men", "Women", "Unisex", "Kids", "Boys", "Girls"].map(
-                (opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
-                  </option>
-                )
-              )}
-            </select>
-
-            {/* <select
-              value={formData.status}
-              onChange={(e) =>
-                setFormData({ ...formData, status: e.target.value })
-              }
-              className="mb-3 w-full p-2 border rounded"
-            >
-              <option value="">Select Status</option>
-              {["draft", "active", "archived"].map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
-                </option>
-              ))}
-            </select> */}
+                ))}
+              </select>
+            ))}
 
             {/* Brands */}
             <select
@@ -510,7 +463,7 @@ const AddProduct = () => {
               onChange={(e) =>
                 setFormData({ ...formData, brand: e.target.value })
               }
-              className="mb-3 w-full p-2 border rounded"
+              className="mb-4 w-full px-3 py-2 bg-black/30 text-[#FFD770] border border-[#FFD770]/40 rounded-md"
             >
               <option value="">Select Brand</option>
               {brands.map((b) => (
@@ -520,7 +473,7 @@ const AddProduct = () => {
               ))}
             </select>
 
-            {/* Category & Subcategory */}
+            {/* Category */}
             <select
               value={formData.category}
               onChange={(e) =>
@@ -530,7 +483,7 @@ const AddProduct = () => {
                   subCategory: e.target.value,
                 })
               }
-              className="mb-3 w-full p-2 border rounded"
+              className="mb-4 w-full px-3 py-2 bg-black/30 text-[#FFD770] border border-[#FFD770]/40 rounded-md"
             >
               <option value="">Select Category</option>
               {categories.map((cat) => (
@@ -540,14 +493,6 @@ const AddProduct = () => {
               ))}
             </select>
 
-            {/* <input
-        type="text"
-        placeholder="Subcategory"
-        value={formData.subCategory}
-        onChange={(e) => setFormData({ ...formData, subCategory: e.target.value })}
-        className="mb-3 w-full p-2 border rounded"
-      /> */}
-
             {/* Description */}
             <textarea
               placeholder="Description"
@@ -555,88 +500,90 @@ const AddProduct = () => {
               onChange={(e) =>
                 setFormData({ ...formData, description: e.target.value })
               }
-              className="mb-3 w-full p-2 border rounded"
+              className="mb-4 w-full px-3 py-2 bg-black/30 text-[#FFD770] border border-[#FFD770]/40 rounded-md placeholder:text-[#FFD770]/60 focus:outline-none"
             />
 
             {/* Boolean Flags */}
-            {["isFeatured", "isNewArrival", "isBestSeller", "isOnSale"].map(
-              (flag) => (
-                <label key={flag} className="block mb-2">
-                  <input
-                    type="checkbox"
-                    checked={formData[flag]}
-                    onChange={(e) =>
-                      setFormData({ ...formData, [flag]: e.target.checked })
-                    }
-                  />{" "}
-                  {flag}
-                </label>
-              )
-            )}
-
-            {/* Lookbook Images
-            <label className="block mt-4 mb-2 font-semibold">
-              Lookbook Images (URLs)
-            </label>
-            {[0, 1].map((index) => (
-              <input
-                key={index}
-                type="text"
-                placeholder={`Lookbook Image ${index + 1}`}
-                value={formData.lookbookImages[index] || ""}
-                onChange={(e) => {
-                  const updatedImages = [...formData.lookbookImages];
-                  updatedImages[index] = e.target.value;
-                  setFormData({ ...formData, lookbookImages: updatedImages });
-                }}
-                className="mb-2 w-full p-2 border rounded"
-              />
-            ))} */}
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              {["isFeatured", "isNewArrival", "isBestSeller", "isOnSale"].map(
+                (flag) => (
+                  <label key={flag} className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData[flag]}
+                      onChange={(e) =>
+                        setFormData({ ...formData, [flag]: e.target.checked })
+                      }
+                    />
+                    <span className="text-sm">{flag}</span>
+                  </label>
+                )
+              )}
+            </div>
 
             {/* Image Upload */}
-            <div className="mb-4">
-              <label className="block font-medium mb-2">Product Images</label>
+            <div className="mb-6">
+              <label className="block font-semibold mb-2">Product Images</label>
               {imageInputs.map((key) => (
                 <input
                   key={key}
                   type="file"
                   accept="image/*"
                   onChange={(e) => handleSingleImageChange(e, key)}
-                  className="mb-2 w-full p-2 rounded border"
+                  className="mb-2 w-full px-3 py-2 bg-black/30 text-[#FFD770] border border-[#FFD770]/40 rounded-md"
                 />
               ))}
               <button
                 type="button"
                 onClick={handleAddMoreImages}
-                className="px-4 py-2 bg-[#FFD700] text-black rounded mt-2 hover:brightness-110"
+                className="mt-2 px-4 py-2 bg-[#FFD770] text-black rounded hover:scale-105 transition"
               >
                 + Add More Pics
               </button>
             </div>
 
             {/* Modal Buttons */}
-            <div className="flex justify-end gap-2 mt-4">
+            <div className="flex justify-end gap-4">
               <button
                 onClick={() => {
                   setShowAddModal(false);
                   setShowEditModal(false);
                 }}
-                className="px-4 py-2 border rounded"
+                className="px-4 py-2 bg-black/30 text-[#FFD770] border border-[#FFD770]/40 rounded hover:bg-[#FFD770]/10 transition"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleSubmit(showEditModal)}
-                className="px-4 py-2 w-[100px] flex justify-center items-center bg-[#FFD770] text-black rounded"
+                className="px-4 py-2 w-[100px] flex justify-center items-center bg-[#FFD770] text-black rounded hover:scale-105 transition"
               >
                 {loading ? (
                   <div className="loader1"></div>
+                ) : showAddModal ? (
+                  "Save"
                 ) : (
-                  <>{showAddModal ? "Save" : "Update"}</>
+                  "Update"
                 )}
               </button>
             </div>
           </div>
+
+          {/* Modal Animation */}
+          <style jsx>{`
+            @keyframes fade-in {
+              from {
+                opacity: 0;
+                transform: scale(0.95);
+              }
+              to {
+                opacity: 1;
+                transform: scale(1);
+              }
+            }
+            .animate-fade-in {
+              animation: fade-in 0.3s ease-out;
+            }
+          `}</style>
         </div>
       )}
     </div>

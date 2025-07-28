@@ -1,5 +1,5 @@
 import express from 'express';
-import { forgotPassword, getAdminDashboardStats, getProfile, getUsers, isAuth, login, logout, register, updatePicture, updateProfile } from '../controllers/userController.js';
+import { forgotPassword, getAdminDashboardStats, getProfile, getUserNoPagination, getUsers, isAuth, login, logout, register, updatePicture, updateProfile } from '../controllers/userController.js';
 
 
 const userRouter = express.Router();
@@ -14,4 +14,5 @@ userRouter.get('/profile/:id', getProfile)
 userRouter.post('/forgot-password', forgotPassword)
 userRouter.get('/admin-dashboard',  getAdminDashboardStats)
 userRouter.get('/getuser', getUsers)
+userRouter.get('/getUserNoPagination',getUserNoPagination)
 export default userRouter

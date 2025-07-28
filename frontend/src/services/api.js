@@ -13,7 +13,8 @@ export const endpoints = {
   getProfile: BASE_URL + "/api/user/profile/",
   updatePicture : BASE_URL + "/api/user/updatePicture/",
   adminDashboard : BASE_URL + "/api/user/admin-dashboard",
-  getUser : BASE_URL + "/api/user/getuser"
+  getUser : BASE_URL + "/api/user/getuser",
+  getUserNoPagination : BASE_URL + "/api/user/getUserNoPagination",
 }
 
 //category endpoints
@@ -79,7 +80,8 @@ export const orderEndpoints = {
   cancelOrder : BASE_URL + "/api/order/",
   getAllOrders : BASE_URL + "/api/order/",
   updateOrderStatus : BASE_URL + "/api/order/",
-  addTrackingInfo : BASE_URL + "/api/order/"
+  addTrackingInfo : BASE_URL + "/api/order/",
+  allOrdersWithoutPagination : BASE_URL + "/api/order/allorders"
 }
 
 //payment endpoints

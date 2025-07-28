@@ -382,3 +382,22 @@ export const getUsers = async (req, res) => {
   }
 };
 
+export const getUserNoPagination = async (req,res)=>{
+  try{
+
+      const users = await User.find({ accountType: "user" })
+
+    return res.status(200).json({
+      success:true,
+      data:users
+    })
+
+  }catch(error){
+    console.log("error while getting no pagination users");
+    return res.status(500).json({
+      success:false,
+      message:error.message,
+    })
+  }
+}
+

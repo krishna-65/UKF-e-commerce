@@ -10,11 +10,11 @@ import {
 import { endpoints, orderEndpoints } from '../services/api';
 import { apiConnector } from '../services/apiConnector';
 import { toast } from 'react-hot-toast';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setLoading } from '../slices/authSlice';
 
-const {adminDashboard, getUser} = endpoints;
-const { getAllOrders } = orderEndpoints;
+const {adminDashboard, getUserNoPagination} = endpoints;
+const { allOrdersWithoutPagination } = orderEndpoints;
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -32,6 +32,7 @@ const AdminDashboard = () => {
   });
 
   const dispatch = useDispatch();
+  const token = useSelector(state => state.auth.token)
 
   const [monthlyData, setMonthlyData] = useState([]);
   const [selectedPeriod, setSelectedPeriod] = useState('monthly');
@@ -80,7 +81,10 @@ const AdminDashboard = () => {
   const fetchOrders = async () => {
     try {
       dispatch(setLoading(true));
-      const res = await apiConnector("GET", `${getAllOrders}?page=${page}&limit=10`);
+      console.log(token)
+      const res = await apiConnector("GET", allOrdersWithoutPagination,null,{
+        Authorization : `Bearer ${token}`
+      });
       console.log(res);
       if (res.data.success) {
         setOrders(res.data.orders);
@@ -101,7 +105,7 @@ const AdminDashboard = () => {
   const fetchUser = async () => {
     try {
       dispatch(setLoading(true));
-      const userRes = await apiConnector("GET", getUser);
+      const userRes = await apiConnector("GET", getUserNoPagination);
       console.log(userRes);
       if (userRes.data.success) {
         setUsers(userRes.data.users || []);
@@ -475,7 +479,7 @@ const AdminDashboard = () => {
         {/* Charts Row 2 */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* User Growth */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 hover:border-yellow-500 transition-all duration-300">
+          {/* <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 hover:border-yellow-500 transition-all duration-300">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-semibold text-white">User Growth</h3>
               <Users className="w-5 h-5 text-yellow-400" />
@@ -489,7 +493,7 @@ const AdminDashboard = () => {
                 <Line type="monotone" dataKey="users" stroke="#FFD700" strokeWidth={3} dot={{ fill: '#FFD700', strokeWidth: 2, r: 4 }} />
               </LineChart>
             </ResponsiveContainer>
-          </div>
+          </div> */}
 
           {/* Orders Trend */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 hover:border-yellow-500 transition-all duration-300">

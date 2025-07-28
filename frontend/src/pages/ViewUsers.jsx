@@ -107,36 +107,58 @@ const ViewUsers = () => {
 
       {/* Modal */}
       {selectedUser && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-          <div className="bg-white text-[#222] max-w-xl w-full rounded-lg p-6 overflow-y-auto max-h-[80vh] shadow-xl">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">User Details</h2>
-              <button
-                onClick={() => setSelectedUser(null)}
-                className="text-red-500 hover:text-red-700 transition"
-              >
-                <X size={20} />
-              </button>
+  <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+    <div className="bg-[#111] text-[#FFD770] max-w-xl w-full rounded-lg p-6 overflow-y-auto max-h-[85vh] shadow-[0_0_20px_rgba(255,215,112,0.3)] animate-scale-in border border-[#FFD770]/30">
+      <div className="flex justify-between items-center mb-4 border-b border-[#FFD770]/20 pb-2">
+        <h2 className="text-xl font-bold uppercase tracking-wide">User Details</h2>
+        <button
+          onClick={() => setSelectedUser(null)}
+          className="text-[#FFD770] hover:text-white hover:bg-[#FFD770]/20 p-2 rounded-full transition"
+        >
+          <X size={20} />
+        </button>
+      </div>
+
+      <div className="space-y-3 text-sm tracking-wide leading-relaxed">
+        <p><span className="font-semibold">Name:</span> {selectedUser.name}</p>
+        <p><span className="font-semibold">Phone:</span> {selectedUser.phone}</p>
+        <p><span className="font-semibold">Total Orders:</span> {selectedUser.totalOrders}</p>
+        <p><span className="font-semibold">Total Spent:</span> ₹{selectedUser.totalSpent}</p>
+
+        {selectedUser.profile ? (
+          <>
+            <p><span className="font-semibold">Age:</span> {selectedUser.profile.age}</p>
+            <p><span className="font-semibold">Gender:</span> {selectedUser.profile.gender}</p>
+            <p><span className="font-semibold">DOB:</span> {new Date(selectedUser.profile.dateOfBirth).toLocaleDateString()}</p>
+            <p><span className="font-semibold">Occupation:</span> {selectedUser.profile.occupation}</p>
+            <p><span className="font-semibold">Bio:</span> {selectedUser.profile.bio}</p>
+            <div>
+              <span className="font-semibold">Address:</span>
+              <p className="ml-2 mt-1 text-[#FFD770]/90">
+                {selectedUser.profile.address}, {selectedUser.profile.city},<br />
+                {selectedUser.profile.state}, {selectedUser.profile.zipCode}, {selectedUser.profile.country}
+              </p>
             </div>
-            <div className="space-y-2 text-sm">
-              <p><strong>Name:</strong> {selectedUser.name}</p>
-              <p><strong>Phone:</strong> {selectedUser.phone}</p>
-              <p><strong>Total Orders:</strong> {selectedUser.totalOrders}</p>
-              <p><strong>Total Spent:</strong> ₹{selectedUser.totalSpent}</p>
-              {selectedUser.profile && (
-                <>
-                  <p><strong>Age:</strong> {selectedUser.profile.age}</p>
-                  <p><strong>Gender:</strong> {selectedUser.profile.gender}</p>
-                  <p><strong>DOB:</strong> {new Date(selectedUser.profile.dateOfBirth).toLocaleDateString()}</p>
-                  <p><strong>Address:</strong> {selectedUser.profile.address}, {selectedUser.profile.city}, {selectedUser.profile.state}, {selectedUser.profile.zipCode}, {selectedUser.profile.country}</p>
-                  <p><strong>Occupation:</strong> {selectedUser.profile.occupation}</p>
-                  <p><strong>Bio:</strong> {selectedUser.profile.bio}</p>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+          </>
+        ) : (
+          <p className="italic text-[#FFD770]/70">No profile information available.</p>
+        )}
+      </div>
+    </div>
+
+    {/* Custom Animation */}
+    <style jsx>{`
+      @keyframes scale-in {
+        0% { transform: scale(0.92); opacity: 0; }
+        100% { transform: scale(1); opacity: 1; }
+      }
+      .animate-scale-in {
+        animation: scale-in 0.3s ease-out;
+      }
+    `}</style>
+  </div>
+)}
+
     </div>
   );
 };
