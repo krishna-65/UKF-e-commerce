@@ -428,29 +428,29 @@ export const updateOrderStatus = async (req, res) => {
     }
 
     // Validate status transition
-    const validTransitions = {
-      'Order Placed': ['Payment Pending', 'Cancelled'],
-      'Payment Pending': ['Payment Received', 'Cancelled'],
-      'Payment Received': ['Processing', 'Cancelled'],
-      'Processing': ['Shipped', 'Cancelled'],
-      'Shipped': ['Out for Delivery', 'Cancelled'],
-      'Out for Delivery': ['Delivered', 'Cancelled'],
-      'Delivered': ['Return Requested'],
-      'Cancelled': [],
-      'Return Requested': ['Return Approved', 'Return Rejected'],
-      'Return Approved': ['Return Completed', 'Refund Initiated'],
-      'Return Rejected': [],
-      'Return Completed': ['Refund Initiated'],
-      'Refund Initiated': ['Refund Completed'],
-      'Refund Completed': []
-    };
+    // const validTransitions = {
+    //   'Order Placed': ['Payment Pending', 'Cancelled'],
+    //   'Payment Pending': ['Payment Received', 'Cancelled'],
+    //   'Payment Received': ['Processing', 'Cancelled'],
+    //   'Processing': ['Shipped', 'Cancelled'],
+    //   'Shipped': ['Out for Delivery', 'Cancelled'],
+    //   'Out for Delivery': ['Delivered', 'Cancelled'],
+    //   'Delivered': ['Return Requested'],
+    //   'Cancelled': [],
+    //   'Return Requested': ['Return Approved', 'Return Rejected'],
+    //   'Return Approved': ['Return Completed', 'Refund Initiated'],
+    //   'Return Rejected': [],
+    //   'Return Completed': ['Refund Initiated'],
+    //   'Refund Initiated': ['Refund Completed'],
+    //   'Refund Completed': []
+    // };
 
-    if (!validTransitions[order.currentStatus].includes(status)) {
-      return res.status(400).json({ 
-        success: false, 
-        message: `Invalid status transition from ${order.currentStatus} to ${status}` 
-      });
-    }
+    // if (!validTransitions[order.currentStatus].includes(status)) {
+    //   return res.status(400).json({ 
+    //     success: false, 
+    //     message: `Invalid status transition from ${order.currentStatus} to ${status}` 
+    //   });
+    // }
 
     // Update order
     order.currentStatus = status;
