@@ -17,4 +17,5 @@ userRouter.post('/forgot-password', forgotPassword)
 userRouter.get('/admin-dashboard', protect, getAdminDashboardStats)
 userRouter.get('/getuser', protect, getUsers)
 userRouter.get('/getUserNoPagination', protect, getUserNoPagination)
+userRouter.get('/me', getMe);
 export default userRouter

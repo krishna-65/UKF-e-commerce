@@ -51,9 +51,7 @@ const AdminDashboard = () => {
   const fetchDashboardData = async () => {
     setIsLoading(true);
     try {
-      const response = await apiConnector("GET", adminDashboard,null,{
-        Authorization : `Bearer ${token}`
-      });
+      const response = await apiConnector("GET", adminDashboard);
       console.log('API Response:', response);
 
       if (response?.data?.success) {
