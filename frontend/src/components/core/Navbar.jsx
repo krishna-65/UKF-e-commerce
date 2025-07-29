@@ -12,7 +12,7 @@ import mensfashion from "../../assets/images/mensfashion.webp";
 import perfumes from "../../assets/images/perfumes.webp";
 import accessories from "../../assets/images/accessories.jpg";
 import { setSearchData } from "../../slices/searchSlice";
-import { updateFilter } from "../../slices/filterSlice";
+import { clearFilters, updateFilter } from "../../slices/filterSlice";
 import CartSidebar from "../rest-comp/CartSidebar";
 import { IoIosLogOut } from "react-icons/io";
 import { resetCart } from "../../slices/cartSlice";
@@ -59,7 +59,7 @@ const Navbar = () => {
         "POST",
         `${bulkCart}${user._id}/bulk`,
         { items: cartItems }, // This will be { items: [] } if cart is empty,
-        {Authorization : `Bearer ${token}`}
+        { Authorization: `Bearer ${token}` }
       );
 
       console.log("save cart response", response);
@@ -80,9 +80,7 @@ const Navbar = () => {
   const logoutHandler = async () => {
     try {
       if (user.accountType === "user") {
-        
-          await saveCart(); // Wait for cart to be saved
-        
+        await saveCart(); // Wait for cart to be saved
       }
 
       // Clear local storage
@@ -137,11 +135,12 @@ const Navbar = () => {
               <NavLink
                 to="/products"
                 onClick={() => {
-                  // Clear existing gender filters first
-                  dispatch(
-                    updateFilter({ type: "gender", value: [], checked: false })
-                  );
-                  // Then set the new filter
+                  // Clear all filters first
+                  dispatch(clearFilters());
+
+                  dispatch(setSearchData(''));
+
+                  // Then apply the new gender filter
                   dispatch(
                     updateFilter({
                       type: "gender",
@@ -152,22 +151,30 @@ const Navbar = () => {
                 }}
                 className="h-[9vh] flex items-center justify-center w-[4vw] cursor-pointer"
               >
+                {/* You can add inner text or icon here */}
                 Men
               </NavLink>
+
               <div className="opacity-0 group-hover:opacity-100 w-[4vw] h-[1px] bg-[#FFD700]"></div>
             </li>
             <li className="group flex flex-col justify-between">
               <NavLink
                 to="/products"
-                onClick={() =>
+                 onClick={() => {
+                  // Clear all filters first
+                  dispatch(clearFilters());
+
+                  dispatch(setSearchData(''));
+
+                  // Then apply the new gender filter
                   dispatch(
                     updateFilter({
                       type: "gender",
                       value: "Women",
                       checked: true,
                     })
-                  )
-                }
+                  );
+                }}
                 className="h-[9vh] flex items-center justify-center w-[4vw] cursor-pointer"
               >
                 Women
@@ -178,15 +185,21 @@ const Navbar = () => {
             <li className="group flex flex-col justify-between relative">
               <NavLink
                 to="/products"
-                onClick={() =>
+                 onClick={() => {
+                  // Clear all filters first
+                  dispatch(clearFilters());
+
+                  dispatch(setSearchData(''));
+
+                  // Then apply the new gender filter
                   dispatch(
                     updateFilter({
                       type: "categories",
                       value: "Perfume",
                       checked: true,
                     })
-                  )
-                }
+                  );
+                }}
                 className="h-[9vh] flex items-center justify-center w-[4vw] cursor-pointer"
               >
                 Perfume
@@ -196,15 +209,29 @@ const Navbar = () => {
             <li className="group flex flex-col justify-between relative">
               <NavLink
                 to="/products"
-                onClick={() =>
+                 onClick={() => {
+                  // Clear all filters first
+                  dispatch(clearFilters());
+
+                  dispatch(setSearchData(''));
+
+                  // Then apply the new gender filter
                   dispatch(
                     updateFilter({
                       type: "categories",
                       value: "Wallet",
                       checked: true,
                     })
-                  )
-                }
+                  );
+
+                  dispatch(
+                    updateFilter({
+                      type: "categories",
+                      value: "Belt",
+                      checked: true,
+                    })
+                  );
+                }}
                 className="h-[9vh] flex items-center justify-center w-[6vw] cursor-pointer"
               >
                 Accessories
@@ -380,28 +407,28 @@ const Navbar = () => {
 
                 {showProfileMenu && (
                   <div className="absolute right-[-40px]  mt-2 w-40 bg-black border border-[#FFD700]/30 rounded-md shadow-lg text-[#FFD700] z-[92]">
-                    { role === 'user' && <button
-                      onClick={() => {
-                        navigate("/profile");
-                        setShowProfileMenu(false);
-                      }}
-                      className="w-full text-left px-4 py-2 flex justify-center hover:bg-[#FFD700] hover:text-black transition duration-200"
-                    >
-                      Profile
-                    </button>}
-                    {
-                        role === "admin" && (
-                          <button
-                      onClick={() => {
-                        navigate('/admindashboard')
-                        setShowProfileMenu(false);
-                      }}
-                      className="w-full text-left px-4 py-2 flex justify-center hover:bg-[#FFD700] hover:text-white transition duration-200"
-                    >
-                      Dashboard
-                    </button>
-                        )
-                    }
+                    {role === "user" && (
+                      <button
+                        onClick={() => {
+                          navigate("/profile");
+                          setShowProfileMenu(false);
+                        }}
+                        className="w-full text-left px-4 py-2 flex justify-center hover:bg-[#FFD700] hover:text-black transition duration-200"
+                      >
+                        Profile
+                      </button>
+                    )}
+                    {role === "admin" && (
+                      <button
+                        onClick={() => {
+                          navigate("/admindashboard");
+                          setShowProfileMenu(false);
+                        }}
+                        className="w-full text-left px-4 py-2 flex justify-center hover:bg-[#FFD700] hover:text-white transition duration-200"
+                      >
+                        Dashboard
+                      </button>
+                    )}
                     <button
                       onClick={() => {
                         logoutHandler();
