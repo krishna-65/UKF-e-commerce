@@ -16,6 +16,11 @@ import { useNavigate } from "react-router-dom";
 import { clearFilters, updateFilter } from "../slices/filterSlice";
 import AnimatedBackground from "../components/AnimatedBackground";
 
+import { reviewEndpoints } from "../services/api";
+import { apiConnector } from "../services/apiConnector";
+
+const {topReview} = reviewEndpoints;
+
 // Fixed working belt image and all other images
 const categoryImages = {
   shirt:
@@ -50,10 +55,25 @@ const Home = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [videoPlaying, setVideoPlaying] = useState(true);
 
+  const [reviews,setReviews] = useState([]);
+
+  const fetchTopReview = async ()=>{
+
+    const topreview = await apiConnector("GET",topReview);
+
+    console.log("top reviews are : ",topreview)
+
+    const dataReview = topreview?.data?.reviews;
+
+    setReviews(dataReview.slice(0,Math.min(3,dataReview.length)));
+
+  }
+
   // RUN useEffect ONLY ONCE ON MOUNT
   useEffect(() => {
     dispatch(clearFilters());
     setTimeout(() => setIsVisible(true), 100);
+    fetchTopReview();
   }, []); // Empty dependency array is critical
 
   const handleCategoryClick = (category) => {
@@ -565,29 +585,7 @@ const Home = () => {
 
           {/* Testimonials Section */}
           <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                name: "Sarah Johnson",
-                role: "Fashion Blogger",
-                text: "Absolutely love the quality and style! Every piece I've bought has exceeded my expectations.",
-                rating: 5,
-                avatar: "👩‍💼",
-              },
-              {
-                name: "Michael Chen",
-                role: "Style Enthusiast",
-                text: "The winter collection is incredible. Perfect fit and amazing comfort for everyday wear.",
-                rating: 5,
-                avatar: "👨‍💻",
-              },
-              {
-                name: "Emily Davis",
-                role: "Fashion Designer",
-                text: "Their attention to detail and sustainable practices make them my go-to fashion brand.",
-                rating: 5,
-                avatar: "👩‍🎨",
-              },
-            ].map((testimonial, index) => (
+            {reviews.map((testimonial, index) => (
               <div
                 key={index}
                 className="group bg-black/40 backdrop-blur-sm rounded-3xl p-6 lg:p-8 border border-yellow-400/20 hover:border-yellow-400/60 transition-all duration-500 hover:scale-105 hover:-translate-y-2"
@@ -595,13 +593,13 @@ const Home = () => {
               >
                 <div className="flex items-center mb-4">
                   <div className="text-4xl mr-4 group-hover:scale-110 transition-transform duration-300">
-                    {testimonial.avatar}
+                    <img src={testimonial.user.image} className="h-[40px] w-[40px] rounded-full"  alt="😊" />
                   </div>
                   <div>
                     <h4 className="text-yellow-400 font-bold text-lg">
-                      {testimonial.name}
+                      {testimonial.user.name}
                     </h4>
-                    <p className="text-gray-300 text-sm">{testimonial.role}</p>
+                    <p className="text-gray-300 text-sm">Customer</p>
                   </div>
                 </div>
 
@@ -615,7 +613,7 @@ const Home = () => {
                 </div>
 
                 <p className="text-white text-lg leading-relaxed group-hover:text-yellow-100 transition-colors duration-300">
-                  "{testimonial.text}"
+                  "{testimonial.comment}"
                 </p>
               </div>
             ))}
