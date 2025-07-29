@@ -13,8 +13,8 @@ import { protect, restrictTo } from "../middlewares/authUser.js";
 const router = express.Router();
 
 router.post("/", protect, restrictTo('admin'), createCategory);
-router.get("/", protect, getAllCategories);
-router.get("/:id", protect, getCategoryById);
+router.get("/", getAllCategories);
+router.get("/:id", getCategoryById);
 router.put("/:id", protect, restrictTo('admin'), updateCategory);
 router.delete("/:id", protect, restrictTo('admin'), deleteCategory);
 router.patch('/status/:categoryId', protect, restrictTo('admin'), activeInactive);

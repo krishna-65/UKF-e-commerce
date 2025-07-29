@@ -20,13 +20,13 @@ import { protect, restrictTo } from '../middlewares/authUser.js';
 const router = express.Router();
 
 // Public routes
-router.get('/', protect, restrictTo('admin'), getAllProducts);
-router.get('/search', protect, searchProducts);
-router.get('/featured', protect, getFeaturedProducts);
-router.get('/new-arrivals', protect, getNewArrivals);
-router.get('/on-sale', protect, getProductsOnSale);
-router.get('/stats', protect, getProductStats);
-router.get('/:id', protect, getProductById);
+router.get('/',  getAllProducts);
+router.get('/search', searchProducts);
+router.get('/featured',  getFeaturedProducts);
+router.get('/new-arrivals', getNewArrivals);
+router.get('/on-sale',  getProductsOnSale);
+router.get('/stats',  getProductStats);
+router.get('/:id',  getProductById);
 
 // Protected routes (require authentication)
 router.post('/:id/reviews', protect, addProductReview);
