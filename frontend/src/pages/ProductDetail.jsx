@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../slices/cartSlice";
+import { apiConnector } from "../services/apiConnector";
+import { orderEndpoints, reviewEndpoints } from "../services/api";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 export default function ProductDetail() {
   const product = useSelector((state) => state.product.productData);
   const images = product?.images || [];
+  const user = useSelector((state) => state.auth.userData);
+  const token = useSelector((state) => state.auth.token);
 
   const navigate = useNavigate();
   const userRole = useSelector((state) => state.auth.role);
@@ -17,6 +21,20 @@ export default function ProductDetail() {
   const [isVisible, setIsVisible] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [animateButtons, setAnimateButtons] = useState(false);
+
+  // Review related states
+  const [reviews, setReviews] = useState([]);
+  const [canReview, setCanReview] = useState(false);
+  const [eligibleOrders, setEligibleOrders] = useState([]);
+  const [existingReview, setExistingReview] = useState(null);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewForm, setReviewForm] = useState({
+    rating: 5,
+    comment: "",
+    selectedOrderId: ""
+  });
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
 
   const buyNowHandler = () => {
     if (userRole !== "user") {
@@ -51,8 +69,155 @@ export default function ProductDetail() {
   const handleImageSelect = (imageUrl) => {
     setImageLoading(true);
     setSelectedImage(imageUrl);
-    // Simulate image loading
     setTimeout(() => setImageLoading(false), 200);
+  };
+
+  // Fetch user's orders to check eligibility for review
+  const checkReviewEligibility = async () => {
+    if (!user || !token || !product?._id) return;
+
+    try {
+      const ordersRes = await apiConnector("GET", orderEndpoints.userOrdersWithoutPagination, null, {
+        Authorization: `Bearer ${token}`
+      });
+
+      console.log("order response : ",ordersRes)
+
+      if (ordersRes.data.success) {
+        const deliveredOrders = ordersRes.data.orders.filter(order => 
+          order.currentStatus === "Delivered" && 
+          order.items.some(item => item.product?.id === product._id)
+        );
+
+        setEligibleOrders(deliveredOrders);
+        setCanReview(deliveredOrders.length > 0);
+
+        // Check if user already has a review for this product
+        if (deliveredOrders.length > 0) {
+          const reviewRes = await apiConnector("GET", 
+            `${reviewEndpoints.getUserReviewForProduct}${product._id}/user`, 
+            null, 
+            { Authorization: `Bearer ${token}` }
+          );
+          
+          if (reviewRes.data && !reviewRes.data.message) {
+            setExistingReview(reviewRes.data);
+            setReviewForm({
+              rating: reviewRes.data.rating,
+              comment: reviewRes.data.comment,
+              selectedOrderId: reviewRes.data.order
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.log("Error checking review eligibility:", error);
+    }
+  };
+
+  // Fetch product reviews
+  const fetchProductReviews = async () => {
+    if (!product?._id) return;
+
+    try {
+      setReviewsLoading(true);
+      const reviewsRes = await apiConnector("GET", 
+        `${reviewEndpoints.getReviewByProductId}${product._id}`
+      );
+
+      console.log("this is the review response",reviewsRes);
+
+      if (reviewsRes.data) {
+        setReviews(reviewsRes.data.reviews || []);
+      }
+    } catch (error) {
+      console.log("Error fetching reviews:", error);
+      setReviews([]);
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
+  // Submit or update review
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!reviewForm.comment.trim()) {
+      toast.error("Please add a comment");
+      return;
+    }
+
+    if (!reviewForm.selectedOrderId && !existingReview) {
+      toast.error("Please select an order");
+      return;
+    }
+
+    setIsSubmittingReview(true);
+
+    try {
+      let response;
+      
+      if (existingReview) {
+        // Update existing review
+        response = await apiConnector("PUT", 
+          `${reviewEndpoints.updateReview}${existingReview._id}`, 
+          {
+            rating: reviewForm.rating,
+            comment: reviewForm.comment
+          },
+          { Authorization: `Bearer ${token}` }
+        );
+      } else {
+        // Create new review
+        response = await apiConnector("POST", 
+          `${reviewEndpoints.createReview}${product._id}/${reviewForm.selectedOrderId}`, 
+          {
+            rating: reviewForm.rating,
+            comment: reviewForm.comment
+          },
+          { Authorization: `Bearer ${token}` }
+        );
+      }
+
+      if (response.data.message !== "You have already reviewed this product for this order") {
+        toast.success(existingReview ? "Review updated!" : "Review submitted!");
+        setShowReviewModal(false);
+        
+        // Refresh reviews and check eligibility
+        await fetchProductReviews();
+        await checkReviewEligibility();
+      } else {
+        toast.error("You have already reviewed this product for this order");
+      }
+    } catch (error) {
+      console.error("Review submission error:", error);
+      toast.error(error.response?.data?.message || "Failed to submit review");
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
+
+  // Render star rating
+  const renderStars = (rating, interactive = false, onRatingChange = null) => {
+    return (
+      <div className="flex gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <button
+            key={star}
+            type="button"
+            onClick={() => interactive && onRatingChange && onRatingChange(star)}
+            className={`text-xl ${
+              star <= rating 
+                ? "text-yellow-400" 
+                : "text-gray-600"
+            } ${interactive ? "hover:text-yellow-300 cursor-pointer" : "cursor-default"} transition-colors duration-200`}
+            disabled={!interactive}
+          >
+            ★
+          </button>
+        ))}
+      </div>
+    );
   };
 
   useEffect(() => {
@@ -61,10 +226,16 @@ export default function ProductDetail() {
       setImageLoading(false);
     }
     
-    // Trigger animations
     setTimeout(() => setIsVisible(true), 100);
     setTimeout(() => setAnimateButtons(true), 800);
   }, [images]);
+
+  useEffect(() => {
+    if (product?._id) {
+      fetchProductReviews();
+      checkReviewEligibility();
+    }
+  }, [product?._id, user, token]);
 
   const detailItems = [
     { label: "Brand", value: product?.brand?.name || "N/A" },
@@ -80,6 +251,10 @@ export default function ProductDetail() {
     { icon: "🏦", text: "Bank Offer: ₹2,000 off on credit card payments" },
     { icon: "🤝", text: "Combo Offer: Buy 2 get 5% off, Buy 3 get 7% off" }
   ];
+
+  const averageRating = reviews.length > 0 
+    ? (reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length).toFixed(1)
+    : "0.0";
 
   return (
     <div className="bg-black text-[#ecba49] min-h-screen p-6 font-sans overflow-hidden">
@@ -100,10 +275,7 @@ export default function ProductDetail() {
               className={`w-full h-full object-cover rounded-xl transition-all duration-500 group-hover:scale-110 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
               onLoad={() => setImageLoading(false)}
             />
-            {/* Image Overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            
-            {/* Zoom Indicator */}
             <div className="absolute top-4 right-4 bg-black/50 text-white px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               Click to zoom
             </div>
@@ -138,11 +310,14 @@ export default function ProductDetail() {
 
           {/* Rating and Badge */}
           <div className={`flex items-center gap-3 text-sm transition-all duration-600 delay-300 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
-            <span className="font-semibold text-[#ecba49] hover:scale-110 transition-transform duration-300">
-              ★ {product?.ratings?.average?.toFixed(1) || "0.0"}
-            </span>
+            <div className="flex items-center gap-2">
+              {renderStars(Math.round(parseFloat(averageRating)))}
+              <span className="font-semibold text-[#ecba49]">
+                {averageRating}
+              </span>
+            </div>
             <span className="text-gray-400 hover:text-gray-300 transition-colors duration-300">
-              ({product?.reviews?.length || 0} reviews)
+              ({reviews.length} reviews)
             </span>
             <span className="bg-yellow-600 text-black px-2 py-1 rounded text-xs font-bold animate-pulse hover:animate-none hover:scale-105 transition-transform duration-300">
               UKF's Pick
@@ -229,7 +404,6 @@ export default function ProductDetail() {
                 isAddingToCart ? 'animate-pulse' : ''
               }`}
             >
-              {/* Button Ripple Effect */}
               <div className="absolute inset-0 bg-white opacity-0 hover:opacity-20 transition-opacity duration-300 rounded-lg"></div>
               <span className="relative z-10">
                 {isAddingToCart ? (
@@ -247,13 +421,137 @@ export default function ProductDetail() {
               onClick={buyNowHandler}
               className="relative border-2 border-[#ecba49] px-6 py-3 rounded-lg font-semibold transition-all duration-300 hover:bg-[#ecba49] hover:text-black hover:scale-105 hover:shadow-lg active:scale-95 overflow-hidden group"
             >
-              {/* Button Background Animation */}
               <div className="absolute inset-0 bg-[#ecba49] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
               <span className="relative z-10">Buy Now</span>
             </button>
+
+            {/* Review Button */}
+            {userRole === "user" && canReview && (
+              <button
+                onClick={() => setShowReviewModal(true)}
+                className="relative border-2 border-green-500 text-green-500 px-6 py-3 rounded-lg font-semibold transition-all duration-300 hover:bg-green-500 hover:text-black hover:scale-105 hover:shadow-lg active:scale-95 overflow-hidden group"
+              >
+                <div className="absolute inset-0 bg-green-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+                <span className="relative z-10">
+                  {existingReview ? "Update Review" : "Write Review"}
+                </span>
+              </button>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Reviews Section */}
+      <div className="max-w-7xl mx-auto mt-12 space-y-6">
+        <h2 className="text-2xl font-bold text-[#ecba49]">Customer Reviews</h2>
+        
+        {reviewsLoading ? (
+          <div className="flex justify-center py-8">
+            <div className="w-8 h-8 border-4 border-[#ecba49] border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : reviews.length > 0 ? (
+          <div className="space-y-4">
+            {reviews.map((review) => (
+              <div key={review._id} className="bg-[#1a1a1a] p-6 rounded-lg border border-[#ecba49]/20">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-[#ecba49] rounded-full flex items-center justify-center text-black font-bold">
+                    {review.user?.name?.charAt(0).toUpperCase() || "U"}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h4 className="font-semibold text-[#ecba49]">
+                        {review.user?.name || "Anonymous User"}
+                      </h4>
+                      {renderStars(review.rating)}
+                      <span className="text-sm text-gray-400">
+                        {new Date(review.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <p className="text-gray-300 leading-relaxed">{review.comment}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-400">
+            <p>No reviews yet. Be the first to review this product!</p>
+          </div>
+        )}
+      </div>
+
+      {/* Review Modal */}
+      {showReviewModal && (
+        <div className="fixed inset-0  bg-opacity-80 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+          <div className="bg-[#1a1a1a] rounded-lg w-full max-w-md p-6 border border-[#ecba49]/30">
+            <h3 className="text-xl font-bold text-[#ecba49] mb-4">
+              {existingReview ? "Update Your Review" : "Write a Review"}
+            </h3>
+            
+            <form onSubmit={handleReviewSubmit} className="space-y-4">
+              {/* Rating */}
+              <div>
+                <label className="block text-sm font-semibold mb-2">Rating</label>
+                {renderStars(reviewForm.rating, true, (rating) => 
+                  setReviewForm(prev => ({ ...prev, rating }))
+                )}
+              </div>
+
+              {/* Order Selection (only for new reviews) */}
+              {!existingReview && eligibleOrders.length > 1 && (
+                <div>
+                  <label className="block text-sm font-semibold mb-2">Select Order</label>
+                  <select
+                    value={reviewForm.selectedOrderId}
+                    onChange={(e) => setReviewForm(prev => ({ ...prev, selectedOrderId: e.target.value }))}
+                    className="w-full p-3 bg-black border border-[#ecba49]/30 rounded text-[#ecba49] focus:border-[#ecba49] focus:outline-none"
+                    required
+                  >
+                    <option value="">Choose an order</option>
+                    {eligibleOrders.map((order) => (
+                      <option key={order._id} value={order._id}>
+                        Order #{order._id.slice(-6)} - {new Date(order.createdAt).toLocaleDateString()}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Comment */}
+              <div>
+                <label className="block text-sm font-semibold mb-2">Review</label>
+                <textarea
+                  value={reviewForm.comment}
+                  onChange={(e) => setReviewForm(prev => ({ ...prev, comment: e.target.value }))}
+                  className="w-full p-3 bg-black border border-[#ecba49]/30 rounded text-[#ecba49] focus:border-[#ecba49] focus:outline-none resize-none"
+                  rows="4"
+                  placeholder="Share your experience with this product..."
+                  required
+                />
+              </div>
+
+              {/* Buttons */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowReviewModal(false)}
+                  className="flex-1 px-4 py-2 border border-gray-600 rounded hover:bg-gray-800 transition-colors duration-300"
+                  disabled={isSubmittingReview}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingReview}
+                  className="flex-1 px-4 py-2 bg-[#ecba49] text-black rounded font-semibold hover:brightness-110 transition-all duration-300 disabled:opacity-50"
+                >
+                  {isSubmittingReview ? "Submitting..." : (existingReview ? "Update Review" : "Submit Review")}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Custom Animations */}
       <style jsx>{`

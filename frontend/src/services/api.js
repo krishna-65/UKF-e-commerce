@@ -81,7 +81,17 @@ export const orderEndpoints = {
   getAllOrders : BASE_URL + "/api/order/",
   updateOrderStatus : BASE_URL + "/api/order/",
   addTrackingInfo : BASE_URL + "/api/order/",
-  allOrdersWithoutPagination : BASE_URL + "/api/order/orders/allorders"
+  allOrdersWithoutPagination : BASE_URL + "/api/order/orders/allorders",
+  userOrdersWithoutPagination : BASE_URL + "/api/order/orders/user"
+}
+
+export const reviewEndpoints = {
+  createReview : BASE_URL + "/api/review/", // token pass
+  getUserReviewForProduct : BASE_URL + "/api/review/product/", //token pass
+  updateReview : BASE_URL + "/api/review/", // token pass
+  topReview : BASE_URL + "/api/review/top",
+  getReviewByProductId : BASE_URL + "/api/review/product/"
+
 }
 
 //payment endpoints
@@ -90,3 +100,4 @@ export const paymentEndpoints = {
   createPayment : BASE_URL + "/api/payment/create-order",
   verifyPayment : BASE_URL + "/api/payment/verify-payment"
 }
+
