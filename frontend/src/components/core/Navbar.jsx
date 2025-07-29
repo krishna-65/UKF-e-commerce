@@ -58,7 +58,8 @@ const Navbar = () => {
       const response = await apiConnector(
         "POST",
         `${bulkCart}${user._id}/bulk`,
-        { items: cartItems } // This will be { items: [] } if cart is empty
+        { items: cartItems }, // This will be { items: [] } if cart is empty,
+        {Authorization : `Bearer ${token}`}
       );
 
       console.log("save cart response", response);

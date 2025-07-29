@@ -14,8 +14,9 @@ const CreateOrder = () => {
   const userId = useSelector(state => state.auth.userData?._id);
   const product = useSelector(state => state.product.productData);
   const user = useSelector(state => state.auth.userData);
-  const cartItems = useSelector(state => state.cart.cart || []); // Updated to use cart array
+  const cartItems = useSelector(state => state.cart.cart || []);
   const cartTotal = useSelector(state => state.cart.total || 0);
+  const token = useSelector(state => state.auth.token);
 
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
@@ -24,6 +25,7 @@ const CreateOrder = () => {
   const [notes, setNotes] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("COD");
   const [isFromCart, setIsFromCart] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const [formData, setFormData] = useState({
     recipientName: "",
@@ -77,7 +79,9 @@ const CreateOrder = () => {
 
   const fetchAddresses = async () => {
     try {
-      const res = await apiConnector("GET", `${addressEndpoints.getUserAddress}${userId}`);
+      const res = await apiConnector("GET", `${addressEndpoints.getUserAddress}${userId}`, null, {
+        Authorization: `Bearer ${token}`
+      });
       if (res.data.success) {
         setAddresses(res.data.addresses);
         const defaultAddr = res.data.addresses.find(a => a.isDefault);
@@ -90,31 +94,44 @@ const CreateOrder = () => {
   };
 
   const handleAddAddress = async () => {
+    // Validation
+    if (!formData.recipientName || !formData.street || !formData.city || !formData.state || !formData.postalCode || !formData.phone) {
+      toast.error("Please fill all required fields");
+      return;
+    }
+
     try {
       setAddingAddress(true);
-      await apiConnector("POST", addressEndpoints.createAddress, {
+      const res = await apiConnector("POST", addressEndpoints.createAddress, {
         userId,
         ...formData
+      }, {
+        Authorization: `Bearer ${token}`
       });
-      toast.success("Address added");
-      setShowModal(false);
-      setFormData({
-        recipientName: "",
-        addressType: "Home",
-        street: "",
-        city: "",
-        state: "",
-        postalCode: "",
-        country: "India",
-        phone: "",
-        landmark: "",
-        instructions: "",
-        isDefault: false
-      });
-      fetchAddresses();
+      
+      if (res.data.success) {
+        toast.success("Address added successfully");
+        setShowModal(false);
+        setFormData({
+          recipientName: "",
+          addressType: "Home",
+          street: "",
+          city: "",
+          state: "",
+          postalCode: "",
+          country: "India",
+          phone: "",
+          landmark: "",
+          instructions: "",
+          isDefault: false
+        });
+        fetchAddresses();
+      } else {
+        toast.error(res.data.message || "Failed to add address");
+      }
     } catch (error) {
       console.error("Failed to add address:", error);
-      toast.error("Failed to add address");
+      toast.error(error.response?.data?.message || "Failed to add address");
     } finally {
       setAddingAddress(false);
     }
@@ -123,16 +140,14 @@ const CreateOrder = () => {
   // Calculate order totals
   const calculateOrderTotals = () => {
     if (isFromCart && cartItems.length > 0) {
-      // For cart orders, use cart total and calculate additional fees
       const subtotal = cartTotal;
-      const shippingFee = 50; // You might want to calculate this based on cart items
+      const shippingFee = 50;
       const tax = Math.round(subtotal * 0.05);
       const discount = 0;
       const total = subtotal + shippingFee + tax;
       
       return { subtotal, shippingFee, tax, discount, total };
     } else if (product) {
-      // For single product orders
       const subtotal = product.price;
       const shippingFee = 50;
       const tax = Math.round(subtotal * 0.05);
@@ -145,162 +160,193 @@ const CreateOrder = () => {
     return { subtotal: 0, shippingFee: 0, tax: 0, discount: 0, total: 0 };
   };
 
-  // Prepare order items
+  // Prepare order items - FIXED: Match backend requirements
   const prepareOrderItems = () => {
     if (isFromCart && cartItems.length > 0) {
-      // For cart orders, map all cart items
-      
-  return cartItems.map(item => ({
-    product: item._id,
-    quantity: item.quantity,
-    price: item.price,
-    name: item.name,
-    image: item.image,
-    razorpayOrderId: razorpay_order_id, // ✅ Inject here
-  }));
-} else if (product) {
-      // For single product orders
+      return cartItems.map(item => ({
+        productId: item._id,
+        quantity: item.quantity || 1,
+        price: item.price,
+        name: item.name,
+        image: item.image || item.images?.[0]?.url
+      }));
+    } else if (product) {
       return [{
         productId: product._id,
         quantity: 1,
         name: product.name,
-        price: product.price
+        price: product.price,
+        image: product.images?.[0]?.url
       }];
     }
     
     return [];
   };
 
- const handlePlaceOrder = async () => {
-  if (!selectedAddress) {
-    toast.error("Please select a shipping address");
-    return;
-  }
-
-  const orderItems = prepareOrderItems();
-  if (orderItems.length === 0) {
-    toast.error("No items to order");
-    return;
-  }
-
-  const { subtotal, shippingFee, tax, discount, total } = calculateOrderTotals();
-
-  const baseOrderPayload = {
-    userId,
-    items: orderItems,
-    shippingAddress: selectedAddress,
-    billingAddress: selectedAddress,
-    paymentMethod,
-    subtotal,
-    shippingFee,
-    tax,
-    discount,
-    total,
-    notes,
-    isFromCart,
-  };
-
-  if (paymentMethod === "COD") {
-    try {
-      const res = await apiConnector("POST", orderEndpoints.createOrder, {
-        ...baseOrderPayload,
-        currentStatus: "Order Placed",
-        paymentStatus: "Pending",
-      });
-
-      if (res.data.success) {
-        handleOrderSuccess();
-      } else {
-        toast.error(res.data.message || "Order placement failed");
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Order placement failed");
+  const handlePlaceOrder = async () => {
+    if (!selectedAddress) {
+      toast.error("Please select a shipping address");
+      return;
     }
-  } else {
-    try {
-      const rpOrderRes = await apiConnector("POST", paymentEndpoints.createPayment, {
-        amount: total,
-        receipt: `order_${Date.now()}`,
-      });
 
-      if (!rpOrderRes.data.success) throw new Error("Payment gateway error");
+    const orderItems = prepareOrderItems();
+    if (orderItems.length === 0) {
+      toast.error("No items to order");
+      return;
+    }
 
-      const { order } = rpOrderRes.data;
+    if (isProcessing) {
+      return; // Prevent multiple submissions
+    }
 
-      const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY,
-        amount: order.amount,
-        currency: order.currency,
-        name: "UKF E-Commerce",
-        description: isFromCart ? `Payment for ${orderItems.length} items` : "Order payment",
-        order_id: order.id,
-        handler: async (response) => {
-          const { razorpay_payment_id, razorpay_order_id } = response;
+    setIsProcessing(true);
+    const { subtotal, shippingFee, tax, discount, total } = calculateOrderTotals();
 
-          try {
-            const verifyRes = await apiConnector("POST", paymentEndpoints.verifyPayment, response);
+    const baseOrderPayload = {
+      userId,
+      items: orderItems,
+      shippingAddress: selectedAddress,
+      billingAddress: selectedAddress,
+      paymentMethod,
+      subtotal,
+      shippingFee,
+      tax,
+      discount,
+      total,
+      notes,
+      isFromCart,
+    };
 
-            const orderPayload = {
-              ...baseOrderPayload,
-              paymentId: razorpay_payment_id,
-              razorpayOrderId: razorpay_order_id,
-              paymentStatus: verifyRes.data.success ? "Completed" : "Failed",
-              currentStatus: verifyRes.data.success ? "Payment Received" : "Payment Pending",
-            };
+    if (paymentMethod === "COD") {
+      try {
+        const res = await apiConnector("POST", orderEndpoints.createOrder, {
+          ...baseOrderPayload,
+          currentStatus: "Order Placed",
+          paymentStatus: "Pending",
+        }, {
+          Authorization: `Bearer ${token}`
+        });
 
-            const finalRes = await apiConnector("POST", orderEndpoints.createOrder, orderPayload);
+        if (res.data.success) {
+          handleOrderSuccess();
+        } else {
+          toast.error(res.data.message || "Order placement failed");
+        }
+      } catch (err) {
+        console.error("COD order error:", err);
+        toast.error(err.response?.data?.message || "Order placement failed");
+      }
+    } else {
+      try {
+        const rpOrderRes = await apiConnector("POST", paymentEndpoints.createPayment, {
+          amount: total,
+          receipt: `order_${Date.now()}`,
+        }, {
+          Authorization: `Bearer ${token}`
+        });
 
-            if (finalRes.data.success) {
-              handleOrderSuccess();
-            } else {
-              toast.error(finalRes.data.message || "Order creation failed");
-            }
-          } catch (error) {
-            console.error("Verification error:", error);
+        if (!rpOrderRes.data.success) {
+          throw new Error(rpOrderRes.data.message || "Payment gateway error");
+        }
 
-            const fallbackPayload = {
-              ...baseOrderPayload,
-              paymentId: razorpay_payment_id,
-              razorpayOrderId: razorpay_order_id,
-              paymentStatus: "Failed",
-              currentStatus: "Payment Pending",
-            };
+        const { order } = rpOrderRes.data;
+
+        const options = {
+          key: import.meta.env.VITE_RAZORPAY_KEY,
+          amount: order.amount,
+          currency: order.currency,
+          name: "UKF E-Commerce",
+          description: isFromCart ? `Payment for ${orderItems.length} items` : "Order payment",
+          order_id: order.id,
+          handler: async (response) => {
+            const { razorpay_payment_id, razorpay_order_id } = response;
 
             try {
-              const failRes = await apiConnector("POST", orderEndpoints.createOrder, fallbackPayload);
+              const verifyRes = await apiConnector("POST", paymentEndpoints.verifyPayment, response, {
+                Authorization: `Bearer ${token}`
+              });
 
-              if (failRes.data.success) {
-                toast.error("Payment verification failed. Order placed with pending payment.");
+              const orderPayload = {
+                ...baseOrderPayload,
+                paymentId: razorpay_payment_id,
+                razorpayOrderId: razorpay_order_id,
+                paymentStatus: verifyRes.data.success ? "Completed" : "Failed",
+                currentStatus: verifyRes.data.success ? "Payment Received" : "Payment Pending",
+              };
+
+              const finalRes = await apiConnector("POST", orderEndpoints.createOrder, orderPayload, {
+                Authorization: `Bearer ${token}`
+              });
+
+              if (finalRes.data.success) {
+                handleOrderSuccess();
               } else {
-                toast.error(failRes.data.message || "Fallback order creation failed");
+                toast.error(finalRes.data.message || "Order creation failed");
               }
-            } catch (fallbackErr) {
-              console.error("Fallback order error:", fallbackErr);
-              toast.error("Order creation failed after payment verification error");
+            } catch (error) {
+              console.error("Verification error:", error);
+
+              const fallbackPayload = {
+                ...baseOrderPayload,
+                paymentId: razorpay_payment_id,
+                razorpayOrderId: razorpay_order_id,
+                paymentStatus: "Failed",
+                currentStatus: "Payment Pending",
+              };
+
+              try {
+                const failRes = await apiConnector("POST", orderEndpoints.createOrder, fallbackPayload, {
+                  Authorization: `Bearer ${token}`
+                });
+
+                if (failRes.data.success) {
+                  toast.error("Payment verification failed. Order placed with pending payment.");
+                  navigate("/Home");
+                } else {
+                  toast.error(failRes.data.message || "Fallback order creation failed");
+                }
+              } catch (fallbackErr) {
+                console.error("Fallback order error:", fallbackErr);
+                toast.error("Order creation failed after payment verification error");
+              }
             }
-          }
-        },
-        prefill: {
-          name: user.name,
-          email: user.email,
-          contact: user.phone,
-        },
-        theme: {
-          color: "#FFD700",
-        },
-      };
+            setIsProcessing(false);
+          },
+          modal: {
+            ondismiss: function() {
+              setIsProcessing(false);
+              toast.error("Payment cancelled");
+            }
+          },
+          prefill: {
+            name: user?.name || "",
+            email: user?.email || "",
+            contact: user?.phone || "",
+          },
+          theme: {
+            color: "#FFD700",
+          },
+        };
 
-      const rzp = new window.Razorpay(options);
-      rzp.open();
-    } catch (error) {
-      console.error("Razorpay error:", error);
-      toast.error(error.message || "Payment initiation failed");
+        if (!window.Razorpay) {
+          toast.error("Razorpay SDK not loaded. Please refresh the page.");
+          setIsProcessing(false);
+          return;
+        }
+
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+      } catch (error) {
+        console.error("Razorpay error:", error);
+        toast.error(error.message || "Payment initiation failed");
+        setIsProcessing(false);
+      }
     }
-  }
-};
-
-
-
+    
+    if (paymentMethod === "COD") {
+      setIsProcessing(false);
+    }
+  };
 
   // Check if current order is from cart
   useEffect(() => {
@@ -369,6 +415,9 @@ const CreateOrder = () => {
                 src={item?.images?.[0]?.url}
                 alt="Product"
                 className="w-16 h-16 object-cover rounded"
+                onError={(e) => {
+                  e.target.src = "/placeholder-image.png"; // Add fallback image
+                }}
               />
               <div className="flex-1">
                 <h3 className="font-semibold">{item?.name}</h3>
@@ -450,6 +499,7 @@ const CreateOrder = () => {
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             className="w-full p-3 rounded border bg-[#111] text-[#FFD700]"
+            rows="3"
           />
         </div>
 
@@ -477,19 +527,19 @@ const CreateOrder = () => {
         <div className="mt-6">
           <motion.button
             onClick={handlePlaceOrder}
-            disabled={!selectedAddress || itemsToDisplay.length === 0}
-            className="w-full bg-[#FFD700] text-black font-bold py-3 rounded hover:brightness-110 disabled:opacity-50"
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.95 }}
+            disabled={!selectedAddress || itemsToDisplay.length === 0 || isProcessing}
+            className="w-full bg-[#FFD700] text-black font-bold py-3 rounded hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
+            whileHover={{ scale: !isProcessing ? 1.03 : 1 }}
+            whileTap={{ scale: !isProcessing ? 0.95 : 1 }}
           >
-            Place Order - ₹{total}
+            {isProcessing ? "Processing..." : `Place Order - ₹${total}`}
           </motion.button>
         </div>
       </motion.div>
 
-      {/* Modal for adding address - keeping the same as before */}
+      {/* Modal for adding address */}
       {showModal && (
-        <div className="fixed inset-0 bg-opacity-60 backdrop-blur-sm flex justify-center items-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex justify-center items-center z-50">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -497,19 +547,84 @@ const CreateOrder = () => {
             className="hidescroll mt-28 bg-white text-black p-6 rounded-lg w-[90%] max-w-lg overflow-y-auto max-h-[70vh]"
           >
             <h2 className="text-xl font-bold mb-4">Add New Address</h2>
-            {[
-              "recipientName", "street", "city", "state",
-              "postalCode", "country", "phone", "landmark", "instructions"
-            ].map((key) => (
-              <input
-                key={key}
-                type="text"
-                placeholder={key.charAt(0).toUpperCase() + key.slice(1)}
-                value={formData[key]}
-                onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
-                className="w-full p-2 mb-3 border rounded"
-              />
-            ))}
+            
+            <input
+              type="text"
+              placeholder="Recipient Name *"
+              value={formData.recipientName}
+              onChange={(e) => setFormData({ ...formData, recipientName: e.target.value })}
+              className="w-full p-2 mb-3 border rounded"
+              required
+            />
+            
+            <input
+              type="text"
+              placeholder="Street Address *"
+              value={formData.street}
+              onChange={(e) => setFormData({ ...formData, street: e.target.value })}
+              className="w-full p-2 mb-3 border rounded"
+              required
+            />
+            
+            <input
+              type="text"
+              placeholder="City *"
+              value={formData.city}
+              onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+              className="w-full p-2 mb-3 border rounded"
+              required
+            />
+            
+            <input
+              type="text"
+              placeholder="State *"
+              value={formData.state}
+              onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+              className="w-full p-2 mb-3 border rounded"
+              required
+            />
+            
+            <input
+              type="text"
+              placeholder="Postal Code *"
+              value={formData.postalCode}
+              onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
+              className="w-full p-2 mb-3 border rounded"
+              required
+            />
+            
+            <input
+              type="text"
+              placeholder="Country"
+              value={formData.country}
+              onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+              className="w-full p-2 mb-3 border rounded"
+            />
+            
+            <input
+              type="text"
+              placeholder="Phone Number *"
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              className="w-full p-2 mb-3 border rounded"
+              required
+            />
+            
+            <input
+              type="text"
+              placeholder="Landmark"
+              value={formData.landmark}
+              onChange={(e) => setFormData({ ...formData, landmark: e.target.value })}
+              className="w-full p-2 mb-3 border rounded"
+            />
+            
+            <input
+              type="text"
+              placeholder="Delivery Instructions"
+              value={formData.instructions}
+              onChange={(e) => setFormData({ ...formData, instructions: e.target.value })}
+              className="w-full p-2 mb-3 border rounded"
+            />
 
             <select
               value={formData.addressType}
@@ -533,15 +648,17 @@ const CreateOrder = () => {
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setShowModal(false)}
-                className="px-4 py-2 border rounded"
+                className="px-4 py-2 border rounded hover:bg-gray-100"
+                disabled={addingAddress}
               >
                 Cancel
               </button>
               <button
                 onClick={handleAddAddress}
-                className="px-4 py-2 bg-[#FFD700] text-black rounded font-semibold"
+                className="px-4 py-2 bg-[#FFD700] text-black rounded font-semibold hover:brightness-110 disabled:opacity-50"
+                disabled={addingAddress}
               >
-                {addingAddress ? "Saving..." : "Save"}
+                {addingAddress ? "Saving..." : "Save Address"}
               </button>
             </div>
           </motion.div>
