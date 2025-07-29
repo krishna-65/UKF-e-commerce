@@ -23,10 +23,14 @@ const ManageOrders = () => {
   const [newStatus, setNewStatus] = useState("");
   const [newPaymentStatus, setNewPaymentStatus] = useState("");
 
+  const token = useSelector(state => state.auth.token)
+
   const fetchOrders = async () => {
     try {
       dispatch(setLoading(true));
-      const res = await apiConnector("GET", `${getAllOrders}?page=${page}&limit=10`);
+      const res = await apiConnector("GET", `${getAllOrders}?page=${page}&limit=10`,null,{
+        Authorization : `Bearer ${token}`
+      });
       if (res.data.success) {
         setOrders(res.data.orders);
         setTotalPages(res.data.pages);
@@ -50,6 +54,8 @@ const ManageOrders = () => {
       await apiConnector("PUT", `${updateOrderStatus}${selectedOrder._id}/status`, {
         status: newStatus,
         note: "Updated via admin panel",
+      },{
+        Authorization : `Bearer ${token}`
       });
       toast.success("Order status updated!");
       fetchOrders();
@@ -65,6 +71,8 @@ const ManageOrders = () => {
     try {
       await apiConnector("PUT", `${addTrackingInfo}${selectedOrder._id}/tracking`, {
         paymentStatus: newPaymentStatus,
+      },{
+        Authorization : `Bearer ${token}`
       });
       toast.success("Payment status updated!");
       fetchOrders();

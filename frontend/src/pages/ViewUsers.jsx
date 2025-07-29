@@ -3,6 +3,7 @@ import { apiConnector } from '../services/apiConnector';
 import { endpoints } from '../services/api';
 import { toast } from 'react-hot-toast';
 import { Eye, X } from 'lucide-react';
+import { useSelector } from 'react-redux';
 
 const ViewUsers = () => {
   const [users, setUsers] = useState([]);
@@ -11,10 +12,14 @@ const ViewUsers = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  const token = useSelector(state => state.auth.token)
+
   const fetchUsers = async (page = 1) => {
     try {
       setLoading(true);
-      const res = await apiConnector("GET", `${endpoints.getUser}?page=${page}`);
+      const res = await apiConnector("GET", `${endpoints.getUser}?page=${page}`,null,{
+        Authorization : `Bearer ${token}`
+      });
       if (res.data.success) {
         setUsers(res.data.users || []);
         setCurrentPage(res.data.currentPage);

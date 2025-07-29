@@ -12,6 +12,8 @@ const AddCategory = () => {
   const loading = useSelector((state) => state.auth.loading);
   const dispatch = useDispatch();
 
+  const token = useSelector(state => state.auth.token)
+
   const [categories, setCategories] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -25,7 +27,9 @@ const AddCategory = () => {
   const getAllCategories = async () => {
     try {
       dispatch(setLoading(true));
-      const res = await apiConnector("GET", getAllCategory);
+      const res = await apiConnector("GET", getAllCategory,null,{
+        Authorization : `Bearer ${token}`
+      });
       console.log(res)
       setCategories(res.data);
       toast.success("All Categories fetched successfully!");
@@ -43,7 +47,9 @@ const AddCategory = () => {
 
   const handleAdd = async () => {
     try {
-      const res = await apiConnector("POST", createCategory, newCategory);
+      const res = await apiConnector("POST", createCategory, newCategory,{
+        Authorization : `Bearer ${token}`
+      });
       console.log(res);
       toast.success("Category created successfully!");
       setShowAddModal(false);
@@ -63,7 +69,9 @@ const AddCategory = () => {
         {
           name: editData.name,
           description: editData.description,
-        }
+        },{
+        Authorization : `Bearer ${token}`
+      }
       );
       console.log(res);
       toast.success("Category updated successfully!");
@@ -86,6 +94,8 @@ const AddCategory = () => {
       const updatedStatus = currentStatus === "active" ? "inactive" : "active";
       const res = await apiConnector("PATCH", `${activeInactiveCategory}${id}`, {
         data: updatedStatus,
+      },{
+        Authorization : `Bearer ${token}`
       });
       console.log("the response of making it inactive is : ", res);
       toast.success(`Category marked as ${updatedStatus}`);

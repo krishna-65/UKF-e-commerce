@@ -17,6 +17,7 @@ const { getAllBrands } = brandEndpoints;
 const AddProduct = () => {
   const dispatch = useDispatch();
   const loading = useSelector((state) => state.auth.loading);
+  const token = useSelector(state => state.auth.token)
 
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
@@ -62,7 +63,9 @@ const AddProduct = () => {
   const getAllCategories = async () => {
     try {
       dispatch(setLoading(true));
-      const res = await apiConnector("GET", getAllCategory);
+      const res = await apiConnector("GET", getAllCategory,null,{
+        Authorization : `Bearer ${token}`
+      });
       setCategories(res.data);
       toast.success("Categories loaded!");
     } catch {
@@ -75,7 +78,9 @@ const AddProduct = () => {
   const getAllProducts = async () => {
     try {
       dispatch(setLoading(true));
-      const res = await apiConnector("GET", getAllProduct);
+      const res = await apiConnector("GET", getAllProduct,null,{
+        Authorization : `Bearer ${token}`
+      });
       console.log("Products fetched :", res);
       setProducts(res.data.products);
       setFiltered(res.data.products);
@@ -91,7 +96,9 @@ const AddProduct = () => {
   const fetchBrands = async () => {
     try {
       dispatch(setLoading(true));
-      const res = await apiConnector("GET", getAllBrands);
+      const res = await apiConnector("GET", getAllBrands,null,{
+        Authorization : `Bearer ${token}`
+      });
       console.log("Brands fetched:", res);
       if (res.data.success) setBrands(res.data.brands);
     } catch {
@@ -132,7 +139,9 @@ const AddProduct = () => {
       );
       if (!confirm) return;
 
-      const res = await apiConnector("DELETE", `${deleteProduct}${id}`);
+      const res = await apiConnector("DELETE", `${deleteProduct}${id}`,null,{
+        Authorization : `Bearer ${token}`
+      });
       if (res.data.success) {
         toast.success("Product deleted successfully!");
         getAllProducts(); // Refresh table
@@ -178,6 +187,7 @@ const AddProduct = () => {
 
       const response = await apiConnector(method, endpoint, payload, {
         headers: { "Content-Type": "multipart/form-data" },
+        Authorization : `Bearer ${token}`
       });
 
       console.log("response for submit is ", response);

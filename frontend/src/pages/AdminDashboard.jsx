@@ -32,6 +32,8 @@ const AdminDashboard = () => {
     completedOrders: []
   });
 
+
+
   const navigate = useNavigate()
 
   const dispatch = useDispatch();
@@ -49,7 +51,9 @@ const AdminDashboard = () => {
   const fetchDashboardData = async () => {
     setIsLoading(true);
     try {
-      const response = await apiConnector("GET", adminDashboard);
+      const response = await apiConnector("GET", adminDashboard,null,{
+        Authorization : `Bearer ${token}`
+      });
       console.log('API Response:', response);
 
       if (response?.data?.success) {
@@ -108,7 +112,9 @@ const AdminDashboard = () => {
   const fetchUser = async () => {
     try {
       dispatch(setLoading(true));
-      const userRes = await apiConnector("GET", getUserNoPagination);
+      const userRes = await apiConnector("GET", getUserNoPagination,null,{
+        Authorization : `Bearer ${token}`
+      });
       console.log(userRes);
       if (userRes.data.success) {
         setUsers(userRes.data.users || []);

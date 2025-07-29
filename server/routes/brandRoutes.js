@@ -9,7 +9,7 @@ import {
   getFeaturedBrands,
   getBrandsWithProducts
 } from '../controllers/brandController.js';
-import { protect } from '../middlewares/authUser.js';
+import { protect,restrictTo } from '../middlewares/authUser.js';
 
 
 const router = express.Router();

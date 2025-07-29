@@ -10,6 +10,7 @@ const { getAllBrands, createBrand, updateBrand, deleteBrand } = brandEndpoints;
 const Brands = () => {
   const dispatch = useDispatch();
   const loading = useSelector((state) => state.auth.loading);
+  const token = useSelector((state)=> state.auth.token)
 
   const [brands, setBrands] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -32,7 +33,9 @@ const Brands = () => {
   const fetchBrands = async () => {
     try {
       dispatch(setLoading(true));
-      const res = await apiConnector("GET", getAllBrands);
+      const res = await apiConnector("GET", getAllBrands,null,{
+        Authorization : `Bearer ${token}`
+      });
       if (res.data.success) setBrands(res.data.brands);
     } catch {
       toast.error("Failed to load brands");
@@ -90,7 +93,9 @@ const Brands = () => {
     const confirmed = window.confirm("Are you sure you want to delete this brand?");
     if (!confirmed) return;
 
-    const res = await apiConnector("DELETE", `${deleteBrand}${id}`);
+    const res = await apiConnector("DELETE", `${deleteBrand}${id}`,null,{
+        Authorization : `Bearer ${token}`
+      });
     if (res.data.success) {
       toast.success("Brand deleted successfully");
       fetchBrands(); // Refresh list
@@ -117,7 +122,9 @@ const Brands = () => {
       const endpoint = editing ? `${updateBrand}${editId}` : createBrand;
       const method = editing ? "PUT" : "POST";
 
-      const res = await apiConnector(method, endpoint, payload);
+      const res = await apiConnector(method, endpoint, payload,{
+        Authorization : `Bearer ${token}`
+      });
       if (res.data.success) {
         toast.success(`Brand ${editing ? "updated" : "created"}!`);
         handleModalClose();
