@@ -24,6 +24,7 @@ import ContactUs from "./pages/ContactUs";
 import Profile from "./pages/Profile";
 import UserRoute from "./components/core/UserRoute";
 import TechSupport from "./pages/TechSupport";
+import Notfound from "./pages/notfound";
 
 const App = () => {
   return (
@@ -95,6 +96,7 @@ const App = () => {
             <Route path="viewusers" element={<ViewUsers />} />
             <Route path='techsupport' element={<TechSupport/>}/>
           </Route>
+          <Route path="*" element={<Notfound/>}/>
         </Routes>
       </div>
 

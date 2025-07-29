@@ -52,7 +52,7 @@ const CartSidebar = () => {
       <div className="relative cursor-pointer" onClick={() => setIsOpen(true)}>
         <FaShoppingCart className="text-[#FFD700] text-xl" />
         {(totalItems > 0 || cart.length > 0) && (
-          <div className="absolute z-[200] w-5 h-5 bg-[#FFD700] rounded-full top-0 right-0 text-sm text-black -translate-y-1/2 translate-x-1/2 flex justify-center items-center font-bold">
+          <div className="absolute z-[140] w-5 h-5 bg-[#FFD700] rounded-full top-0 right-0 text-sm text-black -translate-y-1/2 translate-x-1/2 flex justify-center items-center font-bold">
             {totalItems || cart.length}
           </div>
         )}

@@ -145,7 +145,7 @@ const Products = () => {
   return (
     <div className="flex flex-col lg:flex-row bg-black text-[#FFD700] min-h-screen">
       {/* Animated Sidebar */}
-      <div className={`relative z-50 transition-all duration-700 ease-out ${animateFilters ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'}`}>
+      <div className={`fixed top-0 left-0 lg:relative z-50  transition-all duration-700 ease-out ${animateFilters ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'}`}>
         <ProductSidebar />
       </div>
 
