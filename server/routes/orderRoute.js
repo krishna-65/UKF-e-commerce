@@ -17,19 +17,19 @@ import { protect, restrictTo } from '../middlewares/authUser.js';
 const router = express.Router();
 
 // User routes
-router.post('/', createOrder);
+router.post('/',protect,restrictTo('user'), createOrder);
 router.get('/my-orders',protect,  getUserOrders);
-router.get('/:id', getOrderById);
-router.put('/:id/cancel', cancelOrder);
+router.get('/:id', protect, getOrderById);
+router.put('/:id/cancel', protect,restrictTo('user','admin'), cancelOrder);
 
 // Admin routes
-router.get('/', getAllOrders);
-router.put('/:id/status', updateOrderStatus);
-router.put('/:id/tracking',  addTrackingInfo);
+router.get('/', protect, restrictTo('admin'), getAllOrders);
+router.put('/:id/status', protect, restrictTo('admin'), updateOrderStatus);
+router.put('/:id/tracking', protect, addTrackingInfo);
 
 //No Pagination routes
-router.get('/orders/user', protect,restrictTo("user","admin"), getUserOrdersNoPagination);
-router.get('/orders/allorders',protect,restrictTo("user","admin"), getAllOrdersNoPagination);
+router.get('/orders/user', protect, restrictTo("user", "admin"), getUserOrdersNoPagination);
+router.get('/orders/allorders', protect, restrictTo("user", "admin"), getAllOrdersNoPagination);
 
 export default router;
 

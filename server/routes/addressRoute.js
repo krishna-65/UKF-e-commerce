@@ -6,14 +6,15 @@ import {
   deleteAddress,
   setDefaultAddress
 } from '../controllers/addressController.js';
+import { protect } from '../middlewares/authUser.js';
 
 
 const router = express.Router();
 
-router.post('/',  createAddress);
-router.get('/user/:userId', getUserAddresses);
-router.put('/:id',  updateAddress);//addressId
-router.delete('/:id',  deleteAddress);//addressId
-router.patch('/:id/set-default/:userId', setDefaultAddress);
+router.post('/', protect, createAddress);
+router.get('/user/:userId', protect, getUserAddresses);
+router.put('/:id', protect, updateAddress);//addressId
+router.delete('/:id', protect, deleteAddress);//addressId
+router.patch('/:id/set-default/:userId', protect, setDefaultAddress);
 
 export default router;
