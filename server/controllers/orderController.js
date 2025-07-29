@@ -415,6 +415,75 @@ export const getOrderById = async (req, res) => {
 };
 
 // Update order status (admin)
+// export const updateOrderStatus = async (req, res) => {
+//   try {
+//     const { status, note } = req.body;
+
+//     const order = await Order.findById(req.params.id);
+//     if (!order) {
+//       return res.status(404).json({ 
+//         success: false, 
+//         message: 'Order not found' 
+//       });
+//     }
+
+//     // Validate status transition
+//     const validTransitions = {
+//       'Order Placed': ['Payment Pending', 'Cancelled'],
+//       'Payment Pending': ['Payment Received', 'Cancelled'],
+//       'Payment Received': ['Processing', 'Cancelled'],
+//       'Processing': ['Shipped', 'Cancelled'],
+//       'Shipped': ['Out for Delivery', 'Cancelled'],
+//       'Out for Delivery': ['Delivered', 'Cancelled'],
+//       'Delivered': ['Return Requested'],
+//       'Cancelled': [],
+//       'Return Requested': ['Return Approved', 'Return Rejected'],
+//       'Return Approved': ['Return Completed', 'Refund Initiated'],
+//       'Return Rejected': [],
+//       'Return Completed': ['Refund Initiated'],
+//       'Refund Initiated': ['Refund Completed'],
+//       'Refund Completed': []
+//     };
+
+//     if (!validTransitions[order.currentStatus].includes(status)) {
+//       return res.status(400).json({ 
+//         success: false, 
+//         message: `Invalid status transition from ${order.currentStatus} to ${status}` 
+//       });
+//     }
+
+//     // Update order
+//     order.currentStatus = status;
+//     order.statusHistory.push({
+//       status,
+//       changedBy: req.user.id,
+//       note
+//     });
+
+//     // Handle refund if order is cancelled after payment
+//     if (status === 'Cancelled' && order.paymentStatus === 'Completed') {
+//       order.paymentStatus = 'Refunded';
+//       // Here you would integrate with payment gateway for refund
+//     }
+
+//     await order.save();
+
+//     // TODO: Send status update notification to user
+
+//     res.json({ 
+//       success: true, 
+//       order,
+//       message: 'Order status updated successfully'
+//     });
+
+//   } catch (error) {
+//     res.status(500).json({ 
+//       success: false, 
+//       message: error.message 
+//     });
+//   }
+// };
+
 export const updateOrderStatus = async (req, res) => {
   try {
     const { status, note } = req.body;
@@ -428,29 +497,29 @@ export const updateOrderStatus = async (req, res) => {
     }
 
     // Validate status transition
-    // const validTransitions = {
-    //   'Order Placed': ['Payment Pending', 'Cancelled'],
-    //   'Payment Pending': ['Payment Received', 'Cancelled'],
-    //   'Payment Received': ['Processing', 'Cancelled'],
-    //   'Processing': ['Shipped', 'Cancelled'],
-    //   'Shipped': ['Out for Delivery', 'Cancelled'],
-    //   'Out for Delivery': ['Delivered', 'Cancelled'],
-    //   'Delivered': ['Return Requested'],
-    //   'Cancelled': [],
-    //   'Return Requested': ['Return Approved', 'Return Rejected'],
-    //   'Return Approved': ['Return Completed', 'Refund Initiated'],
-    //   'Return Rejected': [],
-    //   'Return Completed': ['Refund Initiated'],
-    //   'Refund Initiated': ['Refund Completed'],
-    //   'Refund Completed': []
-    // };
+    const validTransitions = {
+      'Order Placed': ['Payment Pending', 'Cancelled'],
+      'Payment Pending': ['Payment Received', 'Cancelled'],
+      'Payment Received': ['Processing', 'Cancelled'],
+      'Processing': ['Shipped', 'Cancelled'],
+      'Shipped': ['Out for Delivery', 'Cancelled'],
+      'Out for Delivery': ['Delivered', 'Cancelled'],
+      'Delivered': ['Return Requested'],
+      'Cancelled': [],
+      'Return Requested': ['Return Approved', 'Return Rejected'],
+      'Return Approved': ['Return Completed', 'Refund Initiated'],
+      'Return Rejected': [],
+      'Return Completed': ['Refund Initiated'],
+      'Refund Initiated': ['Refund Completed'],
+      'Refund Completed': []
+    };
 
-    // if (!validTransitions[order.currentStatus].includes(status)) {
-    //   return res.status(400).json({ 
-    //     success: false, 
-    //     message: `Invalid status transition from ${order.currentStatus} to ${status}` 
-    //   });
-    // }
+    if (!validTransitions[order.currentStatus].includes(status)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: `Invalid status transition from ${order.currentStatus} to ${status}` 
+      });
+    }
 
     // Update order
     order.currentStatus = status;
@@ -460,6 +529,9 @@ export const updateOrderStatus = async (req, res) => {
       note
     });
 
+    if(status === 'Payment Received') {
+      order.paymentStatus = 'Completed';
+    }
     // Handle refund if order is cancelled after payment
     if (status === 'Cancelled' && order.paymentStatus === 'Completed') {
       order.paymentStatus = 'Refunded';
@@ -483,6 +555,7 @@ export const updateOrderStatus = async (req, res) => {
     });
   }
 };
+
 
 // Cancel order (user)
 export const cancelOrder = async (req, res) => {
