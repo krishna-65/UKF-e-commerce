@@ -33,7 +33,7 @@ export const register = async (req, res)=>{
             maxAge: 7 * 24 * 60 * 60 * 1000, // Cookie expiration time
         })
 
-        return res.json({success: true, user: {phone: user.phone, name: user.name, token: token, accountType: user.accountType}})
+        return res.json({success: true, user: {phone: user.phone, name: user.name, token: token, accountType: user.accountType,_id:user._id}})
     } catch (error) {
         console.log(error.message);
         res.json({ success: false, message: error.message });
