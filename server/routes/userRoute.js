@@ -1,5 +1,5 @@
 import express from 'express';
-import { forgotPassword, getAdminDashboardStats, getProfile, getUserNoPagination, getUsers, isAuth, login, logout, register, updatePicture, updateProfile } from '../controllers/userController.js';
+import { forgotPassword, getAdminDashboardStats, getMe, getProfile, getUserNoPagination, getUsers, isAuth, login, logout, register, updatePicture, updateProfile } from '../controllers/userController.js';
 
 import { protect } from '../middlewares/authUser.js';
 
@@ -17,5 +17,5 @@ userRouter.post('/forgot-password', forgotPassword)
 userRouter.get('/admin-dashboard', protect, getAdminDashboardStats)
 userRouter.get('/getuser', protect, getUsers)
 userRouter.get('/getUserNoPagination', protect, getUserNoPagination)
-userRouter.get('/me', getMe);
+userRouter.get('/me', protect, getMe);
 export default userRouter
