@@ -1,5 +1,6 @@
 import express from 'express';
 import { forgotPassword, getAdminDashboardStats, getProfile, getUserNoPagination, getUsers, isAuth, login, logout, register, updatePicture, updateProfile } from '../controllers/userController.js';
+import { protect } from '../middlewares/authUser.js';
 
 
 const userRouter = express.Router();
