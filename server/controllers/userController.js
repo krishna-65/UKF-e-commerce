@@ -256,56 +256,58 @@ export const resetPassword = async (req, res) => {
 
 export const getAdminDashboardStats = async (req, res) => {
   try {
+    // Basic counts
     const totalUsers = await User.countDocuments();
     const totalProducts = await Product.countDocuments();
     const totalOrders = await Order.countDocuments();
 
-    // Get all completed orders
-    const completedOrders = await Order.find({ currentStatus: "Delivered" });
+    // Delivered Orders
+    const deliveredOrders = await Order.find({ currentStatus: "Delivered" });
 
-    // Calculate total revenue and total items sold
     let totalRevenue = 0;
     let totalItemsSold = 0;
+    const productSalesMap = {};
 
-    completedOrders.forEach((order) => {
-      totalRevenue += order.total; // assuming there's a field called totalAmount
-      order.items.forEach((item) => {
+    // Loop once to calculate revenue, items sold, and product sales
+    deliveredOrders.forEach(order => {
+      totalRevenue += order.total || 0;
+
+      order.items.forEach(item => {
         totalItemsSold += item.quantity;
+
+        const productId = item.product.toString();
+        productSalesMap[productId] = (productSalesMap[productId] || 0) + item.quantity;
       });
     });
 
-    // Get top 5 best selling products
-    const allProductSales = {};
-
-    completedOrders.forEach((order) => {
-      order.items.forEach((item) => {
-        const id = item.product.toString();
-        if (!allProductSales[id]) {
-          allProductSales[id] = 0;
-        }
-        allProductSales[id] += item.quantity;
-      });
-    });
-
-    const sortedProductSales = Object.entries(allProductSales)
+    // Top 5 best-selling products
+    const sortedSales = Object.entries(productSalesMap)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5);
 
-    const topProducts = await Promise.all(
-      sortedProductSales.map(async ([productId, quantitySold]) => {
+    const topProductsRaw = await Promise.all(
+      sortedSales.map(async ([productId, quantitySold]) => {
         const product = await Product.findById(productId).select("name price images");
+        if (!product) return null;
         return {
-          ...product._doc,
-          quantitySold,
+          _id: product._id,
+          name: product.name,
+          price: product.price,
+          images: product.images,
+          quantitySold
         };
       })
     );
 
-    // Total stock and out-of-stock count
-    const products = await Product.find().populate('category');
-    const category = await Category.find();
-    const totalStock = products.reduce((sum, product) => sum + product.stock, 0);
-    const outOfStock = products.filter((product) => product.stock === 0).length;
+    const topProducts = topProductsRaw.filter(p => p !== null);
+
+    // Product stock info
+    const allProducts = await Product.find().populate("category");
+    const totalStock = allProducts.reduce((acc, prod) => acc + (prod.stock || 0), 0);
+    const outOfStock = allProducts.filter(prod => prod.stock === 0).length;
+
+    // Category list
+    const categories = await Category.find();
 
     res.status(200).json({
       success: true,
@@ -315,21 +317,21 @@ export const getAdminDashboardStats = async (req, res) => {
         totalOrders,
         totalRevenue,
         totalItemsSold,
-            category,
-            completedOrders,
         totalStock,
         outOfStock,
-        products,
         topProducts,
-    
-      },
+        completedOrders: deliveredOrders.length,
+        categories,
+        products: allProducts
+      }
     });
+
   } catch (error) {
     console.error("Dashboard stats error:", error);
     res.status(500).json({
       success: false,
       message: "Failed to fetch dashboard stats",
-      error: error.message,
+      error: error.message
     });
   }
 };
