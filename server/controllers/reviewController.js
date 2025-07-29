@@ -70,20 +70,25 @@ export const updateReview = async (req, res) => {
     const { reviewId } = req.params;
     const userId = req.user._id;
 
-    const review = await Review.findById(reviewId);
-    if (!review) return res.status(404).json({ message: 'Review not found' });
+    // Find review by ID and user
+    const review = await Review.findOne({ _id: reviewId, user: userId });
+    if (!review) {
+      return res.status(404).json({ message: 'Review not found or not authorized' });
+    }
 
-    if (review.user.toString() !== userId) return res.status(403).json({ message: 'Not authorized to edit this review' });
-
+    // Update fields if provided
     review.rating = rating ?? review.rating;
     review.comment = comment ?? review.comment;
+
     await review.save();
 
-    res.json({ message: 'Review updated', review });
+    res.json({ message: 'Review updated successfully', review });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error(err);
+    res.status(500).json({ message: 'Server error: ' + err.message });
   }
 };
+
 
 
 export const getTopReviews = async (req, res) => {
