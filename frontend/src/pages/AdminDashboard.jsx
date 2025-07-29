@@ -68,7 +68,7 @@ const AdminDashboard = () => {
           totalStock: data.totalStock || 0,
           outOfStock: data.outOfStock || 0,
           topProducts: data.topProducts || [],
-          category: data.category || [],
+          category: data.categories || [],
           products: data.products || [],
           completedOrders: data.completedOrders || []
         };
