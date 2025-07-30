@@ -9,7 +9,7 @@ function OpenRoute({ children }) {
   if (token === null) {
     return children
   } else {
-    return (role === 'user' ? <Navigate to="/Home" /> : <Navigate to="/admindashboard"/>)
+    return (role === 'user' ? <Navigate to="/" /> : <Navigate to="/admindashboard"/>)
   }
 }
 

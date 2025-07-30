@@ -88,7 +88,7 @@ export default function Login() {
       });
 
       if (response.data.user.accountType === "user") {
-        navigate("/Home");
+        navigate("/");
       } else {
         navigate("/admindashboard");
       }
@@ -176,7 +176,7 @@ export default function Login() {
 
         <motion.div
           className="w-full text-center mt-6 text-gray-400 text-lg cursor-pointer hover:text-[#FFD770] transition-colors duration-300"
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/signup')}
           variants={fadeInUp}
         >
           Don't have an account? <span className="underline font-semibold">Register here</span>

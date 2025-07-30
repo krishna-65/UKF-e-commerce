@@ -74,7 +74,7 @@ const CreateOrder = () => {
     resetFormData();
     
     // Navigate to home page
-    navigate("/Home");
+    navigate("/");
   };
 
   const fetchAddresses = async () => {
@@ -301,7 +301,7 @@ const CreateOrder = () => {
 
                 if (failRes.data.success) {
                   toast.error("Payment verification failed. Order placed with pending payment.");
-                  navigate("/Home");
+                  navigate("/");
                 } else {
                   toast.error(failRes.data.message || "Fallback order creation failed");
                 }

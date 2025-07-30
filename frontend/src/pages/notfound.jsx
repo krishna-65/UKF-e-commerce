@@ -30,7 +30,7 @@ const Notfound = () => {
     const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
-          navigate('/Home');
+          navigate('/');
           return 0;
         }
         return prev - 1;
@@ -138,7 +138,7 @@ const Notfound = () => {
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
               <button
-                onClick={() => navigate('/Home')}
+                onClick={() => navigate('/')}
                 className="group relative px-8 py-4 bg-gradient-to-r from-[#FFD700] to-yellow-400 text-black font-bold rounded-2xl overflow-hidden transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 hover:shadow-2xl hover:shadow-[#FFD700]/30"
               >
                 <span className="relative z-10 flex items-center gap-2">

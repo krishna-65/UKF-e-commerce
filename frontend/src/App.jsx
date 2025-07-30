@@ -25,8 +25,12 @@ import Profile from "./pages/Profile";
 import UserRoute from "./components/core/UserRoute";
 import TechSupport from "./pages/TechSupport";
 import Notfound from "./pages/notfound";
+import { useSelector } from "react-redux";
 
 const App = () => {
+  
+
+
   return (
     <div className="relative">
       <Navbar />
@@ -37,7 +41,7 @@ const App = () => {
         <Routes>
           {/* OpenRoute – Unauthenticated Only */}
           <Route
-            path="/"
+            path="/signup"
             element={
               <OpenRoute>
                 <Signup />
@@ -54,7 +58,7 @@ const App = () => {
           />
 
           {/* Public Routes */}
-          <Route path="/home" element={<Home />} />
+          <Route path="/" element={<Home />} />
           <Route path="/about" element={<AboutUs />} />
           <Route path="/products" element={<Products />} />
           <Route path="/productdetail" element={<ProductDetail />} />

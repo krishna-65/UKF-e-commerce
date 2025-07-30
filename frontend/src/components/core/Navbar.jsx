@@ -125,7 +125,7 @@ const Navbar = () => {
         <img
           src={logo}
           className="w-[10vh] ml-10 cursor-pointer lg:ml-0"
-          onClick={() => navigate("/Home")}
+          onClick={() => navigate("/")}
           alt="UKF-Outlets"
         />
 
@@ -442,7 +442,7 @@ const Navbar = () => {
                 )}
               </div>
             ) : (
-              <div onClick={() => navigate("/")} className="cursor-pointer">
+              <div onClick={() => navigate("/signup")} className="cursor-pointer">
                 <FaUser className="text-[#FFD700]" />
               </div>
             )}

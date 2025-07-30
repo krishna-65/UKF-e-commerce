@@ -31,7 +31,7 @@ export default function Sidebar() {
               dispatch(setRole(null))
   
               toast.success("Logged out Successfully!")
-              navigate('/')
+              navigate('/signup')
           }catch(err){
               console.log(err);
               toast.error("unable to LogOut")

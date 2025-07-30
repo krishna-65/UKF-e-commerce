@@ -80,7 +80,7 @@ export default function Signup() {
       });
 
       if (response.data.user.accountType === "user") {
-        navigate("/Home");
+        navigate("/");
       } else {
         navigate("/admindashboard");
       }
@@ -97,7 +97,7 @@ export default function Signup() {
       if (accountType === "admin") {
         navigate("/admindashboard");
       } else {
-        navigate("/Home");
+        navigate("/");
       }
       toast.success(`Welcome! ${userData.name}`);
     }
