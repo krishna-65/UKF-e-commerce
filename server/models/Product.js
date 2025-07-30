@@ -26,11 +26,14 @@ const productSchema = new mongoose.Schema({
   category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
   subCategory: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' }, // For sub-categories like T-Shirts under Men
   brand: { type: mongoose.Schema.Types.ObjectId, ref: 'Brand' }, // Reference to Brand model
-  size: {
-    type: String,
-    enum: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '4XL', '5XL', 'One Size',''],
-  },
-  color: { type: String, required: true },
+ size: {
+  type: [String],
+  enum: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '4XL', '5XL', 'One Size', ''],
+},
+color: {
+  type: [String],
+  required: true,
+},
   material: { type: String }, // e.g., Cotton, Polyester, etc.
   fabric: { type: String }, // More specific than material
   weight: { type: Number }, // In grams
