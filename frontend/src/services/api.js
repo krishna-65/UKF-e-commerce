@@ -88,7 +88,8 @@ export const reviewEndpoints = {
   getUserReviewForProduct : BASE_URL + "/api/review/product/", //token pass
   updateReview : BASE_URL + "/api/review/", // token pass
   topReview : BASE_URL + "/api/review/top",
-  getReviewByProductId : BASE_URL + "/api/review/product/"
+  getReviewByProductId : BASE_URL + "/api/review/product/",
+  avgRating : BASE_URL + "/api/review/overall-average-rating"
 
 }
 
