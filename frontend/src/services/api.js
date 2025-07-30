@@ -1,6 +1,3 @@
-
-
-
 const BASE_URL = "http://localhost:4000"
 
 // AUTH ENDPOINTS
@@ -15,6 +12,7 @@ export const endpoints = {
   adminDashboard : BASE_URL + "/api/user/admin-dashboard",
   getUser : BASE_URL + "/api/user/getuser",
   getUserNoPagination : BASE_URL + "/api/user/getUserNoPagination",
+  contactUs : BASE_URL + '/api/user/send-email',
 }
 
 //category endpoints
