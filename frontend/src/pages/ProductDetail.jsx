@@ -498,7 +498,7 @@ export default function ProductDetail() {
               </div>
 
               {/* Order Selection (only for new reviews) */}
-              {!existingReview && eligibleOrders.length > 1 && (
+              {!existingReview && eligibleOrders.length >= 1 && (
                 <div>
                   <label className="block text-sm font-semibold mb-2">Select Order</label>
                   <select

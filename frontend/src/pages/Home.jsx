@@ -58,8 +58,8 @@ const Home = () => {
   const [reviews,setReviews] = useState([]);
 
   const fetchTopReview = async ()=>{
-
-    const topreview = await apiConnector("GET",topReview);
+    try{
+      const topreview = await apiConnector("GET",topReview);
 
     console.log("top reviews are : ",topreview)
 
@@ -67,6 +67,11 @@ const Home = () => {
 
     setReviews(dataReview.slice(0,Math.min(3,dataReview.length)));
 
+    }catch(error){
+      console.log("error in finding top reviews : ",error)
+    }
+
+    
   }
 
   // RUN useEffect ONLY ONCE ON MOUNT
