@@ -1,6 +1,3 @@
-
-
-
 const BASE_URL = "http://localhost:4000"
 
 // AUTH ENDPOINTS
@@ -15,6 +12,7 @@ export const endpoints = {
   adminDashboard : BASE_URL + "/api/user/admin-dashboard",
   getUser : BASE_URL + "/api/user/getuser",
   getUserNoPagination : BASE_URL + "/api/user/getUserNoPagination",
+  contactUs : BASE_URL + '/api/user/send-email',
 }
 
 //category endpoints
@@ -90,7 +88,8 @@ export const reviewEndpoints = {
   getUserReviewForProduct : BASE_URL + "/api/review/product/", //token pass
   updateReview : BASE_URL + "/api/review/", // token pass
   topReview : BASE_URL + "/api/review/top",
-  getReviewByProductId : BASE_URL + "/api/review/product/"
+  getReviewByProductId : BASE_URL + "/api/review/product/",
+  avgRating : BASE_URL + "/api/review/overall-average-rating"
 
 }
 

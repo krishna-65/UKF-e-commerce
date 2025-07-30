@@ -7,7 +7,7 @@ import {
   Users, ShoppingBag, Package, TrendingUp, DollarSign, Eye, Star,
   Calendar, Filter, Download, RefreshCw, ArrowUp, ArrowDown
 } from 'lucide-react';
-import { endpoints, orderEndpoints } from '../services/api';
+import { endpoints, orderEndpoints, reviewEndpoints } from '../services/api';
 import { apiConnector } from '../services/apiConnector';
 import { toast } from 'react-hot-toast';
 import { useDispatch, useSelector } from 'react-redux';
@@ -46,6 +46,7 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [avgRating,setAvgRating] = useState(5)
   
   // Fetch dashboard data
   const fetchDashboardData = async () => {
@@ -82,6 +83,19 @@ const AdminDashboard = () => {
       setIsLoading(false);
     }
   };
+
+  const fetchAvgRating = async () => {
+    try{
+      dispatch(setLoading(true));
+      const avgRating = await apiConnector("GET",reviewEndpoints.avgRating);
+      console.log("avg rating is :",avgRating)
+      setAvgRating(avgRating.data.averageRating)
+    }catch(error){
+      console.log("avg rating error is :",error);
+    }finally{
+      dispatch(setLoading(false))
+    }
+  }
 
   const fetchOrders = async () => {
     try {
@@ -125,6 +139,7 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     fetchUser();
+    fetchAvgRating();
   }, [])
 
   // Generate monthly data from orders
@@ -787,13 +802,11 @@ const AdminDashboard = () => {
               <div className="p-3 bg-purple-500/20 rounded-xl">
                 <Star className="w-6 h-6 text-purple-400" />
               </div>
-              <span className="text-purple-400 text-sm font-medium">0/5</span>
+              <span className="text-purple-400 text-sm font-medium">{avgRating}/5</span>
             </div>
             <h3 className="text-gray-400 text-sm font-medium mb-2">Avg Rating</h3>
             <p className="text-2xl font-bold text-white">
-              {stats.products.length > 0 ? 
-                (stats.products.reduce((acc, product) => acc + (product.ratings?.average || 0), 0) / stats.products.length).toFixed(1) 
-                : '0'}
+              {avgRating}
             </p>
           </div>
 

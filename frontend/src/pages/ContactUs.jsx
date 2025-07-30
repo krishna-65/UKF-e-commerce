@@ -1,6 +1,16 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin, MessageSquareText, Users, Handshake } from 'lucide-react';
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  MessageSquareText,
+  Users,
+  Handshake,
+} from "lucide-react";
+import { apiConnector } from "../services/apiConnector";
+import { endpoints } from "../services/api";
+import toast from "react-hot-toast";
 
 // Animation variants for a consistent fade-in-up effect
 const fadeInUp = {
@@ -10,9 +20,9 @@ const fadeInUp = {
     y: 0,
     transition: {
       duration: 0.8,
-      ease: "easeOut"
-    }
-  }
+      ease: "easeOut",
+    },
+  },
 };
 
 const staggerContainer = {
@@ -21,11 +31,62 @@ const staggerContainer = {
     opacity: 1,
     transition: {
       staggerChildren: 0.2,
-    }
-  }
+    },
+  },
 };
 
 const ContactUs = () => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const formattedData = {
+        email: import.meta.env.VITE_EMAIL,
+        title: formData.subject || "No Title choosen",
+        body:
+          formData.name && formData.email && formData.message
+            ? 
+                `name: ${formData.name}
+                email: ${formData.email}
+                message: ${formData.message}`
+              
+            : "No body given",
+      };
+
+      const contactusRes = await apiConnector(
+        "POST",
+        endpoints.contactUs,
+        formattedData
+      );
+
+      console.log(contactusRes);
+
+      setFormData({name: "",
+    email: "",
+    subject: "",
+    message: ""})
+
+      toast.success("Email sent successfully!!");
+    } catch (error) {
+      console.log(error);
+      toast.error("Unable to sent email.");
+    }
+  };
+
   return (
     <div className="bg-black text-white font-sans overflow-x-hidden relative min-h-screen">
       {/* GLOBAL BACKGROUND DOTS/BLOBS - Subtle and overlay everything */}
@@ -55,7 +116,9 @@ const ContactUs = () => {
           Get in Touch with UKF-Outfits
         </h1>
         <p className="max-w-3xl mx-auto text-lg md:text-xl text-gray-300 leading-relaxed">
-          Got questions about our fashion collections? Whether you're curious about sizes, shipping, or potential partnerships—reach out to us. We're always here to help!
+          Got questions about our fashion collections? Whether you're curious
+          about sizes, shipping, or potential partnerships—reach out to us.
+          We're always here to help!
         </p>
       </motion.header>
 
@@ -74,9 +137,12 @@ const ContactUs = () => {
             className="group bg-gray-900/50 border border-[#FFD770]/20 rounded-xl shadow-xl p-8 text-center flex flex-col items-center justify-center transition-all duration-500 hover:scale-105 hover:border-[#FFD770]/60 hover:shadow-yellow-400/20"
           >
             <MapPin className="w-12 h-12 text-[#FFD770] mb-4 group-hover:scale-110 transition-transform duration-300" />
-            <h2 className="text-xl md:text-2xl font-bold mb-2 text-[#FFD770]">Our Location</h2>
+            <h2 className="text-xl md:text-2xl font-bold mb-2 text-[#FFD770]">
+              Our Location
+            </h2>
             <p className="text-gray-300 text-base leading-relaxed">
-              UKF-Outfits HQ<br/>
+              UKF-Outfits HQ
+              <br />
               Mall Road, Kotdwara, Uttarakhand – 246149
             </p>
           </motion.div>
@@ -87,10 +153,25 @@ const ContactUs = () => {
             className="group bg-gray-900/50 border border-[#FFD770]/20 rounded-xl shadow-xl p-8 text-center flex flex-col items-center justify-center transition-all duration-500 hover:scale-105 hover:border-[#FFD770]/60 hover:shadow-yellow-400/20"
           >
             <Phone className="w-12 h-12 text-[#FFD770] mb-4 group-hover:scale-110 transition-transform duration-300" />
-            <h2 className="text-xl md:text-2xl font-bold mb-2 text-[#FFD770]">Call or Email Us</h2>
+            <h2 className="text-xl md:text-2xl font-bold mb-2 text-[#FFD770]">
+              Call or Email Us
+            </h2>
             <p className="text-gray-300 text-base leading-relaxed">
-              Customer Care: <a href="tel:+911234567890" className="text-[#FFD770] hover:underline">+91-1234567890</a><br/>
-              Email: <a href="mailto:support@ukfoutfits.com" className="text-[#FFD770] hover:underline">support@ukfoutfits.com</a>
+              Customer Care:{" "}
+              <a
+                href="tel:+911234567890"
+                className="text-[#FFD770] hover:underline"
+              >
+                +91-1234567890
+              </a>
+              <br />
+              Email:{" "}
+              <a
+                href="mailto:support@ukfoutfits.com"
+                className="text-[#FFD770] hover:underline"
+              >
+                support@ukfoutfits.com
+              </a>
             </p>
           </motion.div>
 
@@ -100,10 +181,18 @@ const ContactUs = () => {
             className="group bg-gray-900/50 border border-[#FFD770]/20 rounded-xl shadow-xl p-8 text-center flex flex-col items-center justify-center transition-all duration-500 hover:scale-105 hover:border-[#FFD770]/60 hover:shadow-yellow-400/20"
           >
             <Handshake className="w-12 h-12 text-[#FFD770] mb-4 group-hover:scale-110 transition-transform duration-300" />
-            <h2 className="text-xl md:text-2xl font-bold mb-2 text-[#FFD770]">Collaborations</h2>
+            <h2 className="text-xl md:text-2xl font-bold mb-2 text-[#FFD770]">
+              Collaborations
+            </h2>
             <p className="text-gray-300 text-base leading-relaxed">
-              For business queries and partnerships, please email:<br/>
-              <a href="mailto:partnerships@ukfoutfits.com" className="text-[#FFD770] hover:underline">partnerships@ukfoutfits.com</a>
+              For business queries and partnerships, please email:
+              <br />
+              <a
+                href="mailto:partnerships@ukfoutfits.com"
+                className="text-[#FFD770] hover:underline"
+              >
+                partnerships@ukfoutfits.com
+              </a>
             </p>
           </motion.div>
         </motion.div>
@@ -128,27 +217,39 @@ const ContactUs = () => {
               Drop Us a Message
             </h2>
           </div>
-          <form className="flex flex-col gap-6">
+          <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
             <input
               type="text"
+              name="name"
               placeholder="Your Name"
+              value={formData.name}
+              onChange={handleChange}
               className="bg-gray-800 border border-gray-700 rounded-lg p-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FFD770]/60 transition-colors duration-300"
               required
             />
             <input
               type="email"
+              name="email"
               placeholder="Your Email"
+              value={formData.email}
+              onChange={handleChange}
               className="bg-gray-800 border border-gray-700 rounded-lg p-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FFD770]/60 transition-colors duration-300"
               required
             />
             <input
               type="text"
+              name="subject"
               placeholder="Subject"
+              value={formData.subject}
+              onChange={handleChange}
               className="bg-gray-800 border border-gray-700 rounded-lg p-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FFD770]/60 transition-colors duration-300"
               required
             />
             <textarea
+              name="message"
               placeholder="Your Message"
+              value={formData.message}
+              onChange={handleChange}
               className="bg-gray-800 border border-gray-700 rounded-lg p-4 h-40 resize-none text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FFD770]/60 transition-colors duration-300"
               required
             />
@@ -168,20 +269,37 @@ const ContactUs = () => {
       {/* Tailwind CSS Custom Keyframes (from AboutUs page, ensured for consistency) */}
       <style jsx>{`
         @keyframes float {
-          0%, 100% { transform: translateY(0px) translateX(0px) rotate(0deg); }
-          25% { transform: translateY(-10px) translateX(5px) rotate(5deg); }
-          50% { transform: translateY(0px) translateX(10px) rotate(0deg); }
-          75% { transform: translateY(10px) translateX(5px) rotate(-5deg); }
-          100% { transform: translateY(0px) translateX(0px) rotate(0deg); }
+          0%,
+          100% {
+            transform: translateY(0px) translateX(0px) rotate(0deg);
+          }
+          25% {
+            transform: translateY(-10px) translateX(5px) rotate(5deg);
+          }
+          50% {
+            transform: translateY(0px) translateX(10px) rotate(0deg);
+          }
+          75% {
+            transform: translateY(10px) translateX(5px) rotate(-5deg);
+          }
+          100% {
+            transform: translateY(0px) translateX(0px) rotate(0deg);
+          }
         }
 
         @keyframes float-slow {
-          0%, 100% { transform: translateY(0px) translateX(0px); }
-          50% { transform: translateY(-15px) translateX(15px); }
+          0%,
+          100% {
+            transform: translateY(0px) translateX(0px);
+          }
+          50% {
+            transform: translateY(-15px) translateX(15px);
+          }
         }
 
         @keyframes blob-slow {
-          0%, 100% {
+          0%,
+          100% {
             border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
             transform: translate(0px, 0px) scale(1);
           }
@@ -200,7 +318,8 @@ const ContactUs = () => {
         }
 
         @keyframes blob-medium {
-          0%, 100% {
+          0%,
+          100% {
             border-radius: 40% 60% 70% 30% / 60% 40% 60% 40%;
             transform: translate(0px, 0px) scale(1);
           }
@@ -211,7 +330,8 @@ const ContactUs = () => {
         }
 
         @keyframes blob-fast {
-          0%, 100% {
+          0%,
+          100% {
             border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
             transform: translate(0px, 0px);
           }
@@ -222,13 +342,21 @@ const ContactUs = () => {
         }
 
         @keyframes spin-slow {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
         }
 
         @keyframes spin-fast {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
         }
 
         .animate-float {
