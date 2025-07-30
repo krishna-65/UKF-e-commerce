@@ -4,7 +4,8 @@ import {
   getReviewsByProduct,
   updateReview,
   getUserReviewForProduct,
-  getTopReviews
+  getTopReviews,
+  getOverallAverageRating
 } from '../controllers/reviewController.js';
 import { protect, restrictTo } from '../middlewares/authUser.js';
 
@@ -16,5 +17,6 @@ router.get('/product/:productId', getReviewsByProduct);
 router.get('/product/:productId/user', protect, getUserReviewForProduct);
 router.put('/:reviewId', protect, updateReview);
 router.get('/top', getTopReviews);
+router.get('/overall-average-rating', getOverallAverageRating);
 
 export default router;

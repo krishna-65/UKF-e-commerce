@@ -111,3 +111,32 @@ export const getTopReviews = async (req, res) => {
     });
   }
 };
+
+
+export const getOverallAverageRating = async (req, res) => {
+  try {
+    const reviews = await Review.find();
+
+    if (reviews.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No reviews found',
+        averageRating: 0,
+      });
+    }
+
+    const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+    const average = totalRating / reviews.length;
+
+    res.status(200).json({
+      success: true,
+      averageRating: average.toFixed(1),
+      totalReviews: reviews.length,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching overall average rating: ' + error.message,
+    });
+  }
+};
