@@ -59,11 +59,11 @@ const ContactUs = () => {
         title: formData.subject || "No Title choosen",
         body:
           formData.name && formData.email && formData.message
-            ? {
-                name: formData.name,
-                email: formData.email,
-                message: formData.message,
-              }
+            ? 
+                `name: ${formData.name}
+                email: ${formData.email}
+                message: ${formData.message}`
+              
             : "No body given",
       };
 
