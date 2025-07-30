@@ -240,7 +240,7 @@ export default function Footer() {
                     <div className="p-2 bg-gradient-to-br from-[#FFD700]/20 to-yellow-400/20 rounded-lg">
                       <FaMapMarkerAlt className="text-[#FFD700]" />
                     </div>
-                    <span className="font-medium">UKF Outlet, India</span>
+                    <span className="font-medium">J45P+XQX, In side, chandpol, gate, Subhash Chowk, Sikar, Rajasthan 332001</span>
                   </div>
                 </div>
               </div>

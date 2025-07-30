@@ -143,7 +143,7 @@ const ContactUs = () => {
             <p className="text-gray-300 text-base leading-relaxed">
               UKF-Outfits HQ
               <br />
-              Mall Road, Kotdwara, Uttarakhand – 246149
+              J45P+XQX, In side, chandpol, gate, Subhash Chowk, Sikar, Rajasthan 332001
             </p>
           </motion.div>
 
@@ -162,7 +162,7 @@ const ContactUs = () => {
                 href="tel:+911234567890"
                 className="text-[#FFD770] hover:underline"
               >
-                +91-1234567890
+                +91 8741-930153
               </a>
               <br />
               Email:{" "}

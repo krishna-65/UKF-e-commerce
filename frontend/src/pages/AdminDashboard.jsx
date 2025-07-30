@@ -244,10 +244,10 @@ const AdminDashboard = () => {
     switch (selectedPeriod) {
       case 'daily':
         const [year, month, day] = date.split('-');
-        return `${day}/${month}`;
+        return `${day}/${month}/${year}`;
       case 'monthly':
         const [y, m] = date.split('-');
-        return `${months[parseInt(m) - 1]}`;
+        return `${months[parseInt(m) - 1]} ${y}`;
       case 'yearly':
         return date;
       default:
@@ -516,12 +516,12 @@ const AdminDashboard = () => {
           </div> */}
 
           {/* Orders Trend */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 hover:border-yellow-500 transition-all duration-300">
+          <div  className="lg:col-span-2 bg-gray-900 border border-gray-800  rounded-xl p-6 hover:border-yellow-500 transition-all duration-300">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-semibold text-white">Orders Trend</h3>
               <ShoppingBag className="w-5 h-5 text-yellow-400" />
             </div>
-            <ResponsiveContainer width="100%" height={250}>
+            <ResponsiveContainer width="100%" height={380}>
               <BarChart data={monthlyData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                 <XAxis dataKey="month" stroke="#9CA3AF" />
@@ -731,7 +731,7 @@ const AdminDashboard = () => {
               <div>
                 <h4 className="text-lg font-semibold text-white">Manage Users</h4>
                 <p className="text-gray-400 text-sm">View and manage user accounts</p>
-                <p className="text-yellow-400 text-xs mt-1">{users.length} users registered</p>
+                <p className="text-yellow-400 text-xs mt-1">{stats.totalUsers} users registered</p>
               </div>
             </div>
             <button onClick={()=> navigate('/admindashboard/viewusers')} className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-medium py-2 rounded-lg transition-colors">
@@ -775,7 +775,8 @@ const AdminDashboard = () => {
               <div className="p-3 bg-green-500/20 rounded-xl">
                 <TrendingUp className="w-6 h-6 text-green-400" />
               </div>
-              <span className="text-green-400 text-sm font-medium">↑ 12%</span>
+              <span className="text-green-400 text-sm font-medium">↑ {stats.totalOrders > 0 ? '+' : ''}
+              {Math.round((stats.totalOrders / 30) * 100) / 100}%</span>
             </div>
             <h3 className="text-gray-400 text-sm font-medium mb-2">Monthly Growth</h3>
             <p className="text-2xl font-bold text-white">
