@@ -356,7 +356,7 @@ export const getUsers = async (req, res) => {
     // Add totalOrders and totalSpent for each user
     const enrichedUsers = await Promise.all(
       users.map(async (user) => {
-        const userOrders = await Order.find({ user: user._id});
+        const userOrders = await Order.find({ user: user._id , currentStatus: { $ne: 'Cancelled' }});
         const totalOrders = userOrders.length;
         const totalSpent = userOrders.reduce((sum, order) => sum + order.total, 0);
 
