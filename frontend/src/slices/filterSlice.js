@@ -7,8 +7,11 @@ const initialState = {
   material: [],
   color: [],
   size: [],
-  priceRanges: [],
-  season:[],
+  season: [],
+  priceRange: {
+    min: 0,
+    max: 10000
+  }
 };
 
 export const filterSlice = createSlice({
@@ -19,21 +22,7 @@ export const filterSlice = createSlice({
       const { type, value, checked } = action.payload;
       
       if (type === "priceRange") {
-        // For price range, we need to handle adding/removing ranges
-        if (checked) {
-          // Add new price range if it doesn't exist
-          const exists = state.priceRanges.some(
-            range => range.min === value.min && range.max === value.max
-          );
-          if (!exists) {
-            state.priceRanges.push(value);
-          }
-        } else {
-          // Remove the price range
-          state.priceRanges = state.priceRanges.filter(
-            range => !(range.min === value.min && range.max === value.max)
-          );
-        }
+        state.priceRange = value;
       } else {
         // Handle other filters
         if (checked) {

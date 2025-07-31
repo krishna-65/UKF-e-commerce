@@ -20,6 +20,9 @@ const ViewUsers = () => {
       const res = await apiConnector("GET", `${endpoints.getUser}?page=${page}`,null,{
         Authorization : `Bearer ${token}`
       });
+
+      console.log(res)
+
       if (res.data.success) {
         setUsers(res.data.users || []);
         setCurrentPage(res.data.currentPage);
