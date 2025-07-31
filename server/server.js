@@ -16,7 +16,7 @@ import brandRouter from './routes/brandRoutes.js';
 import paymentRouter from './routes/paymentRoute.js';
 import reviewRouter from './routes/reviewRoute.js';
 import { stripeWebhooks } from './controllers/orderController.js';
-
+import chatbotRoute from './routes/chatbotRoute.js';
 const app = express();
 const port = process.env.PORT || 4000;
 
@@ -52,7 +52,7 @@ app.use('/api/category', categoryRouter)
 app.use('/api/brand', brandRouter);
 app.use('/api/payment', paymentRouter);
 app.use('/api/review', reviewRouter);
-
+app.use('/api/chat', chatbotRoute);
 
 app.listen(port, ()=>{
     console.log(`Server is running on http://localhost:${port}`)
