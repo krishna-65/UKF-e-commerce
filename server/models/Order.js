@@ -16,7 +16,7 @@ const orderItemSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  color: {
+  colour: {
     type: String,
     required: true
   },

@@ -260,7 +260,7 @@ export const createOrder = async (req, res) => {
     const orderItems = [];
     
     for (const item of items) {
-      if (!item.productId || !item.quantity || !item.name || !item.price) {
+      if (!item.productId || !item.quantity || !item.name || !item.price ||!item.colour || !item.size) {
         return res.status(400).json({ 
           success: false, 
           message: 'Each item must contain productId, quantity, name, and price' 
@@ -287,6 +287,8 @@ export const createOrder = async (req, res) => {
         quantity: item.quantity,
         price: item.price,
         name: item.name,
+        colour: item.colour,
+        size : item.size,
         image: product.images[0]?.url || ''
       });
     }
