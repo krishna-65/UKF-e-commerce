@@ -362,6 +362,7 @@ export const getUsers = async (req, res) => {
 
         return {
           ...user,
+          userOrders,
           totalOrders,
           totalSpent,
         };
