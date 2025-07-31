@@ -141,8 +141,8 @@ const CreateOrder = () => {
   const calculateOrderTotals = () => {
     if (isFromCart && cartItems.length > 0) {
       const subtotal = cartTotal;
-      const shippingFee = 50;
-      const tax = Math.round(subtotal * 0.05);
+      const shippingFee = 0;
+      const tax = 0;
       const discount = 0;
       const total = subtotal + shippingFee + tax;
       
@@ -168,7 +168,10 @@ const CreateOrder = () => {
         quantity: item.quantity || 1,
         price: item.price,
         name: item.name,
-        image: item.image || item.images?.[0]?.url
+        image: item.image || item.images?.[0]?.url,
+        // Ensure size and color are always set
+        size: item.size || "Default",
+        color: item.color || "Default"
       }));
     } else if (product) {
       return [{
@@ -176,7 +179,10 @@ const CreateOrder = () => {
         quantity: 1,
         name: product.name,
         price: product.price,
-        image: product.images?.[0]?.url
+        image: product.images?.[0]?.url,
+        // Ensure size and color are always set
+        size: product.size || "Default",
+        color: product.color || "Default"
       }];
     }
     
@@ -194,6 +200,8 @@ const CreateOrder = () => {
       toast.error("No items to order");
       return;
     }
+
+   
 
     if (isProcessing) {
       return; // Prevent multiple submissions
@@ -216,6 +224,8 @@ const CreateOrder = () => {
       notes,
       isFromCart,
     };
+
+     console.log("order payload is : ",baseOrderPayload)
 
     if (paymentMethod === "COD") {
       try {

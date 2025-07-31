@@ -113,7 +113,8 @@ const CartSidebar = () => {
                         >
                           {item.name}
                         </h3>
-                        <p className="text-xs text-gray-300 mb-3">{item.color}</p>
+                        <p className="text-xs text-gray-300 mb-3">Color : {item.color}</p>
+                        <p className="text-xs text-gray-300 mb-3">Size : {item.size}</p>
                         
                         <div className="space-y-2">
                           <div className="flex flex-col">

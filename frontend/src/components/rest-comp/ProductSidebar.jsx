@@ -186,57 +186,7 @@ const ProductSidebar = () => {
             )}
           </div>
 
-          {/* Color */}
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Color</h2>
-            {[
-              "Red",
-              "Blue",
-              "Green",
-              "Black",
-              "White",
-              "Yellow",
-              "Pink",
-              "Brown",
-              "Orange",
-            ].map((color) => (
-              <label key={color} className="flex items-center mb-1">
-                <input
-                  type="checkbox"
-                  value={color}
-                  checked={filters.color.includes(color)}
-                  onChange={(e) =>
-                    handleCheckboxChange("color", color, e.target.checked)
-                  }
-                  className="mr-2"
-                />
-                <span
-                  className="w-4 h-4 inline-block rounded-full mr-2"
-                  style={{ backgroundColor: color.toLowerCase() }}
-                ></span>
-                {color}
-              </label>
-            ))}
-          </div>
-
-          {/* Size */}
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Size</h2>
-            {["XS", "S", "M", "L", "XL", "XXL"].map((size) => (
-              <label key={size} className="flex items-center mb-1">
-                <input
-                  type="checkbox"
-                  value={size}
-                  checked={filters.size.includes(size)}
-                  onChange={(e) =>
-                    handleCheckboxChange("size", size, e.target.checked)
-                  }
-                  className="mr-2"
-                />
-                {size}
-              </label>
-            ))}
-          </div>
+         
 
           {/* Price Range */}
           <div>

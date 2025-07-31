@@ -540,6 +540,8 @@ const ManageOrders = () => {
                           <div>
                             <h5 className="font-semibold text-gray-800">{item.name}</h5>
                             <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
+                            <p className="text-sm text-gray-600">Color: {item.color}</p>
+                            <p className="text-sm text-gray-600">Size: {item.size}</p>
                           </div>
                           <div className="text-right">
                             <div className="text-lg font-semibold text-blue-600">₹{item.price}</div>

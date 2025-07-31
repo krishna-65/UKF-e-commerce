@@ -52,6 +52,7 @@ const Products = () => {
     try {
       dispatch(setLoading(true));
       const res = await apiConnector("GET", getAllProduct);
+      console.log("these are the products :",res)
       setProducts(res.data.products || []);
       toast.success("Products loaded!");
     } catch {

@@ -5,6 +5,7 @@ import { apiConnector } from "../services/apiConnector";
 import { orderEndpoints, reviewEndpoints } from "../services/api";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { setProductData } from "../slices/productSlice";
 
 export default function ProductDetail() {
   const product = useSelector((state) => state.product.productData);
@@ -21,6 +22,10 @@ export default function ProductDetail() {
   const [isVisible, setIsVisible] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [animateButtons, setAnimateButtons] = useState(false);
+
+  // Size and Color selection states
+  const [selectedSize, setSelectedSize] = useState("");
+  const [selectedColor, setSelectedColor] = useState("");
 
   // Review related states
   const [reviews, setReviews] = useState([]);
@@ -41,6 +46,36 @@ export default function ProductDetail() {
       toast.error("Please log in as a valid user!");
       return;
     }
+
+    // Set default values if no selection is required
+    let finalSize = "Default";
+    let finalColor = "Default";
+
+    // Only validate and use selected values if the product has size/color options
+    if (product?.size && product.size.length > 0) {
+      if (!selectedSize) {
+        toast.error("Please select a size");
+        return;
+      }
+      finalSize = selectedSize;
+    }
+
+    if (product?.color && product.color.length > 0) {
+      if (!selectedColor) {
+        toast.error("Please select a color");
+        return;
+      }
+      finalColor = selectedColor;
+    }
+
+    // Add selected size and color to product in Redux store
+    const productWithSelections = {
+      ...product,
+      size: finalSize,
+      color: finalColor
+    };
+    
+    dispatch(setProductData(productWithSelections));
     navigate("/create-order");
   };
 
@@ -55,12 +90,41 @@ export default function ProductDetail() {
       return;
     }
 
+    // Set default values if no selection is required
+    let finalSize = "Default";
+    let finalColor = "Default";
+
+    // Only validate and use selected values if the product has size/color options
+    if (product?.size && product.size.length > 0) {
+      if (!selectedSize) {
+        toast.error("Please select a size");
+        return;
+      }
+      finalSize = selectedSize;
+    }
+
+    if (product?.color && product.color.length > 0) {
+      if (!selectedColor) {
+        toast.error("Please select a color");
+        return;
+      }
+      finalColor = selectedColor;
+    }
+
     try {
       setIsAddingToCart(true);
-      dispatch(addToCart(product));
+      
+      const productToAdd = {
+        ...product,
+        size: finalSize,
+        color: finalColor
+      };
+      
+      dispatch(addToCart(productToAdd));
       toast.success("Added to cart!");
     } catch (error) {
       console.error("Failed to add to cart:", error);
+      toast.error("Failed to add to cart");
     } finally {
       setIsAddingToCart(false);
     }
@@ -242,8 +306,6 @@ export default function ProductDetail() {
     { label: "Category", value: product?.category?.name || "Uncategorized" },
     { label: "Material", value: product?.material || "—" },
     { label: "Gender", value: product?.gender || "Unisex" },
-    { label: "Color", value: product?.color || "—" },
-    { label: "Size", value: product?.size || "—" }
   ];
 
   const offers = [
@@ -298,6 +360,78 @@ export default function ProductDetail() {
               />
             ))}
           </div>
+
+          {/* Size Selection */}
+          {product?.size && Array.isArray(product.size) && product.size.length > 0 && (
+            <div className={`transition-all duration-600 delay-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
+              <h3 className="text-lg font-semibold mb-3 text-[#ecba49]">Select Size:</h3>
+              <div className="flex flex-wrap gap-3">
+                {product.size.map((size, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setSelectedSize(size)}
+                    className={`px-4 py-2 border-2 rounded-lg font-semibold transition-all duration-300 hover:scale-105 ${
+                      selectedSize === size
+                        ? "border-[#ecba49] bg-[#ecba49] text-black shadow-lg scale-105"
+                        : "border-[#ecba49]/50 text-[#ecba49] hover:border-[#ecba49] hover:bg-[#ecba49]/10"
+                    }`}
+                    style={{ transitionDelay: `${idx * 50}ms` }}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+              {selectedSize && (
+                <p className="text-sm text-gray-400 mt-2">Selected size: <span className="text-[#ecba49] font-semibold">{selectedSize}</span></p>
+              )}
+            </div>
+          )}
+
+          {/* Color Selection */}
+          {product?.color && Array.isArray(product.color) && product.color.length > 0 && (
+            <div className={`transition-all duration-600 delay-600 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
+              <h3 className="text-lg font-semibold mb-3 text-[#ecba49]">Select Color:</h3>
+              <div className="flex flex-wrap gap-3">
+                {product.color.map((color, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setSelectedColor(color)}
+                    className={`px-4 py-2 border-2 rounded-lg font-semibold transition-all duration-300 hover:scale-105 ${
+                      selectedColor === color
+                        ? "border-[#ecba49] bg-[#ecba49] text-black shadow-lg scale-105"
+                        : "border-[#ecba49]/50 text-[#ecba49] hover:border-[#ecba49] hover:bg-[#ecba49]/10"
+                    }`}
+                    style={{ transitionDelay: `${idx * 50}ms` }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="w-4 h-4 rounded-full border border-gray-600"
+                        style={{ 
+                          backgroundColor: color.toLowerCase() === 'white' ? '#ffffff' : 
+                                           color.toLowerCase() === 'black' ? '#000000' :
+                                           color.toLowerCase() === 'red' ? '#ef4444' :
+                                           color.toLowerCase() === 'blue' ? '#3b82f6' :
+                                           color.toLowerCase() === 'green' ? '#22c55e' :
+                                           color.toLowerCase() === 'yellow' ? '#eab308' :
+                                           color.toLowerCase() === 'purple' ? '#a855f7' :
+                                           color.toLowerCase() === 'pink' ? '#ec4899' :
+                                           color.toLowerCase() === 'gray' ? '#6b7280' :
+                                           color.toLowerCase() === 'brown' ? '#a3685a' :
+                                           color.toLowerCase() === 'orange' ? '#f97316' :
+                                           color.toLowerCase() === 'navy' ? '#1e3a8a' :
+                                           '#ecba49'
+                        }}
+                      />
+                      {color}
+                    </div>
+                  </button>
+                ))}
+              </div>
+              {selectedColor && (
+                <p className="text-sm text-gray-400 mt-2">Selected color: <span className="text-[#ecba49] font-semibold">{selectedColor}</span></p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Product Info Section */}
