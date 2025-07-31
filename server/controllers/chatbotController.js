@@ -31,6 +31,8 @@ export const handleChat = async (req, res) => {
       }
     );
 
+
+    
     const botReply = response.data.choices[0].message.content;
     res.json({ reply: botReply });
 
