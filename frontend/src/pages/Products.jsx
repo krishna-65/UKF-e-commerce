@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import ProductCard from "../components/rest-comp/ProductCard";
 import ProductSidebar from "../components/rest-comp/ProductSidebar";
 import { productEndpoints } from "../services/api";
@@ -18,7 +18,11 @@ const Products = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [showProducts, setShowProducts] = useState(false);
   const [animateFilters, setAnimateFilters] = useState(false);
+  const [isFiltering, setIsFiltering] = useState(false);
   const productsPerPage = 20;
+
+  // Debounce timer ref to prevent excessive filtering
+  const filterTimeoutRef = useRef(null);
 
   const loading = useSelector((state) => state.auth.loading);
   const categories = useSelector((state) => state.filters.categories);
@@ -38,21 +42,15 @@ const Products = () => {
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
   const handlePageChange = (pageNum) => {
-    // Add exit animation before changing page
-    setShowProducts(false);
-    
-    setTimeout(() => {
-      setCurrentPage(pageNum);
-      setShowProducts(true);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }, 300);
+    setCurrentPage(pageNum);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const getAllProducts = async () => {
     try {
       dispatch(setLoading(true));
       const res = await apiConnector("GET", getAllProduct);
-      console.log("these are the products :",res)
+      console.log("these are the products :", res);
       setProducts(res.data.products || []);
       toast.success("Products loaded!");
     } catch {
@@ -67,86 +65,96 @@ const Products = () => {
     // Initial animations
     setTimeout(() => setIsVisible(true), 100);
     setTimeout(() => setAnimateFilters(true), 300);
+    setTimeout(() => setShowProducts(true), 500);
   }, []);
 
+  // Debounced filtering effect
   useEffect(() => {
-    const areFiltersEmpty =
-      categories.length === 0 &&
-      gender.length === 0 &&
-      material.length === 0 &&
-      season.length === 0 &&
-      color.length === 0 &&
-      size.length === 0 &&
-      filters.priceRanges.length === 0 &&
-      !search;
-
-    if (areFiltersEmpty) {
-      setFilteredProducts(products);
-      return;
+    // Clear existing timeout
+    if (filterTimeoutRef.current) {
+      clearTimeout(filterTimeoutRef.current);
     }
 
-    let filtered = [...products];
+    // Set filtering state
+    setIsFiltering(true);
 
-    if (categories.length > 0) {
-      filtered = filtered.filter((product) =>
-        categories.includes(product.category?.name)
-      );
-    }
-    if (gender.length > 0) {
-      filtered = filtered.filter((product) =>
-        gender.includes(product.gender)
-      );
-    }
-    if (material.length > 0) {
-      filtered = filtered.filter((product) =>
-        material.includes(product.material)
-      );
-    }
-    if (color.length > 0) {
-      filtered = filtered.filter((product) => color.includes(product.color));
-    }
-    if (size.length > 0) {
-      filtered = filtered.filter((product) => size.includes(product.size));
-    }
-    if (season.length > 0) {
-      filtered = filtered.filter((product) => season.includes(product.season));
-    }
-    if (filters.priceRanges.length > 0) {
-      filtered = filtered.filter((product) =>
-        filters.priceRanges.some(
-          (range) =>
-            product.price >= range.min && product.price <= range.max
-        )
-      );
-    }
-    if (search) {
-      filtered = filtered.filter(
-        (product) =>
-          product.name.toLowerCase().includes(search.toLowerCase()) ||
-          product.description.toLowerCase().includes(search.toLowerCase())
-      );
-    }
+    // Debounce the filtering
+    filterTimeoutRef.current = setTimeout(() => {
+      const areFiltersEmpty =
+        categories.length === 0 &&
+        gender.length === 0 &&
+        material.length === 0 &&
+        season.length === 0 &&
+        color.length === 0 &&
+        size.length === 0 &&
+        (!filters.priceRange ||
+          (filters.priceRange.min === 0 && filters.priceRange.max === 10000)) &&
+        !search;
 
-    // Animate filter changes
-    setShowProducts(false);
-    setTimeout(() => {
+      if (areFiltersEmpty) {
+        setFilteredProducts(products);
+        setCurrentPage(1);
+        setIsFiltering(false);
+        return;
+      }
+
+      let filtered = [...products];
+
+      if (categories.length > 0) {
+        filtered = filtered.filter((product) =>
+          categories.includes(product.category?.name)
+        );
+      }
+      if (gender.length > 0) {
+        filtered = filtered.filter((product) =>
+          gender.includes(product.gender)
+        );
+      }
+      if (material.length > 0) {
+        filtered = filtered.filter((product) =>
+          material.includes(product.material)
+        );
+      }
+      if (color.length > 0) {
+        filtered = filtered.filter((product) => color.includes(product.color));
+      }
+      if (size.length > 0) {
+        filtered = filtered.filter((product) => size.includes(product.size));
+      }
+      if (season.length > 0) {
+        filtered = filtered.filter((product) => season.includes(product.season));
+      }
+      if (filters.priceRange) {
+        filtered = filtered.filter((product) =>
+          product.price >= filters.priceRange.min && 
+          product.price <= filters.priceRange.max
+        );
+      }
+      if (search) {
+        filtered = filtered.filter(
+          (product) =>
+            product.name.toLowerCase().includes(search.toLowerCase()) ||
+            product.description.toLowerCase().includes(search.toLowerCase())
+        );
+      }
+
       setFilteredProducts(filtered);
       setCurrentPage(1);
-      setShowProducts(true);
-    }, 200);
-  }, [products, categories, gender, season, material, color, size, search, filters.priceRanges]);
+      setIsFiltering(false);
+    }, 300); // 300ms debounce delay
 
-  useEffect(() => {
-    // Animate products when they load
-    if (filteredProducts.length > 0 && !loading) {
-      setShowProducts(true);
-    }
-  }, [filteredProducts, loading]);
+    // Cleanup function
+    return () => {
+      if (filterTimeoutRef.current) {
+        clearTimeout(filterTimeoutRef.current);
+      }
+    };
+  }, [products, categories, gender, season, material, color, size, search, filters.priceRange]);
 
   return (
     <div className="flex flex-col lg:flex-row bg-black text-[#FFD700] min-h-screen">
       {/* Animated Sidebar */}
-      <div className={`fixed top-0 left-0 lg:relative z-50  transition-all duration-700 ease-out ${animateFilters ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'}`}>
+      <div className={`fixed top-0 left-0 lg:relative z-50 transition-all duration-700 ease-out ${animateFilters ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'}`}>
         <ProductSidebar />
       </div>
 
@@ -170,22 +178,31 @@ const Products = () => {
           </div>
         ) : (
           <>
-            {/* Products Grid with Staggered Animation */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+            {/* Filtering Indicator */}
+            {isFiltering && (
+              <div className="flex justify-center items-center mb-4">
+                <div className="flex items-center space-x-2 bg-yellow-400/10 px-4 py-2 rounded-lg">
+                  <div className="w-4 h-4 border-2 border-yellow-400/30 border-t-yellow-400 rounded-full animate-spin"></div>
+                  <span className="text-yellow-400 text-sm">Filtering products...</span>
+                </div>
+              </div>
+            )}
+
+            {/* Products Grid with Smooth Transition */}
+            <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 transition-opacity duration-300 ${isFiltering ? 'opacity-50' : 'opacity-100'}`}>
               {paginatedProducts.map((prod, index) => (
                 <div
                   key={prod._id}
-                  className={`transition-all duration-700 ease-out transform hover:scale-105 hover:-translate-y-2 hover:shadow-2xl ${
-                    showProducts 
-                      ? 'translate-y-0 opacity-100' 
-                      : 'translate-y-12 opacity-0'
+                  className={`product-card-wrapper transform transition-all duration-500 ease-out ${
+                    showProducts && !isFiltering
+                      ? 'translate-y-0 opacity-100 scale-100' 
+                      : 'translate-y-4 opacity-80 scale-95'
                   }`}
                   style={{ 
-                    transitionDelay: `${index * 100}ms`,
-                    filter: showProducts ? 'none' : 'blur(4px)'
+                    transitionDelay: `${Math.min(index * 50, 500)}ms`
                   }}
                 >
-                  <div className="group relative overflow-hidden rounded-lg">
+                  <div className="group relative overflow-hidden rounded-lg transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
                     <ProductCard product={prod} />
                     {/* Hover Overlay Effect */}
                     <div className="absolute inset-0 bg-gradient-to-t from-yellow-400/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
@@ -195,8 +212,8 @@ const Products = () => {
             </div>
 
             {/* Enhanced No Products Message */}
-            {filteredProducts.length === 0 && !loading && (
-              <div className={`flex flex-col items-center justify-center h-[40vh] transition-all duration-800 ${showProducts ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
+            {filteredProducts.length === 0 && !loading && !isFiltering && (
+              <div className="flex flex-col items-center justify-center h-[40vh] transition-all duration-800 translate-y-0 opacity-100">
                 <div className="text-6xl mb-4 animate-bounce">😔</div>
                 <div className="text-2xl font-semibold mb-2 text-yellow-400">No Products Found</div>
                 <div className="text-gray-400 text-center max-w-md">
@@ -205,9 +222,9 @@ const Products = () => {
               </div>
             )}
 
-            {/* Animated Pagination */}
-            {totalPages > 1 && (
-              <div className={`flex justify-center items-center mt-10 gap-2 flex-wrap transition-all duration-800 ${showProducts ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-8 opacity-0 scale-95'}`}>
+            {/* Smooth Pagination */}
+            {totalPages > 1 && !isFiltering && (
+              <div className="flex justify-center items-center mt-10 gap-2 flex-wrap transition-all duration-500 translate-y-0 opacity-100">
                 {/* Previous Button */}
                 {currentPage > 1 && (
                   <button
@@ -232,9 +249,6 @@ const Products = () => {
                           ? "bg-[#FFD700] text-black font-bold shadow-lg scale-110 border-[#FFD700]"
                           : "border-[#FFD700] hover:bg-[#FFD700] hover:text-black hover:shadow-lg"
                       }`}
-                      style={{
-                        animation: isActive ? 'pulse 2s infinite' : 'none'
-                      }}
                     >
                       {pageNum}
                     </button>
@@ -254,19 +268,21 @@ const Products = () => {
             )}
 
             {/* Product Count Indicator */}
-            <div className={`text-center mt-6 text-gray-400 transition-all duration-800 ${showProducts ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
-              Showing {paginatedProducts.length} of {filteredProducts.length} products
-              {filteredProducts.length !== products.length && (
-                <span className="text-yellow-400 ml-2">
-                  (filtered from {products.length} total)
-                </span>
-              )}
-            </div>
+            {!isFiltering && (
+              <div className="text-center mt-6 text-gray-400 transition-all duration-500 translate-y-0 opacity-100">
+                Showing {paginatedProducts.length} of {filteredProducts.length} products
+                {filteredProducts.length !== products.length && (
+                  <span className="text-yellow-400 ml-2">
+                    (filtered from {products.length} total)
+                  </span>
+                )}
+              </div>
+            )}
           </>
         )}
       </main>
 
-      {/* Custom Styles for Enhanced Animations */}
+      {/* Custom Styles for Smooth Animations */}
       <style jsx>{`
         @keyframes reverse {
           from { transform: rotate(360deg); }
@@ -277,17 +293,14 @@ const Products = () => {
           animation-direction: reverse;
         }
 
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
+        .product-card-wrapper {
+          will-change: transform, opacity;
         }
 
-        .float-animation {
-          animation: float 3s ease-in-out infinite;
-        }
-
-        .group:hover .group-hover\\:scale-x-100 {
-          transform: scaleX(1);
+        @media (prefers-reduced-motion: reduce) {
+          .product-card-wrapper {
+            transition: none;
+          }
         }
       `}</style>
     </div>
