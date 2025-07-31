@@ -39,8 +39,8 @@ const AddProduct = () => {
     category: "",
     subCategory: "",
     brand: "",
-    size: "",
-    color: "",
+    size: [],
+    color: [],
     material: "",
     fabric: "",
     fit: "",
@@ -59,6 +59,14 @@ const AddProduct = () => {
 
   const [imageInputs, setImageInputs] = useState([0]);
   const [images, setImages] = useState({});
+
+  // Available options for sizes and colors
+  const sizeOptions = ["XS", "S", "M", "L", "XL", "XXL", "XXXL", "4XL", "5XL", "One Size", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
+  const colorOptions = [
+    "Red", "Blue", "Green", "Yellow", "Black", "White", "Gray", "Brown", 
+    "Orange", "Purple", "Pink", "Navy", "Maroon", "Olive", "Teal", "Silver",
+    "Gold", "Beige", "Cream", "Tan", "Coral", "Mint", "Lavender", "Peach"
+  ];
 
   const getAllCategories = async () => {
     try {
@@ -160,6 +168,26 @@ const AddProduct = () => {
     setImageInputs((prev) => [...prev, prev.length]);
   };
 
+  // Handle size selection
+  const handleSizeChange = (size) => {
+    setFormData(prev => ({
+      ...prev,
+      size: prev.size.includes(size) 
+        ? prev.size.filter(s => s !== size)
+        : [...prev.size, size]
+    }));
+  };
+
+  // Handle color selection
+  const handleColorChange = (color) => {
+    setFormData(prev => ({
+      ...prev,
+      color: prev.color.includes(color) 
+        ? prev.color.filter(c => c !== color)
+        : [...prev.color, color]
+    }));
+  };
+
   const handleSubmit = async (edit = false) => {
     try {
       dispatch(setLoading(true));
@@ -172,6 +200,7 @@ const AddProduct = () => {
           if (isNaN(numVal)) throw new Error(`Invalid ${key} value`);
           payload.append(key, numVal);
         } else if (Array.isArray(value)) {
+          // Handle arrays (size, color, etc.)
           value.forEach((v) => payload.append(key, v));
         } else {
           payload.append(key, value);
@@ -220,8 +249,8 @@ const AddProduct = () => {
       category: prod.category?._id || "",
       subCategory: prod.subCategory || "",
       brand: prod.brand || "",
-      size: prod.size || "",
-      color: prod.color || "",
+      size: Array.isArray(prod.size) ? prod.size : [],
+      color: Array.isArray(prod.color) ? prod.color : [],
       material: prod.material || "",
       fabric: prod.fabric || "",
       fit: prod.fit || "",
@@ -242,42 +271,46 @@ const AddProduct = () => {
     setShowEditModal(true);
   };
 
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      description: "",
+      shortDescription: "",
+      price: "",
+      comparePrice: "",
+      costPerItem: "",
+      stock: "",
+      category: "",
+      subCategory: "",
+      brand: "",
+      size: [],
+      color: [],
+      material: "",
+      fabric: "",
+      fit: "",
+      sleeveLength: "",
+      pattern: "",
+      occasion: "",
+      season: "",
+      gender: "",
+      status: "active",
+      isFeatured: false,
+      isNewArrival: false,
+      isBestSeller: false,
+      isOnSale: false,
+      lookbookImages: [],
+    });
+    setImages({});
+    setImageInputs([0]);
+  };
+
   return (
     <div className="lg:w-[calc(100vw-256px)] p-6 text-black overflow-y-auto h-[100vh]">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-semibold">Manage Products</h2>
         <button
           onClick={() => {
-            setFormData({
-              name: "",
-              description: "",
-              shortDescription: "",
-              price: "",
-              comparePrice: "",
-              costPerItem: "",
-              stock: "",
-              category: "",
-              subCategory: "",
-              brand: "",
-              size: "",
-              color: "",
-              material: "",
-              fabric: "",
-              fit: "",
-              sleeveLength: "",
-              pattern: "",
-              occasion: "",
-              season: "",
-              gender: "",
-              status: "active",
-              isFeatured: false,
-              isNewArrival: false,
-              isBestSeller: false,
-              isOnSale: false,
-              lookbookImages: [],
-            });
-            setImages({});
-            setImageInputs([0]);
+            resetForm();
             setShowAddModal(true);
           }}
           className="bg-[#FFD770] text-black px-4 py-2 rounded shadow-lg hover:brightness-110 transition"
@@ -369,139 +402,171 @@ const AddProduct = () => {
 
       {(showAddModal || showEditModal) && (
         <div className="fixed z-[151] inset-0 bg-black/80 backdrop-blur-md flex justify-center items-center">
-          <div className="bg-[#111] text-[#FFD770] p-6 rounded-xl max-w-2xl w-[90%] hidescroll max-h-[90vh] overflow-y-auto shadow-[0_0_20px_rgba(255,215,112,0.3)] animate-fade-in border border-[#FFD770]/30 transition-all duration-300">
+          <div className="bg-[#111] text-[#FFD770] p-6 rounded-xl max-w-4xl w-[95%] hidescroll max-h-[90vh] overflow-y-auto shadow-[0_0_20px_rgba(255,215,112,0.3)] animate-fade-in border border-[#FFD770]/30 transition-all duration-300">
             <h3 className="text-2xl font-bold mb-6 text-center uppercase">
               {showAddModal ? "Add Product" : "Edit Product"}
             </h3>
 
-            {/* Text Inputs */}
-            {[
-              "name",
-              "shortDescription",
-              "price",
-              "comparePrice",
-              "costPerItem",
-              "stock",
-              "color",
-              "material",
-              "fabric",
-              "pattern",
-              "occasion",
-            ].map((key) => (
-              <input
-                key={key}
-                type={
-                  ["price", "stock", "comparePrice", "costPerItem"].includes(
-                    key
-                  )
-                    ? "number"
-                    : "text"
-                }
-                placeholder={key.charAt(0).toUpperCase() + key.slice(1)}
-                value={formData[key]}
-                onChange={(e) =>
-                  setFormData({ ...formData, [key]: e.target.value })
-                }
-                className="mb-4 w-full px-3 py-2 bg-black/30 text-[#FFD770] border border-[#FFD770]/40 rounded-md placeholder:text-[#FFD770]/60 focus:outline-none focus:border-[#FFD770]/80"
-              />
-            ))}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Text Inputs */}
+              {[
+                "name",
+                "shortDescription",
+                "price",
+                "comparePrice",
+                "costPerItem",
+                "stock",
+                "material",
+                "fabric",
+                "pattern",
+                "occasion",
+              ].map((key) => (
+                <input
+                  key={key}
+                  type={
+                    ["price", "stock", "comparePrice", "costPerItem"].includes(
+                      key
+                    )
+                      ? "number"
+                      : "text"
+                  }
+                  placeholder={key.charAt(0).toUpperCase() + key.slice(1)}
+                  value={formData[key]}
+                  onChange={(e) =>
+                    setFormData({ ...formData, [key]: e.target.value })
+                  }
+                  className="w-full px-3 py-2 bg-black/30 text-[#FFD770] border border-[#FFD770]/40 rounded-md placeholder:text-[#FFD770]/60 focus:outline-none focus:border-[#FFD770]/80"
+                />
+              ))}
 
-            {/* Dropdowns */}
-            {[
-              {
-                label: "Size",
-                value: formData.size,
-                options: [
-                  "XS",
-                  "S",
-                  "M",
-                  "L",
-                  "XL",
-                  "XXL",
-                  "XXXL",
-                  "4XL",
-                  "5XL",
-                  "One Size",
-                ],
-                key: "size",
-              },
-              {
-                label: "Fit",
-                value: formData.fit,
-                options: ["Slim", "Regular", "Oversized", "Relaxed"],
-                key: "fit",
-              },
-              {
-                label: "Sleeve Length",
-                value: formData.sleeveLength,
-                options: ["Short", "Half", "Long", "Sleeveless"],
-                key: "sleeveLength",
-              },
-              {
-                label: "Season",
-                value: formData.season,
-                options: ["Summer", "Winter", "Spring", "Fall", "All Season"],
-                key: "season",
-              },
-              {
-                label: "Gender",
-                value: formData.gender,
-                options: ["Men", "Women", "Unisex", "Kids", "Boys", "Girls"],
-                key: "gender",
-              },
-            ].map((dropdown) => (
+              {/* Size Selection */}
+              <div className="md:col-span-2">
+                <label className="block font-semibold mb-2 text-[#FFD770]">Sizes</label>
+                <div className="flex flex-wrap gap-2">
+                  {sizeOptions.map((size) => (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() => handleSizeChange(size)}
+                      className={`px-3 py-1 rounded border text-sm transition ${
+                        formData.size.includes(size)
+                          ? 'bg-[#FFD770] text-black border-[#FFD770]'
+                          : 'bg-black/30 text-[#FFD770] border-[#FFD770]/40 hover:border-[#FFD770]/80'
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-2 text-sm text-[#FFD770]/80">
+                  Selected: {formData.size.length > 0 ? formData.size.join(', ') : 'None'}
+                </div>
+              </div>
+
+              {/* Color Selection */}
+              <div className="md:col-span-2">
+                <label className="block font-semibold mb-2 text-[#FFD770]">Colors</label>
+                <div className="flex flex-wrap gap-2">
+                  {colorOptions.map((color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => handleColorChange(color)}
+                      className={`px-3 py-1 rounded border text-sm transition ${
+                        formData.color.includes(color)
+                          ? 'bg-[#FFD770] text-black border-[#FFD770]'
+                          : 'bg-black/30 text-[#FFD770] border-[#FFD770]/40 hover:border-[#FFD770]/80'
+                      }`}
+                    >
+                      {color}
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-2 text-sm text-[#FFD770]/80">
+                  Selected: {formData.color.length > 0 ? formData.color.join(', ') : 'None'}
+                </div>
+              </div>
+
+              {/* Dropdowns */}
+              {[
+                {
+                  label: "Fit",
+                  value: formData.fit,
+                  options: ["Slim", "Regular", "Oversized", "Relaxed"],
+                  key: "fit",
+                },
+                {
+                  label: "Sleeve Length",
+                  value: formData.sleeveLength,
+                  options: ["Short", "Half", "Long", "Sleeveless"],
+                  key: "sleeveLength",
+                },
+                {
+                  label: "Season",
+                  value: formData.season,
+                  options: ["Summer", "Winter", "Spring", "Fall", "All Season"],
+                  key: "season",
+                },
+                {
+                  label: "Gender",
+                  value: formData.gender,
+                  options: ["Men", "Women", "Unisex", "Kids", "Boys", "Girls"],
+                  key: "gender",
+                },
+              ].map((dropdown) => (
+                <select
+                  key={dropdown.key}
+                  value={dropdown.value}
+                  onChange={(e) =>
+                    setFormData({ ...formData, [dropdown.key]: e.target.value })
+                  }
+                  className="w-full px-3 py-2 bg-black/30 text-[#FFD770] border border-[#FFD770]/40 rounded-md focus:outline-none"
+                >
+                  <option className="bg-black" value="">Select {dropdown.label}</option>
+                  {dropdown.options.map((opt) => (
+                    <option className="bg-black" key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
+                </select>
+              ))}
+
+              {/* Brands */}
               <select
-                key={dropdown.key}
-                value={dropdown.value}
+                value={formData.brand}
                 onChange={(e) =>
-                  setFormData({ ...formData, [dropdown.key]: e.target.value })
+                  setFormData({ ...formData, brand: e.target.value })
                 }
-                className="mb-4 w-full px-3 py-2 bg-black/30 text-[#FFD770] border border-[#FFD770]/40 rounded-md focus:outline-none"
+                className="w-full px-3 py-2 bg-black/30 text-[#FFD770] border border-[#FFD770]/40 rounded-md"
               >
-                <option value="">Select {dropdown.label}</option>
-                {dropdown.options.map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
+                <option className="bg-black"  value="">Select Brand</option>
+                {brands.map((b) => (
+                  <option className="bg-black"  key={b._id} value={b._id}>
+                    {b.name}
                   </option>
                 ))}
               </select>
-            ))}
 
-            {/* Brands */}
-            <select
-              value={formData.brand}
-              onChange={(e) =>
-                setFormData({ ...formData, brand: e.target.value })
-              }
-              className="mb-4 w-full px-3 py-2 bg-black/30 text-[#FFD770] border border-[#FFD770]/40 rounded-md"
-            >
-              <option value="">Select Brand</option>
-              {brands.map((b) => (
-                <option key={b._id} value={b._id}>
-                  {b.name}
-                </option>
-              ))}
-            </select>
-
-            {/* Category */}
-            <select
-              value={formData.category}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  category: e.target.value,
-                  subCategory: e.target.value,
-                })
-              }
-              className="mb-4 w-full px-3 py-2 bg-black/30 text-[#FFD770] border border-[#FFD770]/40 rounded-md"
-            >
-              <option value="">Select Category</option>
-              {categories.map((cat) => (
-                <option key={cat._id} value={cat._id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
+              {/* Category */}
+              <select
+                value={formData.category}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    category: e.target.value,
+                    subCategory: e.target.value,
+                  })
+                }
+                className="w-full px-3 py-2 bg-black/30 text-[#FFD770] border border-[#FFD770]/40 rounded-md"
+              >
+                <option className="bg-black"  value="">Select Category</option>
+                {categories.map((cat) => (
+                  <option  className="bg-black" key={cat._id} value={cat._id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             {/* Description */}
             <textarea
@@ -510,11 +575,11 @@ const AddProduct = () => {
               onChange={(e) =>
                 setFormData({ ...formData, description: e.target.value })
               }
-              className="mb-4 w-full px-3 py-2 bg-black/30 text-[#FFD770] border border-[#FFD770]/40 rounded-md placeholder:text-[#FFD770]/60 focus:outline-none"
+              className="mt-4 w-full px-3 py-2 bg-black/30 text-[#FFD770] border border-[#FFD770]/40 rounded-md placeholder:text-[#FFD770]/60 focus:outline-none h-24"
             />
 
             {/* Boolean Flags */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="grid grid-cols-2 gap-4 mt-4">
               {["isFeatured", "isNewArrival", "isBestSeller", "isOnSale"].map(
                 (flag) => (
                   <label key={flag} className="flex items-center gap-2">
@@ -532,7 +597,7 @@ const AddProduct = () => {
             </div>
 
             {/* Image Upload */}
-            <div className="mb-6">
+            <div className="mt-6">
               <label className="block font-semibold mb-2">Product Images</label>
               {imageInputs.map((key) => (
                 <input
@@ -553,7 +618,7 @@ const AddProduct = () => {
             </div>
 
             {/* Modal Buttons */}
-            <div className="flex justify-end gap-4">
+            <div className="flex justify-end gap-4 mt-6">
               <button
                 onClick={() => {
                   setShowAddModal(false);
