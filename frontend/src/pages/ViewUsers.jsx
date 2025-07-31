@@ -89,7 +89,6 @@ const ViewUsers = () => {
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
       fetchUsers(newPage);
-      
     }
   };
 
@@ -102,42 +101,42 @@ const ViewUsers = () => {
   };
 
   return (
-    <div className="p-4 bg-[#fafafa] lg:h-screen overflow-y-scroll hidescroll lg:min-w-[1600px] text-black">
+    <div className="p-3 sm:p-4 lg:p-6 bg-[#fafafa] h-screen overflow-y-scroll hidescroll w-[100vw] lg:w-[1600px] text-black">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-[#222] flex items-center justify-center gap-2">
-            <Users className="text-[#FFD770]" size={32} />
+        <div className="text-center mb-4 sm:mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#222] flex items-center justify-center gap-2">
+            <Users className="text-[#FFD770]" size={28} />
             All Users
           </h1>
         </div>
 
         {/* Search Bar */}
-        <div className="mb-6 max-w-md mx-auto">
+        <div className="mb-4 sm:mb-6 max-w-md mx-auto">
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-gray-400" />
+              <Search className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
             </div>
             <input
               type="text"
               placeholder="Search by name or phone number on this page..."
               value={searchQuery}
               onChange={handleSearchChange}
-              className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#FFD770] focus:border-transparent transition duration-200 shadow-sm"
+              className="block w-full pl-10 pr-10 py-2 sm:py-3 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#FFD770] focus:border-transparent transition duration-200 shadow-sm text-sm sm:text-base"
             />
             {searchQuery && (
               <button
                 onClick={clearSearch}
                 className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             )}
           </div>
 
           {/* Search Results Summary */}
           {!loading && (
-            <div className="mt-2 text-sm text-gray-600 text-center">
+            <div className="mt-2 text-xs sm:text-sm text-gray-600 text-center">
               {searchQuery.trim() ? (
                 filteredUsers.length > 0 ? (
                   <span className="text-green-600">
@@ -157,9 +156,9 @@ const ViewUsers = () => {
           )}
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto shadow-lg rounded-lg">
-          <table className="lg:min-w-[700px] w-full bg-white rounded">
+        {/* Desktop Table View - Hidden on mobile */}
+        <div className="hidden lg:block overflow-x-auto shadow-lg rounded-lg mb-6">
+          <table className="min-w-[700px] w-full bg-white rounded">
             <thead className="bg-[#FFD770] text-[#222]">
               <tr>
                 <th className="px-4 py-3 text-left font-semibold">Sr. No.</th>
@@ -257,18 +256,101 @@ const ViewUsers = () => {
           </table>
         </div>
 
+        {/* Mobile/Tablet Card View - Hidden on desktop */}
+        <div className="lg:hidden mb-6">
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#FFD770] border-t-transparent mr-3"></div>
+              <span className="text-gray-600">Loading users...</span>
+            </div>
+          ) : filteredUsers.length > 0 ? (
+            <div className="space-y-4">
+              {filteredUsers.map((user, idx) => {
+                const originalIndex = allUsers.findIndex(u => u._id === user._id);
+                const serialNumber = (currentPage - 1) * 10 + originalIndex + 1;
+                
+                return (
+                  <div key={user._id} className="bg-white rounded-lg shadow-lg p-5 border border-gray-200 hover:shadow-xl transition-shadow duration-300">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-xs bg-gray-100 px-2 py-1 rounded font-medium">#{serialNumber}</span>
+                          <span className="bg-[#FFD770] text-black px-2 py-1 rounded text-xs font-medium">
+                            {user.totalOrders || 0} Orders
+                          </span>
+                        </div>
+                        <h3 className="font-bold text-lg text-gray-800 mb-1">
+                          {searchQuery && user.name && user.name.toLowerCase().includes(searchQuery.toLowerCase()) ? (
+                            <span
+                              dangerouslySetInnerHTML={{
+                                __html: user.name.replace(
+                                  new RegExp(`(${searchQuery})`, 'gi'),
+                                  '<mark class="bg-yellow-200 px-1 rounded">$1</mark>'
+                                )
+                              }}
+                            />
+                          ) : (
+                            user.name
+                          )}
+                        </h3>
+                        <p className="text-gray-600 text-lg font-medium">
+                          {searchQuery && user.phone && String(user.phone).toLowerCase().includes(searchQuery.toLowerCase()) ? (
+                            <span
+                              dangerouslySetInnerHTML={{
+                                __html: String(user.phone).replace(
+                                  new RegExp(`(${searchQuery})`, 'gi'),
+                                  '<mark class="bg-yellow-200 px-1 rounded">$1</mark>'
+                                )
+                              }}
+                            />
+                          ) : (
+                            user.phone
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="pt-3 border-t border-gray-200">
+                      <button
+                        className="w-full bg-[#FFD770] text-black py-3 px-4 rounded-md hover:brightness-110 transition font-medium flex items-center justify-center gap-2"
+                        onClick={() => setSelectedUser(user)}
+                      >
+                        <Eye size={18} />
+                        View Details
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="bg-white rounded-lg shadow-lg p-8 text-center border border-gray-200">
+              <Users size={48} className="text-gray-300 mb-4 mx-auto" />
+              <p className="text-lg font-medium text-gray-700 mb-2">No users found</p>
+              {searchQuery ? (
+                <div className="text-sm space-y-1 text-gray-500">
+                  <p>No users match your search: "<strong>{searchQuery}</strong>" on this page</p>
+                  <p className="text-gray-400">Try clearing the search or check other pages</p>
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500">No users are available on this page</p>
+              )}
+            </div>
+          )}
+        </div>
+
         {/* Pagination Controls */}
         {totalPages > 1 && !loading && (
-          <div className="flex justify-center items-center gap-4 mt-6">
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-6">
             <button
-              className="px-4 py-2 bg-[#FFD770] text-black rounded-md hover:scale-105 transition disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 font-medium"
+              className="px-4 py-2 bg-[#FFD770] text-black rounded-md hover:scale-105 transition disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 font-medium w-full sm:w-auto"
               disabled={currentPage === 1}
               onClick={() => handlePageChange(currentPage - 1)}
             >
               Previous
             </button>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap justify-center">
               {/* Page numbers */}
               {[...Array(Math.min(5, totalPages))].map((_, i) => {
                 let pageNum;
@@ -286,7 +368,7 @@ const ViewUsers = () => {
                   <button
                     key={i}
                     onClick={() => handlePageChange(pageNum)}
-                    className={`px-3 py-2 rounded-md transition font-medium ${
+                    className={`px-3 py-2 rounded-md transition font-medium text-sm ${
                       currentPage === pageNum
                         ? 'bg-[#FFD770] text-black shadow-md'
                         : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
@@ -299,7 +381,7 @@ const ViewUsers = () => {
             </div>
 
             <button
-              className="px-4 py-2 bg-[#FFD770] text-black rounded-md hover:scale-105 transition disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 font-medium"
+              className="px-4 py-2 bg-[#FFD770] text-black rounded-md hover:scale-105 transition disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 font-medium w-full sm:w-auto"
               disabled={currentPage === totalPages}
               onClick={() => handlePageChange(currentPage + 1)}
             >
@@ -308,7 +390,7 @@ const ViewUsers = () => {
           </div>
         )}
 
-        <div className="text-center mt-4 text-sm text-gray-600">
+        <div className="text-center mt-4 text-xs sm:text-sm text-gray-600">
           {!loading && (
             <p>
               {searchQuery ? (
@@ -323,10 +405,10 @@ const ViewUsers = () => {
 
       {/* Modal */}
       {selectedUser && (
-        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="bg-[#111] text-[#FFD770] max-w-xl w-full rounded-lg p-6 overflow-y-auto max-h-[85vh] shadow-[0_0_20px_rgba(255,215,112,0.3)] animate-scale-in border border-[#FFD770]/30">
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-3 sm:p-4 backdrop-blur-sm">
+          <div className="bg-[#111] text-[#FFD770] max-w-xl w-full rounded-lg p-4 sm:p-6 overflow-y-auto max-h-[90vh] shadow-[0_0_20px_rgba(255,215,112,0.3)] animate-scale-in border border-[#FFD770]/30">
             <div className="flex justify-between items-center mb-4 border-b border-[#FFD770]/20 pb-2">
-              <h2 className="text-xl font-bold uppercase tracking-wide">User Details</h2>
+              <h2 className="text-lg sm:text-xl font-bold uppercase tracking-wide">User Details</h2>
               <button
                 onClick={() => setSelectedUser(null)}
                 className="text-[#FFD770] hover:text-white hover:bg-[#FFD770]/20 p-2 rounded-full transition"
@@ -335,7 +417,7 @@ const ViewUsers = () => {
               </button>
             </div>
 
-            <div className="space-y-3 text-sm tracking-wide leading-relaxed">
+            <div className="space-y-3 text-sm sm:text-base tracking-wide leading-relaxed">
               <p><span className="font-semibold">Name:</span> {selectedUser.name}</p>
               <p><span className="font-semibold">Phone:</span> {selectedUser.phone}</p>
               <p><span className="font-semibold">Total Orders:</span> {selectedUser.totalOrders}</p>
