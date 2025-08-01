@@ -6,6 +6,10 @@ import jwt from 'jsonwebtoken';
 import Order from "../models/Order.js";
 import {uploadImageToCloudinary} from '../utils/imageUploader.js'
 import twilio from 'twilio';
+import dotenv from "dotenv";
+dotenv.config();
+
+const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 // Register User : /api/user/register
 export const register = async (req, res)=>{
     try {
@@ -190,15 +194,12 @@ export const getProfile = async(req, res) =>{
 
 
 
-
-const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-
 export const sendOTPToPhone = async (phone, otp) => {
   try {
     const message = await client.messages.create({
       body: `Your OTP is ${otp}. It will expire in 10 minutes.`,
-      from: process.env.TWILIO_PHONE_NUMBER,
-      to: `+91${phone}` // assumes Indian number, customize if needed
+      messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
+      to: `+91${phone}`
     });
     console.log("OTP sent:", message.sid);
     return true;
@@ -237,28 +238,45 @@ export const resetPassword = async (req, res) => {
   try {
     const { phone, otp, newPassword, confirmPassword } = req.body;
 
+
+
+    // Find the user
     const user = await User.findOne({ phone });
-    if (!user) return res.status(404).json({ message: 'User not found' });
-
-    if(otp)
-    if (user.otp !== otp || new Date() > user.otpExpires) {
-      return res.status(400).json({ message: 'Invalid or expired OTP' });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
 
+    // Check OTP validity
+    if (otp) {
+      if (!otp || user.otp !== otp || new Date() > user.otpExpires) {
+        return res.status(400).json({ success: false, message: 'Invalid or expired OTP' });
+      }
+    }
+    
+
+    // Check if passwords match
     if (newPassword !== confirmPassword) {
-      return res.status(400).json({ message: 'Passwords do not match' });
+      return res.status(400).json({ success: false, message: 'Passwords do not match' });
     }
+
+    // Hash the new password
     const hashed = await bcrypt.hash(newPassword, 10);
+
+    // Update user fields
     user.password = hashed;
     user.otp = null;
     user.otpExpires = null;
-    await user.save();
+
+    // Save user without triggering full validation
+    await user.save({ validateBeforeSave: false });
 
     res.json({ success: true, message: 'Password reset successful' });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    console.error("Reset Password Error:", err);
+    res.status(500).json({ success: false, message: "Server Error", error: err.message });
   }
 };
+
 
 export const getAdminDashboardStats = async (req, res) => {
   try {
