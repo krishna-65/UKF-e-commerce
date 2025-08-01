@@ -19,6 +19,9 @@ import {
   ShoppingBag,
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
+  Filter,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { setProductData } from "../slices/productSlice";
@@ -278,6 +281,86 @@ const EditableDOBField = ({
   );
 };
 
+// Pagination Component
+const Pagination = ({ currentPage, totalPages, onPageChange, totalItems, itemsPerPage }) => {
+  const startItem = (currentPage - 1) * itemsPerPage + 1;
+  const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) pages.push(i);
+        pages.push('...');
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1);
+        pages.push('...');
+        for (let i = totalPages - 3; i <= totalPages; i++) pages.push(i);
+      } else {
+        pages.push(1);
+        pages.push('...');
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) pages.push(i);
+        pages.push('...');
+        pages.push(totalPages);
+      }
+    }
+    
+    return pages;
+  };
+
+  if (totalPages <= 1) return null;
+
+  return (
+    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6 p-4 bg-[#1a1a1a] rounded-lg border border-[#ecba49]/20">
+      <div className="text-sm text-gray-400">
+        Showing {startItem} to {endItem} of {totalItems} orders
+      </div>
+      
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="p-2 rounded-lg border border-[#ecba49]/30 hover:bg-[#ecba49]/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+        >
+          <ChevronLeft size={16} className="text-[#ecba49]" />
+        </button>
+        
+        {getPageNumbers().map((page, index) => (
+          <button
+            key={index}
+            onClick={() => typeof page === 'number' && onPageChange(page)}
+            disabled={page === '...'}
+            className={`px-3 py-2 rounded-lg transition-all duration-300 ${
+              page === currentPage
+                ? 'bg-[#ecba49] text-black font-semibold'
+                : page === '...'
+                ? 'cursor-default text-gray-500'
+                : 'border border-[#ecba49]/30 hover:bg-[#ecba49]/10 text-[#ecba49]'
+            }`}
+          >
+            {page}
+          </button>
+        ))}
+        
+        <button
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="p-2 rounded-lg border border-[#ecba49]/30 hover:bg-[#ecba49]/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+        >
+          <ChevronRight size={16} className="text-[#ecba49]" />
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const Profile = () => {
   const user = useSelector((state) => state.auth.userData);
   const [profileData, setProfileData] = useState(null);
@@ -288,6 +371,13 @@ const Profile = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalOrders, setTotalOrders] = useState(0);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [statusFilter, setStatusFilter] = useState('');
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -312,27 +402,29 @@ const Profile = () => {
         setProfileData(response.data.user);
       }
     } catch (error) {
-      console.log("error whil fetching profile", error);
+      console.log("error while fetching profile", error);
       toast.error("Failed to fetch profile");
     } finally {
       setLoading(false);
     }
   };
+
   const token = useSelector((state) => state.auth.token);
 
-//SELECT PRODUCT TO GUIDE TO THE PRODUCT FROM THE ORDER TO THE PRODUCT
-
-//   const selectProduct = (item) => {
-//     dispatch(setProductData(item.product));
-//     navigate("/productdetail");
-//   };
-
-  const fetchOrders = async () => {
+  // Updated fetchOrders with pagination
+  const fetchOrders = async (page = 1, limit = 10, status = '') => {
     try {
       setOrdersLoading(true);
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+      });
+      
+      if (status) params.append('status', status);
+
       const response = await apiConnector(
         "GET",
-        orderEndpoints.getUserOrders,
+        `${orderEndpoints.getUserOrders}?${params.toString()}`,
         null,
         {
           Authorization: `Bearer ${token}`,
@@ -343,13 +435,39 @@ const Profile = () => {
 
       if (response.data.success) {
         setOrders(response.data.orders);
+        setCurrentPage(response.data.page);
+        setTotalPages(response.data.pages);
+        setTotalOrders(response.data.total);
+        setItemsPerPage(response.data.limit);
       }
     } catch (error) {
-      console.log("error while fetchingorder", error);
+      console.log("error while fetching orders", error);
       toast.error("Failed to fetch orders");
     } finally {
       setOrdersLoading(false);
     }
+  };
+
+  // Handle page change
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      fetchOrders(page, itemsPerPage, statusFilter);
+    }
+  };
+
+  // Handle items per page change
+  const handleItemsPerPageChange = (newLimit) => {
+    setItemsPerPage(newLimit);
+    setCurrentPage(1);
+    fetchOrders(1, newLimit, statusFilter);
+  };
+
+  // Handle status filter change
+  const handleStatusFilterChange = (status) => {
+    setStatusFilter(status);
+    setCurrentPage(1);
+    fetchOrders(1, itemsPerPage, status);
   };
 
   const handleSave = async (field, value) => {
@@ -386,7 +504,7 @@ const Profile = () => {
       );
       if (response.data.success) {
         toast.success("Order cancelled successfully");
-        fetchOrders();
+        fetchOrders(currentPage, itemsPerPage, statusFilter);
       }
     } catch (error) {
       console.log("error while cancelling", error);
@@ -449,29 +567,8 @@ const Profile = () => {
     setSortConfig({ key, direction });
   };
 
-  const sortedOrders = React.useMemo(() => {
-    let sortableOrders = [...orders];
-    if (sortConfig.key) {
-      sortableOrders.sort((a, b) => {
-        let aValue = a[sortConfig.key];
-        let bValue = b[sortConfig.key];
-
-        if (sortConfig.key === "createdAt") {
-          aValue = new Date(aValue);
-          bValue = new Date(bValue);
-        }
-
-        if (aValue < bValue) {
-          return sortConfig.direction === "asc" ? -1 : 1;
-        }
-        if (aValue > bValue) {
-          return sortConfig.direction === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return sortableOrders;
-  }, [orders, sortConfig]);
+  // Remove local sorting since we're using pagination from backend
+  const sortedOrders = orders;
 
   const SortButton = ({ column, children }) => (
     <button
@@ -497,26 +594,67 @@ const Profile = () => {
       <div className="min-h-screen bg-black text-[#ecba49] p-6 overflow-hidden">
         <div className="max-w-7xl mx-auto">
           <div
-            className={`flex justify-between items-center mb-8 transition-all duration-800 ${
+            className={`flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 transition-all duration-800 ${
               isVisible
                 ? "translate-y-0 opacity-100"
                 : "-translate-y-8 opacity-0"
             }`}
           >
-            <h1 className="text-3xl font-bold flex items-center gap-3 hover:text-yellow-300 transition-colors duration-300">
-              <ShoppingBag className="animate-bounce" />
-              My Orders
-            </h1>
-            <button
-              onClick={() => {
-                setShowOrders(false);
-                setIsVisible(false);
-                setTimeout(() => setIsVisible(true), 100);
-              }}
-              className="px-6 py-3 border border-[#ecba49] rounded-lg hover:bg-[#ecba49] hover:text-black transition-all duration-300 hover:scale-105 active:scale-95"
-            >
-              Back to Profile
-            </button>
+            <div>
+              <h1 className="text-3xl font-bold flex items-center gap-3 hover:text-yellow-300 transition-colors duration-300">
+                <ShoppingBag className="animate-bounce" />
+                My Orders
+              </h1>
+              <p className="text-gray-400 text-sm mt-1">
+                Total: {totalOrders} orders
+              </p>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+              {/* Items per page selector */}
+              <div className="flex items-center gap-2">
+                <label className="text-sm text-gray-400">Show:</label>
+                <select
+                  value={itemsPerPage}
+                  onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                  className="bg-[#1a1a1a] border border-[#ecba49]/30 rounded px-3 py-2 text-[#ecba49] focus:outline-none focus:ring-2 focus:ring-[#ecba49]/50"
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                </select>
+              </div>
+
+              {/* Status filter */}
+              <div className="flex items-center gap-2">
+                <Filter size={16} className="text-[#ecba49]" />
+                <select
+                  value={statusFilter}
+                  onChange={(e) => handleStatusFilterChange(e.target.value)}
+                  className="bg-[#1a1a1a] border border-[#ecba49]/30 rounded px-3 py-2 text-[#ecba49] focus:outline-none focus:ring-2 focus:ring-[#ecba49]/50"
+                >
+                  <option value="">All Orders</option>
+                  <option value="Order Placed">Order Placed</option>
+                  <option value="Processing">Processing</option>
+                  <option value="Shipped">Shipped</option>
+                  <option value="Delivered">Delivered</option>
+                  <option value="Cancelled">Cancelled</option>
+                  <option value="Return Requested">Return Requested</option>
+                </select>
+              </div>
+
+              <button
+                onClick={() => {
+                  setShowOrders(false);
+                  setIsVisible(false);
+                  setTimeout(() => setIsVisible(true), 100);
+                }}
+                className="px-6 py-3 border border-[#ecba49] rounded-lg hover:bg-[#ecba49] hover:text-black transition-all duration-300 hover:scale-105 active:scale-95"
+              >
+                Back to Profile
+              </button>
+            </div>
           </div>
 
           {ordersLoading ? (
@@ -703,6 +841,15 @@ const Profile = () => {
                   </div>
                 ))}
               </div>
+
+              {/* Pagination Component */}
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+                totalItems={totalOrders}
+                itemsPerPage={itemsPerPage}
+              />
             </div>
           ) : (
             <div className="text-center py-20">
@@ -710,10 +857,21 @@ const Profile = () => {
                 size={64}
                 className="mx-auto mb-4 text-gray-600 animate-pulse"
               />
-              <h3 className="text-xl font-semibold mb-2">No Orders Yet</h3>
+              <h3 className="text-xl font-semibold mb-2">No Orders Found</h3>
               <p className="text-gray-400">
-                Your order history will appear here
+                {statusFilter 
+                  ? `No orders found with status "${statusFilter}"`
+                  : "Your order history will appear here"
+                }
               </p>
+              {statusFilter && (
+                <button
+                  onClick={() => handleStatusFilterChange('')}
+                  className="mt-4 px-4 py-2 border border-[#ecba49] rounded-lg hover:bg-[#ecba49] hover:text-black transition-all duration-300"
+                >
+                  Show All Orders
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -1060,7 +1218,7 @@ const Profile = () => {
               setIsVisible(false);
               setTimeout(() => {
                 setIsVisible(true);
-                fetchOrders();
+                fetchOrders(1, itemsPerPage, statusFilter);
               }, 100);
             }}
             className="flex items-center gap-2 px-6 py-3 bg-[#ecba49] text-black rounded-lg font-semibold hover:brightness-110 transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
