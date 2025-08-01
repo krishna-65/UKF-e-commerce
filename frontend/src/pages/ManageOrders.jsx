@@ -536,6 +536,234 @@ const ManageOrders = () => {
         </>
       )}
 
+        {/* Order Detail Modal */}
+      {showDetailModal && selectedOrder && (
+        <div className="fixed inset-0 backdrop-blur-lg bg-opacity-50 flex justify-center items-center z-50 p-4">
+          <div className="bg-white rounded-lg w-full max-w-4xl max-h-[70vh] mt-16 overflow-y-auto text-black relative hidescroll">
+            <div className="sticky top-0 bg-white border-b p-4 sm:p-6 flex justify-between items-center">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-800">
+                Order Details: {selectedOrder.orderId}
+              </h3>
+              <button
+                onClick={() => setShowDetailModal(false)}
+                className="text-gray-500 hover:text-gray-700 text-2xl font-bold p-1"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="p-4 sm:p-6 space-y-6">
+              {/* Order Summary */}
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 sm:p-6 rounded-lg border border-blue-200">
+                <h4 className="text-lg font-semibold mb-4 text-blue-800">Order Summary</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="text-center p-3 bg-white rounded-lg shadow-sm">
+                    <div className="text-2xl font-bold text-blue-600">₹{selectedOrder.total}</div>
+                    <div className="text-sm text-gray-600">Total Amount</div>
+                  </div>
+                  <div className="text-center p-3 bg-white rounded-lg shadow-sm">
+                    <div className="text-2xl font-bold text-green-600">{selectedOrder.items.length}</div>
+                    <div className="text-sm text-gray-600">Items</div>
+                  </div>
+                  <div className="text-center p-3 bg-white rounded-lg shadow-sm">
+                    <div className={`text-sm font-medium px-2 py-1 rounded-full ${getStatusBadgeColor(selectedOrder.currentStatus)}`}>
+                      {selectedOrder.currentStatus}
+                    </div>
+                    <div className="text-sm text-gray-600 mt-1">Status</div>
+                  </div>
+                  <div className="text-center p-3 bg-white rounded-lg shadow-sm">
+                    <div className="text-sm font-medium text-gray-800">{selectedOrder.paymentMethod}</div>
+                    <div className="text-sm text-gray-600">Payment Method</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Customer Information */}
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 sm:p-6 rounded-lg border border-green-200">
+                <h4 className="text-lg font-semibold mb-4 text-green-800">Customer Information</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Name</label>
+                    <div className="text-base font-semibold">{selectedOrder.user?.name}</div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Phone</label>
+                    <div className="text-base">{selectedOrder.user?.phone}</div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Order Date</label>
+                    <div className="text-base">{new Date(selectedOrder.createdAt).toLocaleDateString()}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Ordered Items */}
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 sm:p-6 rounded-lg border border-purple-200">
+                <h4 className="text-lg font-semibold mb-4 text-purple-800">Ordered Items</h4>
+                <div className="space-y-4">
+                  {selectedOrder.items.map((item, index) => (
+                    <div key={index} className="flex flex-col sm:flex-row gap-4 p-4 bg-white rounded-lg shadow-sm border">
+                      <div className="w-full sm:w-20 h-20 flex-shrink-0">
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-full h-full object-cover rounded-lg"
+                          onError={(e) => {
+                            e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMDAgMTIwSDgwVjEwMEgxMDBWMTIwWk0xMjAgMTIwSDEwMFYxMDBIMTIwVjEyMFoiIGZpbGw9IiNEMUQ1REIiLz4KPHN2Zz4K';
+                          }}
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                          <div>
+                            <h5 className="font-semibold text-gray-800">{item.name}</h5>
+                            <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
+                            <p className="text-sm text-gray-600">Color: {item.color}</p>
+                            <p className="text-sm text-gray-600">Size: {item.size}</p>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-lg font-semibold text-blue-600">₹{item.price}</div>
+                            <div className="text-sm text-gray-500">₹{item.price * item.quantity} total</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Pricing Breakdown */}
+              <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-4 sm:p-6 rounded-lg border border-yellow-200">
+                <h4 className="text-lg font-semibold mb-4 text-yellow-800">Pricing Breakdown</h4>
+                <div className="space-y-3">
+                  <div className="flex justify-between py-2 border-b border-yellow-200">
+                    <span className="text-gray-600">Subtotal</span>
+                    <span className="font-medium">₹{selectedOrder.subtotal}</span>
+                  </div>
+                  <div className="flex justify-between py-2 border-b border-yellow-200">
+                    <span className="text-gray-600">Shipping Fee</span>
+                    <span className="font-medium">₹{selectedOrder.shippingFee}</span>
+                  </div>
+                  <div className="flex justify-between py-2 border-b border-yellow-200">
+                    <span className="text-gray-600">Tax</span>
+                    <span className="font-medium">₹{selectedOrder.tax}</span>
+                  </div>
+                  {selectedOrder.discount > 0 && (
+                    <div className="flex justify-between py-2 border-b border-yellow-200">
+                      <span className="text-gray-600">Discount</span>
+                      <span className="font-medium text-green-600">-₹{selectedOrder.discount}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between py-3 border-t-2 border-yellow-300">
+                    <span className="text-lg font-semibold text-gray-800">Total Amount</span>
+                    <span className="text-lg font-bold text-blue-600">₹{selectedOrder.total}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Shipping Address */}
+              <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-4 sm:p-6 rounded-lg border border-indigo-200">
+                <h4 className="text-lg font-semibold mb-4 text-indigo-800">Shipping Address</h4>
+                <div className="bg-white p-4 rounded-lg shadow-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Recipient Name</label>
+                      <div className="text-base font-semibold">{selectedOrder.shippingAddress?.recipientName}</div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Phone</label>
+                      <div className="text-base">{selectedOrder.shippingAddress?.phone}</div>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="text-sm font-medium text-gray-600">Address</label>
+                      <div className="text-base">
+                        {selectedOrder.shippingAddress?.street}, {selectedOrder.shippingAddress?.city}
+                        <br />
+                        {selectedOrder.shippingAddress?.state} - {selectedOrder.shippingAddress?.postalCode}
+                        <br />
+                        {selectedOrder.shippingAddress?.country}
+                      </div>
+                    </div>
+                    {selectedOrder.shippingAddress?.landmark && (
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Landmark</label>
+                        <div className="text-base">{selectedOrder.shippingAddress?.landmark}</div>
+                      </div>
+                    )}
+                    {selectedOrder.shippingAddress?.instructions && (
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Delivery Instructions</label>
+                        <div className="text-base">{selectedOrder.shippingAddress?.instructions}</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Information */}
+              <div className="bg-gradient-to-r from-gray-50 to-slate-50 p-4 sm:p-6 rounded-lg border border-gray-200">
+                <h4 className="text-lg font-semibold mb-4 text-gray-800">Payment Information</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="bg-white p-4 rounded-lg shadow-sm">
+                    <label className="text-sm font-medium text-gray-600">Payment Method</label>
+                    <div className="text-base font-semibold">{selectedOrder.paymentMethod}</div>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg shadow-sm">
+                    <label className="text-sm font-medium text-gray-600">Payment Status</label>
+                    <div className={`text-sm font-medium px-2 py-1 rounded-full inline-block mt-1 ${
+                      selectedOrder.paymentStatus === 'Completed' ? 'bg-green-100 text-green-800' :
+                      selectedOrder.paymentStatus === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                      selectedOrder.paymentStatus === 'Refunded' ? 'bg-red-100 text-red-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {selectedOrder.paymentStatus}
+                    </div>
+                  </div>
+                  {selectedOrder.paymentId && (
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
+                      <label className="text-sm font-medium text-gray-600">Payment ID</label>
+                      <div className="text-base font-mono text-sm break-all">{selectedOrder.paymentId}</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Order Notes */}
+              {selectedOrder.notes && (
+                <div className="bg-gradient-to-r from-amber-50 to-yellow-50 p-4 sm:p-6 rounded-lg border border-amber-200">
+                  <h4 className="text-lg font-semibold mb-4 text-amber-800">Order Notes</h4>
+                  <div className="bg-white p-4 rounded-lg shadow-sm">
+                    <p className="text-gray-700">{selectedOrder.notes}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
+                <button
+                  onClick={() => setShowDetailModal(false)}
+                  className="px-6 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors font-medium"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => {
+                    setShowDetailModal(false);
+                    setShowStatusModal(true);
+                    setNewStatus("");
+                    setStatusError("");
+                  }}
+                  className="px-6 py-3 bg-[#FFD700] text-black font-semibold rounded-lg hover:bg-yellow-500 transition-colors"
+                >
+                  Update Status
+                </button>
+               
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Order Detail Modal */}
       {showStatusModal && selectedOrder && (
         <div className="fixed inset-0 backdrop-blur-3xl bg-opacity-50 flex justify-center items-center z-50 p-4">
