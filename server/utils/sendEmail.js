@@ -72,8 +72,8 @@ export async function sendTrackingEmail(email, name, trackingId, message, courie
 
 
 
-export async function sendOrderConfirmationEmail(req, res) {
-  const { email, fullName, orderId, items, shippingCharges, totalAmount, shippingInfo } = req.body;
+export async function sendOrderConfirmationEmail(data) {
+  const { email, fullName, orderId, items, shippingCharges, totalAmount, shippingInfo } = data;
 
 
   if (!email || !fullName || !orderId || !items || !totalAmount || !shippingInfo) {
@@ -147,11 +147,6 @@ export async function sendOrderConfirmationEmail(req, res) {
     html: emailHtml
   };
 
-  try {
     await transporter.sendMail(mailOptions);
-    return res.json({ success: true, message: "Order confirmation email sent" });
-  } catch (error) {
-    console.error("Email sending error:", error);
-    return res.status(500).json({ success: false, message: "Failed to send email" });
-  }
+   
 }

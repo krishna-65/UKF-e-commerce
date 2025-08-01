@@ -3,8 +3,7 @@ import Product from '../models/Product.js';
 import User from '../models/User.js';
 import Address from '../models/Address.js';
 import mongoose from 'mongoose';
-// import Order from "../models/Order.js";
-// import Product from "../models/Product.js";
+
 import stripe from "stripe"
 import { sendOrderConfirmationEmail, sendTrackingEmail } from '../utils/sendEmail.js';
 // import User from "../models/User.js"
@@ -238,7 +237,7 @@ export const createOrder = async (req, res) => {
     }
 
     // Validate shipping address exists
-    const shippingAddr = await Address.findById(shippingAddress).populate('user');
+    const shippingAddr = await Address.findById(shippingAddress);
     if (!shippingAddr) {
       return res.status(404).json({ 
         success: false, 
@@ -330,27 +329,23 @@ export const createOrder = async (req, res) => {
     }
     
 
-    await sendOrderConfirmationEmail({
-        body: {
-          email: user.profile.email,
-          fullName: user.fullName || user.name,
-          orderId: order.orderId,
-          items: orderItems.map(i => ({
-            title: i.name,
-            quantity: i.quantity,
-            netPrice: i.price
-          })),
-          shippingCharges: shippingFee,
-          totalAmount: total,
-          shippingInfo: {
-            fullName: shippingAddr.user.name,
-            address: `${shippingAddr.street}, ${shippingAddr.city}, ${shippingAddr.state}, ${shippingAddr.postalCode}`,
-            mobile: shippingAddr.user.phone
-          }
-        }
-      }, {
-        status: () => ({ json: () => {} }) // Dummy response object since you're calling internally
-      });
+   await sendOrderConfirmationEmail({
+    email: user.profile.email,
+    fullName: user.fullName || user.name,
+    orderId: order.orderId,
+    items: orderItems.map(i => ({
+      title: i.name,
+      quantity: i.quantity,
+      netPrice: i.price
+    })),
+    shippingCharges: shippingFee,
+    totalAmount: total,
+    shippingInfo: {
+      fullName: user.name,
+      address: `${shippingAddr.street}, ${shippingAddr.city}, ${shippingAddr.state}, ${shippingAddr.postalCode}`,
+      mobile: user.phone
+    }
+  });
 
     res.status(201).json({
       success: true,
