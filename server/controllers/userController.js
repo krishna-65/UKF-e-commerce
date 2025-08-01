@@ -111,6 +111,8 @@ export const updateProfile = async (req, res) => {
     const userId = req.params.id; // from route param
     const updateFields = req.body;
 
+    console.log(updateFields);
+
     const updatedUser = await User.findByIdAndUpdate(userId, updateFields, { new: true });
 
     if (!updatedUser) {

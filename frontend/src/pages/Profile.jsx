@@ -13,6 +13,7 @@ import {
   Calendar,
   MapPin,
   Phone,
+  Mail,
   User,
   Settings,
   ShoppingBag,
@@ -1130,6 +1131,13 @@ const Profile = () => {
               value={profileData?.phone}
               type="tel"
               icon={Phone}
+              handleSave={handleSave}
+            />
+            <EditableField
+              label="Email"
+              field="profile.email"
+              value={profileData?.profile?.email}
+              icon={Mail}
               handleSave={handleSave}
             />
             <EditableField

@@ -34,8 +34,8 @@ export async function sendTrackingEmail(email, name, trackingId, message, courie
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: process.env.EMAIL_USER, // dalipshekhawat2863@gmail.com
-      pass: process.env.EMAIL_PASS  // jqof mfqu bdfx lnig
+      user: process.env.MAIL_USER, // dalipshekhawat2863@gmail.com
+      pass: process.env.MAIL_PASS  // jqof mfqu bdfx lnig
     }
   });
 
