@@ -6,7 +6,7 @@ import mongoose from 'mongoose';
 // import Order from "../models/Order.js";
 // import Product from "../models/Product.js";
 import stripe from "stripe"
-import { sendTrackingEmail } from '../utils/sendEmail.js';
+import { sendOrderConfirmationEmail, sendTrackingEmail } from '../utils/sendEmail.js';
 // import User from "../models/User.js"
 
 // // Place Order COD : /api/order/cod
