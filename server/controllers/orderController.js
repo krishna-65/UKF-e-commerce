@@ -238,7 +238,7 @@ export const createOrder = async (req, res) => {
     }
 
     // Validate shipping address exists
-    const shippingAddr = await Address.findById(shippingAddress);
+    const shippingAddr = await Address.findById(shippingAddress).populate('user');
     if (!shippingAddr) {
       return res.status(404).json({ 
         success: false, 
@@ -343,9 +343,9 @@ export const createOrder = async (req, res) => {
           shippingCharges: shippingFee,
           totalAmount: total,
           shippingInfo: {
-            fullName: shippingAddr.fullName,
-            address: `${shippingAddr.address}, ${shippingAddr.city}, ${shippingAddr.state}, ${shippingAddr.pincode}`,
-            mobile: shippingAddr.mobile
+            fullName: shippingAddr.user.name,
+            address: `${shippingAddr.street}, ${shippingAddr.city}, ${shippingAddr.state}, ${shippingAddr.postalCode}`,
+            mobile: shippingAddr.user.phone
           }
         }
       }, {
