@@ -74,7 +74,7 @@ export async function sendTrackingEmail(email, name, trackingId, message, courie
   `;
 
   const mailOptions = {
-    from: `UKF <${process.env.EMAIL_USER}>`,
+    from: `UKF <${process.env.MAIL_USER}>`,
     to: email,
     subject: `Dispatched! Your UKF order has been dispatched`,
     html: `
@@ -107,6 +107,7 @@ export async function sendTrackingEmail(email, name, trackingId, message, courie
 export async function sendOrderConfirmationEmail(req, res) {
   const { email, fullName, orderId, items, shippingCharges, totalAmount, shippingInfo } = req.body;
 
+
   if (!email || !fullName || !orderId || !items || !totalAmount || !shippingInfo) {
     return res.status(400).json({ success: false, message: "Missing required fields" });
   }
@@ -114,8 +115,8 @@ export async function sendOrderConfirmationEmail(req, res) {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
+      user: process.env.MAIL_USER,
+      pass: process.env.MAIL_PASS,
     }
   });
 
@@ -172,7 +173,7 @@ export async function sendOrderConfirmationEmail(req, res) {
   `;
 
   const mailOptions = {
-    from: `UKF-Outfits <${process.env.EMAIL_USER}>`,
+    from: `UKF-Outfits <${process.env.MAIL_USER}>`,
     to: email,
     subject: `🧾 Order Confirmed | UKF-Outfits #${orderId}`,
     html: emailHtml
