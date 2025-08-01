@@ -102,3 +102,87 @@ export async function sendTrackingEmail(email, name, trackingId, message, courie
 
   await transporter.sendMail(mailOptions);
 }
+
+
+export async function sendOrderConfirmationEmail(req, res) {
+  const { email, fullName, orderId, items, shippingCharges, totalAmount, shippingInfo } = req.body;
+
+  if (!email || !fullName || !orderId || !items || !totalAmount || !shippingInfo) {
+    return res.status(400).json({ success: false, message: "Missing required fields" });
+  }
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    }
+  });
+
+  const itemsRows = items.map(item => `
+    <tr style="border-bottom: 1px solid #333;">
+      <td style="padding: 8px;">${item.title}</td>
+      <td style="padding: 8px;">${item.quantity}</td>
+      <td style="padding: 8px;">₹${item.netPrice}</td>
+    </tr>
+  `).join("");
+
+  const emailHtml = `
+  <div style="font-family: 'Inter', sans-serif; background-color: #000; color: #FFD770; padding: 30px; border-radius: 8px; max-width: 600px; margin: auto;">
+    <h2 style="color: #FFD770; text-align: center;">✨ Order Confirmed – UKF Outfits ✨</h2>
+    <p>Hello <b>${fullName}</b>,</p>
+    <p>We're thrilled you've chosen UKF-Outfits to elevate your fashion game. Your order has been confirmed and is now being prepared for dispatch.</p>
+
+    <h3 style="color: #FFD770;">🧾 ORDER ID: #${orderId}</h3>
+
+    <p>Here’s a breakdown of your purchase:</p>
+    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+      <thead>
+        <tr style="background-color: #FFD770; color: #000;">
+          <th style="padding: 10px;">Item</th>
+          <th style="padding: 10px;">Qty</th>
+          <th style="padding: 10px;">Price</th>
+        </tr>
+      </thead>
+      <tbody style="color: #FFD770;">
+        ${itemsRows}
+        <tr>
+          <td style="padding: 8px;">Shipping Charges</td>
+          <td style="padding: 8px;">–</td>
+          <td style="padding: 8px;">₹${shippingCharges}</td>
+        </tr>
+        <tr style="font-weight: bold;">
+          <td colspan="2" style="padding: 8px;">Total Amount</td>
+          <td style="padding: 8px;">₹${totalAmount}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin-top: 20px;">📦 Shipping Info</h3>
+    <p>Name: ${shippingInfo.fullName}</p>
+    <p>Address: ${shippingInfo.address}</p>
+    <p>Contact: ${shippingInfo.mobile}</p>
+
+    <p style="margin-top: 20px;">You’ll receive a tracking ID once your package is out for delivery.</p>
+    <p>Thank you for shopping with us! We can't wait for you to rock your new look 🔥</p>
+
+    <p style="margin-top: 30px;">With style,<br><b>Team UKF-Outfits</b></p>
+    <p><a href="https://ukfoutfits.com" style="color: #FFD770;">Visit Our Store</a></p>
+  </div>
+  `;
+
+  const mailOptions = {
+    from: `UKF-Outfits <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: `🧾 Order Confirmed | UKF-Outfits #${orderId}`,
+    html: emailHtml
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    return res.json({ success: true, message: "Order confirmation email sent" });
+  } catch (error) {
+    console.error("Email sending error:", error);
+    return res.status(500).json({ success: false, message: "Failed to send email" });
+  }
+}

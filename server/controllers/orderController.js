@@ -328,6 +328,29 @@ export const createOrder = async (req, res) => {
         $inc: { stock: -item.quantity, sold: item.quantity }
       });
     }
+    
+
+    await sendOrderConfirmationEmail({
+        body: {
+          email: user.email,
+          fullName: user.fullName || user.name,
+          orderId: order.orderId,
+          items: orderItems.map(i => ({
+            title: i.name,
+            quantity: i.quantity,
+            netPrice: i.price
+          })),
+          shippingCharges: shippingFee,
+          totalAmount: total,
+          shippingInfo: {
+            fullName: shippingAddr.fullName,
+            address: `${shippingAddr.address}, ${shippingAddr.city}, ${shippingAddr.state}, ${shippingAddr.pincode}`,
+            mobile: shippingAddr.mobile
+          }
+        }
+      }, {
+        status: () => ({ json: () => {} }) // Dummy response object since you're calling internally
+      });
 
     res.status(201).json({
       success: true,
