@@ -29,6 +29,7 @@ const userSchema = new mongoose.Schema({
     accountType: {type: String, default: 'user'},
      cartItems: [cartItemSchema],
        profile: {
+        email: { type: String, unique: true },
         address: { type: String, default: '' },
         city: { type: String, default: '' },
         state: { type: String, default: '' },

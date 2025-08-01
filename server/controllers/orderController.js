@@ -6,6 +6,7 @@ import mongoose from 'mongoose';
 // import Order from "../models/Order.js";
 // import Product from "../models/Product.js";
 import stripe from "stripe"
+import { sendTrackingEmail } from '../utils/sendEmail.js';
 // import User from "../models/User.js"
 
 // // Place Order COD : /api/order/cod
@@ -497,6 +498,7 @@ export const updateOrderStatus = async (req, res) => {
         message: 'Order not found' 
       });
     }
+    const user = await User.findById(order.user);
 
     // Validate status transition
     const validTransitions = {
@@ -523,6 +525,7 @@ export const updateOrderStatus = async (req, res) => {
       });
     }
 
+
     // Update order
     order.currentStatus = status;
     order.statusHistory.push({
@@ -534,6 +537,12 @@ export const updateOrderStatus = async (req, res) => {
     if(status === 'Payment Received') {
       order.paymentStatus = 'Completed';
     }
+    if(status === 'Shipped') {
+      order.trackingNumber = req.body.trackingId || '';
+      order.trackingCompany = req.body.courier || 'India Post';
+      sendTrackingEmail(user.profile.email,user.name,order.trackingNumber,'',order.trackingCompany);
+    }
+   
     // Handle refund if order is cancelled after payment
     if (status === 'Cancelled' && order.paymentStatus === 'Completed') {
       order.paymentStatus = 'Refunded';
