@@ -1,5 +1,5 @@
 import express from 'express';
-import { forgotPassword, getAdminDashboardStats, getMe, getProfile, getUserNoPagination, getUsers, isAuth, login, logout, register, updatePicture, updateProfile } from '../controllers/userController.js';
+import { forgotPassword, getAdminDashboardStats, getMe, getProfile, getUserNoPagination, getUsers, isAuth, login, logout, register, sendOTPToPhone, updatePicture, updateProfile } from '../controllers/userController.js';
 
 import { protect } from '../middlewares/authUser.js';
 import { sendEmail } from '../controllers/contact.js';
@@ -24,4 +24,5 @@ userRouter.get('/me', protect, getMe);
 //mail sender route
 
 userRouter.post('/send-email', sendEmail);
+userRouter.post('/send-otp', sendOTPToPhone);
 export default userRouter

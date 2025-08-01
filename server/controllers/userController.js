@@ -235,15 +235,19 @@ export const forgotPassword = async (req, res) => {
 
 export const resetPassword = async (req, res) => {
   try {
-    const { phone, otp, newPassword } = req.body;
+    const { phone, otp, newPassword, confirmPassword } = req.body;
 
     const user = await User.findOne({ phone });
     if (!user) return res.status(404).json({ message: 'User not found' });
 
+    if(otp)
     if (user.otp !== otp || new Date() > user.otpExpires) {
       return res.status(400).json({ message: 'Invalid or expired OTP' });
     }
 
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ message: 'Passwords do not match' });
+    }
     const hashed = await bcrypt.hash(newPassword, 10);
     user.password = hashed;
     user.otp = null;
