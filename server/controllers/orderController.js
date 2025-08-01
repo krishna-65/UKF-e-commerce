@@ -341,9 +341,9 @@ export const createOrder = async (req, res) => {
     shippingCharges: shippingFee,
     totalAmount: total,
     shippingInfo: {
-      fullName: user.name,
+      fullName: shippingAddr.recipientName,
       address: `${shippingAddr.street}, ${shippingAddr.city}, ${shippingAddr.state}, ${shippingAddr.postalCode}`,
-      mobile: user.phone
+      mobile: shippingAddr.phone,
     }
   });
 
