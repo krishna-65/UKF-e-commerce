@@ -26,6 +26,8 @@ import UserRoute from "./components/core/UserRoute";
 import TechSupport from "./pages/TechSupport";
 import Notfound from "./pages/notfound";
 import { useSelector } from "react-redux";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 const App = () => {
   
@@ -53,6 +55,24 @@ const App = () => {
             element={
               <OpenRoute>
                 <Login />
+              </OpenRoute>
+            }
+          />
+
+          <Route
+            path="/forgetpassword"
+            element={
+              <OpenRoute>
+                <ForgotPassword />
+              </OpenRoute>
+            }
+          />
+
+          <Route
+            path="/resetpassword"
+            element={
+              <OpenRoute>
+                <ResetPassword />
               </OpenRoute>
             }
           />
