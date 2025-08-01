@@ -332,7 +332,7 @@ export const createOrder = async (req, res) => {
 
     await sendOrderConfirmationEmail({
         body: {
-          email: user.email,
+          email: user.profile.email,
           fullName: user.fullName || user.name,
           orderId: order.orderId,
           items: orderItems.map(i => ({
