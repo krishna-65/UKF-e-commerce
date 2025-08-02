@@ -198,7 +198,7 @@ export const sendOTPToPhone = async (phone, otp) => {
   try {
     const message = await client.messages.create({
       body: `Your OTP is ${otp}. It will expire in 10 minutes.`,
-      messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
+      from: process.env.TWILIO_PHONE_NUMBER,
       to: `+91${phone}`
     });
     console.log("OTP sent:", message.sid);
