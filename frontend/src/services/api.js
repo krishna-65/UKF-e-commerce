@@ -36,6 +36,9 @@ export const productEndpoints = {
   getProduct : BASE_URL + "/api/product/",
   updateProduct : BASE_URL + "/api/product/update/",
   deleteProduct : BASE_URL + "/api/product/",
+  featuredProduct: BASE_URL + "/api/product/featured",
+  newArrivals: BASE_URL + "/api/product/new-arrivals",
+  onSale : BASE_URL + "/api/product/on-sale",
 }
 
 //cart endopints
