@@ -216,17 +216,17 @@ export const forgotPassword = async (req, res) => {
   try {
     const { phone } = req.body;
 
-    // const user = await User.findOne({ phone });
-    // if (!user) return res.status(404).json({ message: 'User not found' });
+    const user = await User.findOne({ phone:phone });
+    if (!user) return res.status(404).json({ message: 'User not found' });
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
 
-    // user.otp = otp;
-    // user.otpExpires = expiry;
-    // await user.save();
+    user.otp = otp;
+    user.otpExpires = expiry;
+    await user.save();
 
-    await sendOTPToPhone(phone, otp);
+     await sendOTPToPhone(phone, otp);
 
     res.json({ success: true, message: 'OTP sent to your phone' });
   } catch (err) {
