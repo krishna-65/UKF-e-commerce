@@ -466,7 +466,7 @@ export default function ProductDetail() {
           {/* Price Section */}
           <div className={`space-y-1 transition-all duration-600 delay-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
             <div className="flex gap-2 items-baseline">
-              <span className="text-red-500 text-lg font-bold animate-pulse">-25%</span>
+              <span className="text-red-500 text-lg font-bold animate-pulse">-{Math.round(((product?.comparePrice - product?.price)/product?.comparePrice)*100)}%</span>
               <span className="text-2xl font-bold hover:text-yellow-300 transition-colors duration-300">
                 ₹{product?.price}
               </span>

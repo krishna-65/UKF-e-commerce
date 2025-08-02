@@ -138,7 +138,7 @@ export default function Login() {
           />
         </motion.label>
 
-        <motion.label className="block mb-8 relative" variants={fadeInUp}>
+        <motion.label className="block  relative" variants={fadeInUp}>
           <span className="text-gray-300 font-medium text-lg mb-2 block">Password</span>
           <input
             type={showPassword ? "text" : "password"}
@@ -158,6 +158,10 @@ export default function Login() {
             {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
         </motion.label>
+
+        <div onClick={()=> navigate('/forgetpassword')} className="text-slate-500 cursor-pointer w-full flex justify-end mb-8">
+          Forget Password?
+        </div>
 
         <motion.button
           type="submit"

@@ -201,7 +201,7 @@ export const sendOTPToPhone = async (phone, otp) => {
       from: process.env.TWILIO_PHONE_NUMBER,
       to: `+91${phone}`
     });
-    console.log("OTP sent:", message.sid);
+    
     return true;
   } catch (error) {
     console.error("Twilio error:", error);
@@ -241,6 +241,7 @@ export const resetPassword = async (req, res) => {
 
 
     // Find the user
+    
     const user = await User.findOne({ phone });
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
@@ -248,6 +249,7 @@ export const resetPassword = async (req, res) => {
 
     // Check OTP validity
     if (otp) {
+     
       if (!otp || user.otp !== otp || new Date() > user.otpExpires) {
         return res.status(400).json({ success: false, message: 'Invalid or expired OTP' });
       }

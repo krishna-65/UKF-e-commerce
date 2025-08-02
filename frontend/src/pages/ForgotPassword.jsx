@@ -3,39 +3,32 @@ import { motion } from "framer-motion";
 import { apiConnector } from "../services/apiConnector";
 import { endpoints } from "../services/api";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
-const { SEND_OTP_API, VERIFY_OTP_API } = endpoints;
+const { forgotPassword } = endpoints;
 
 const fadeInUp = { hidden: { opacity: 0, y: 50 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } } };
 const staggerContainer = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } };
 
-export default function ForgotPassword({ navigate }) {
+export default function ForgotPassword() {
   const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
+  const navigate = useNavigate()
 
   const handleSendOTP = async () => {
     try {
-      const res = await apiConnector("POST", SEND_OTP_API, { phone });
+      const res = await apiConnector("POST", forgotPassword, { phone });
       toast.success("OTP sent to your phone");
-      setOtpSent(true);
+   
+      navigate('/resetforgetpassword',{
+  state: { phone: phone } // or any variable storing the number
+})
     } catch (err) {
       console.error(err);
       toast.error("Failed to send OTP");
     }
   };
 
-  const handleVerifyOTP = async () => {
-    try {
-      const res = await apiConnector("POST", VERIFY_OTP_API, { phone, otp });
-      toast.success("OTP verified");
-      navigate("/reset-password", { state: { phone } });
-    } catch (err) {
-      console.error(err);
-      toast.error("Invalid OTP");
-    }
-  };
-
+ 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center px-6 py-16 relative overflow-hidden">
       {/* Blobs and Floating Elements reused from Login */}
@@ -49,7 +42,7 @@ export default function ForgotPassword({ navigate }) {
           Reset Password
         </motion.h2>
 
-        {!otpSent ? (
+        
           <motion.div className="mb-6" variants={fadeInUp}>
             <input
               type="tel"
@@ -62,20 +55,7 @@ export default function ForgotPassword({ navigate }) {
               Send OTP
             </button>
           </motion.div>
-        ) : (
-          <motion.div className="mb-6" variants={fadeInUp}>
-            <input
-              type="text"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-              placeholder="Enter OTP"
-              className="w-full p-4 rounded-lg bg-gray-800 text-white border border-gray-700 placeholder-gray-400 focus:outline-none"
-            />
-            <button onClick={handleVerifyOTP} className="mt-4 w-full py-3 bg-yellow-500 text-black rounded-full font-semibold hover:bg-yellow-600 transition">
-              Verify OTP
-            </button>
-          </motion.div>
-        )}
+
       </motion.div>
 
          {/* Tailwind CSS Custom Keyframes (from AboutUs page, ensured for consistency) */}
