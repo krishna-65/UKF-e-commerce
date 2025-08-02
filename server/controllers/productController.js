@@ -322,7 +322,7 @@ export const getFeaturedProducts = async (req, res) => {
     const limit = parseInt(req.query.limit) || 8;
     const products = await Product.find({ isFeatured: true })
       .limit(limit)
-      .populate('category');
+      .populate('category brand');
     
     res.json({ 
       success: true, 
