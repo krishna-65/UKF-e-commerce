@@ -367,6 +367,7 @@ export const getNewArrivals = async (req, res) => {
 export const getProductsOnSale = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 8;
+    console.log("Fetching products on sale",limit);
     const products = await Product.find({
       isOnSale: true,
       saleStartDate: { $lte: new Date() },

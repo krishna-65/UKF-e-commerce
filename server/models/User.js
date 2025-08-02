@@ -42,8 +42,9 @@ const userSchema = new mongoose.Schema({
         occupation: { type: String, default: '' },
         interests: [{ type: String }]
     },
-     otp: String,
+  otp: String,
   otpExpires: Date,
+  isVerified: { type: Boolean, default: false },
 }, {minimize: false})
 
 const User = mongoose.models.user || mongoose.model('user', userSchema)
