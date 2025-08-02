@@ -281,6 +281,8 @@ const EditableDOBField = ({
   );
 };
 
+
+
 // Pagination Component
 const Pagination = ({ currentPage, totalPages, onPageChange, totalItems, itemsPerPage }) => {
   const startItem = (currentPage - 1) * itemsPerPage + 1;
@@ -1321,6 +1323,11 @@ const Profile = () => {
               icon={Calendar}
               handleSave={handleSave}
             />
+
+              <div className="border text-xl  border-[#FFD700] p-5 rounded-full flex justify-center items-center cursor-pointer" onClick={()=>navigate('/resetpassword')}>
+                Reset-password?
+              </div>
+
           </div>
           <div className="space-y-4">
             <h2

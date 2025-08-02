@@ -7,18 +7,20 @@ import toast from "react-hot-toast";
 
 const { resetPassword } = endpoints;
 
-export default function ResetPassword() {
+export default function ResetForgotPassword() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
   const [phone,setPhone] = useState("");
+  const [otp,setOtp] = useState("")
+
   const handleReset = async (e) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) return toast.error("Passwords do not match");
 
     try {
-      await apiConnector("POST", resetPassword, { phone, newPassword,confirmPassword });
+      await apiConnector("POST", resetPassword, { otp,phone, newPassword,confirmPassword });
       toast.success("Password reset successful");
       navigate("/login");
     } catch (err) {
@@ -37,6 +39,15 @@ export default function ResetPassword() {
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
         <h2 className="text-3xl font-bold bg-gradient-to-r from-yellow-300 to-yellow-500 bg-clip-text text-transparent mb-6 text-center">Set New Password</h2>
+
+        <input
+          type="otp"
+          value={otp}
+          onChange={(e) => setOtp(e.target.value)}
+          placeholder="OTP"
+          className="w-full p-4 mb-4 rounded-lg bg-gray-800 text-white border border-gray-700 placeholder-gray-400 focus:outline-none"
+          required
+        />
 
         <input
           type="phone"

@@ -13,6 +13,8 @@ export const endpoints = {
   getUser : BASE_URL + "/api/user/getuser",
   getUserNoPagination : BASE_URL + "/api/user/getUserNoPagination",
   contactUs : BASE_URL + '/api/user/send-email',
+  resetPassword : BASE_URL + '/api/user/reset-password',
+  forgotPassword : BASE_URL + '/api/user/forgot-password',
 }
 
 //category endpoints

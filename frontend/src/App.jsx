@@ -28,6 +28,7 @@ import Notfound from "./pages/notfound";
 import { useSelector } from "react-redux";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import ResetForgotPassword from "./pages/ResetForgotPassword";
 
 const App = () => {
   
@@ -69,13 +70,15 @@ const App = () => {
           />
 
           <Route
-            path="/resetpassword"
+            path="/resetforgetpassword"
             element={
               <OpenRoute>
-                <ResetPassword />
+                <ResetForgotPassword />
               </OpenRoute>
             }
           />
+
+          
 
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
@@ -98,6 +101,15 @@ const App = () => {
             element={
               <UserRoute>
                 <Profile />
+              </UserRoute>
+            }
+          />
+
+          <Route
+            path="/resetpassword"
+            element={
+              <UserRoute>
+                <ResetPassword />
               </UserRoute>
             }
           />
