@@ -248,7 +248,7 @@ const AddProduct = () => {
       stock: prod.stock || "",
       category: prod.category?._id || "",
       subCategory: prod.subCategory || "",
-      brand: prod.brand || "",
+      brand: prod.brand._id || "",
       size: Array.isArray(prod.size) ? prod.size : [],
       color: Array.isArray(prod.color) ? prod.color : [],
       material: prod.material || "",

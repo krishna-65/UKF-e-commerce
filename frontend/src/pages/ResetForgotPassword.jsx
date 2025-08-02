@@ -12,8 +12,13 @@ export default function ResetForgotPassword() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
-  const [phone,setPhone] = useState("");
+ 
   const [otp,setOtp] = useState("")
+
+ 
+
+  const phone = location.state?.phone;
+
 
   const handleReset = async (e) => {
     e.preventDefault();
@@ -49,14 +54,7 @@ export default function ResetForgotPassword() {
           required
         />
 
-        <input
-          type="phone"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          placeholder="Phone"
-          className="w-full p-4 mb-4 rounded-lg bg-gray-800 text-white border border-gray-700 placeholder-gray-400 focus:outline-none"
-          required
-        />
+       
 
         <input
           type="password"

@@ -19,7 +19,9 @@ export default function ForgotPassword() {
       const res = await apiConnector("POST", forgotPassword, { phone });
       toast.success("OTP sent to your phone");
    
-      navigate('/resetforgetpassword')
+      navigate('/resetforgetpassword',{
+  state: { phone: phone } // or any variable storing the number
+})
     } catch (err) {
       console.error(err);
       toast.error("Failed to send OTP");
