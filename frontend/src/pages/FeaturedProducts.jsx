@@ -37,24 +37,14 @@ const FeaturedProduct = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const token = useSelector(state => state.auth.token)
-  const role = useSelector(state => state.auth.role)
+
 
   const productHandler = (product)=>{
     dispatch(setProductData(product));
     navigate("/productdetail")
   }
 
-  const cartHandler = (product)=>{
-
-    if(token && role === 'user'){
-         dispatch(addToCart(product))
-         toast.success("Added to cart!")
-    }else{
-        toast.error("Login with valid account first!!")
-    }
-   
-  }
+  
 
   const ProductCard = ({ product, index }) => {
     const isHovered = hoveredCard === product._id;
@@ -110,12 +100,10 @@ const FeaturedProduct = () => {
           <div className={`absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 transition-all duration-300 ${
             isHovered ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
           }`}>
-            <button  onClick={()=>productHandler(product)} className="bg-yellow-500 hover:bg-yellow-400 text-black p-2 rounded-full transition-colors duration-200 hover:scale-110">
+            <button  onClick={()=>productHandler(product)} className="bg-yellow-500 cursor-pointer hover:bg-yellow-400 text-black p-2 rounded-full transition-colors duration-200 hover:scale-110">
               <Eye size={16} />
             </button>
-            <button onClick={()=>cartHandler(product)} className="bg-yellow-500 hover:bg-yellow-400 text-black p-2 rounded-full transition-colors duration-200 hover:scale-110">
-              <ShoppingCart size={16} />
-            </button>
+            
           </div>
         </div>
 
@@ -156,8 +144,8 @@ const FeaturedProduct = () => {
             <div className="text-2xl font-bold text-yellow-400">
               ₹ {product.price}
             </div>
-            <button onClick={()=>cartHandler(product)} className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black px-6 py-2 rounded-full font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-yellow-500/30 hover:scale-105">
-              Add to Cart
+            <button onClick={()=>productHandler(product)} className="bg-gradient-to-r from-yellow-500 to-yellow-600 cursor-pointer hover:from-yellow-400 hover:to-yellow-500 text-black px-6 py-2 rounded-full font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-yellow-500/30 hover:scale-105">
+              View Product
             </button>
           </div>
         </div>
@@ -265,7 +253,7 @@ const FeaturedProduct = () => {
 
         {/* Load More Button */}
         <div className="text-center mt-16">
-          <button onClick={()=>navigate("/products")} className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black px-12 py-4 rounded-full font-bold text-lg transition-all duration-300 hover:shadow-2xl hover:shadow-yellow-500/30 hover:scale-105 transform">
+          <button onClick={()=>navigate("/products")} className="bg-gradient-to-r from-yellow-500 to-yellow-600 cursor-pointer hover:from-yellow-400 hover:to-yellow-500 text-black px-12 py-4 rounded-full font-bold text-lg transition-all duration-300 hover:shadow-2xl hover:shadow-yellow-500/30 hover:scale-105 transform">
             Load More Products
           </button>
         </div>
