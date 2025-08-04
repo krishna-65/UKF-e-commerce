@@ -1,61 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { Star, Heart, ShoppingCart, Eye, Clock, Zap, TrendingUp } from 'lucide-react';
+import { productEndpoints } from '../services/api';
+import { apiConnector } from '../services/apiConnector';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { setProductData } from '../slices/productSlice';
+import { addToCart } from '../slices/cartSlice';
+import toast from 'react-hot-toast';
+
+const {newArrivals} = productEndpoints;
 
 const NewArrival = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [hoveredCard, setHoveredCard] = useState(null);
 
+
+  const fetchProducts = async () => {
+      // Simulate API call
+     try{
+      setLoading(true);
+      const res = await apiConnector("GET",newArrivals);
+
+      console.log(res)
+
+      setProducts(res.data.products)
+     }catch(error){
+      console.log(error)
+     }finally{
+      setLoading(false);
+     }
+
+    };
+
   // Mock data for demonstration (replace with actual API call)
   useEffect(() => {
-    const fetchProducts = async () => {
-      // Simulate API call
-      setTimeout(() => {
-        setProducts([
-          {
-            _id: '1',
-            name: 'Latest Gaming Console',
-            price: 599,
-            images: ['https://images.unsplash.com/photo-1606813907291-d86efa9b94db?w=400'],
-            category: { name: 'Gaming' },
-            rating: 4.9,
-            reviews: 145,
-            createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) // 2 days ago
-          },
-          {
-            _id: '2',
-            name: 'Ultra-Slim Laptop',
-            price: 1299,
-            images: ['https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400'],
-            category: { name: 'Computers' },
-            rating: 4.8,
-            reviews: 89,
-            createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000) // 5 days ago
-          },
-          {
-            _id: '3',
-            name: 'Wireless Charging Pad',
-            price: 79,
-            images: ['https://images.unsplash.com/photo-1583394838336-acd977736f90?w=400'],
-            category: { name: 'Accessories' },
-            rating: 4.6,
-            reviews: 234,
-            createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) // 1 day ago
-          },
-          {
-            _id: '4',
-            name: 'Smart Home Hub',
-            price: 199,
-            images: ['https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400'],
-            category: { name: 'Smart Home' },
-            rating: 4.7,
-            reviews: 167,
-            createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) // 3 days ago
-          }
-        ]);
-        setLoading(false);
-      }, 1000);
-    };
+    
 
     fetchProducts();
   }, []);
@@ -66,6 +46,19 @@ const NewArrival = () => {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
   };
+
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+ 
+
+  const productHandler = (product)=>{
+    dispatch(setProductData(product));
+    navigate("/productdetail")
+  }
+
+  
 
   const ProductCard = ({ product, index }) => {
     const isHovered = hoveredCard === product._id;
@@ -107,7 +100,7 @@ const NewArrival = () => {
         {/* Product image with overlay effects */}
         <div className="relative h-72 overflow-hidden">
           <img
-            src={product.images[0]}
+            src={product.images[0].url}
             alt={product.name}
             className={`w-full h-full object-cover transition-all duration-1000 ${
               isHovered ? 'scale-125 rotate-3' : 'scale-100'
@@ -134,17 +127,13 @@ const NewArrival = () => {
             isHovered ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'
           }`}>
             <button 
-              className="bg-yellow-500 hover:bg-yellow-400 text-black p-3 rounded-full transition-all duration-300 hover:scale-125 transform hover:-rotate-12"
+            onClick={()=>productHandler(product)}
+              className="bg-yellow-500 cursor-pointer hover:bg-yellow-400 text-black p-3 rounded-full transition-all duration-300 hover:scale-125 transform hover:-rotate-12"
               style={{ animationDelay: '0.1s' }}
             >
               <Eye size={18} />
             </button>
-            <button 
-              className="bg-yellow-500 hover:bg-yellow-400 text-black p-3 rounded-full transition-all duration-300 hover:scale-125 transform hover:rotate-12"
-              style={{ animationDelay: '0.2s' }}
-            >
-              <ShoppingCart size={18} />
-            </button>
+         
           </div>
 
           {/* Animated shine effect */}
@@ -166,38 +155,16 @@ const NewArrival = () => {
             {product.name}
           </h3>
 
-          {/* Rating with animated stars */}
-          <div className="flex items-center gap-3 mb-5">
-            <div className="flex">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  size={16}
-                  className={`transition-all duration-300 ${
-                    i < Math.floor(product.rating)
-                      ? 'text-yellow-400 fill-yellow-400 animate-pulse'
-                      : 'text-gray-600'
-                  } hover:scale-125`}
-                  style={{ 
-                    animationDelay: `${i * 0.1}s`,
-                    transitionDelay: `${i * 0.05}s`
-                  }}
-                />
-              ))}
-            </div>
-            <span className="text-gray-400 text-sm font-medium">
-              {product.rating} ({product.reviews} reviews)
-            </span>
-          </div>
+          
 
           {/* Price and CTA */}
           <div className="flex items-center justify-between">
             <div className="text-3xl font-bold text-yellow-400 animate-pulse">
-              ${product.price}
+              ₹{product.price}
             </div>
-            <button className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black px-8 py-3 rounded-full font-bold transition-all duration-300 hover:shadow-xl hover:shadow-yellow-500/40 hover:scale-110 transform relative overflow-hidden group">
-              <span className="relative z-10">Add to Cart</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-yellow-300 to-yellow-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+            <button onClick={()=>productHandler(product)} className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 cursor-pointer hover:to-yellow-500 text-black px-8 py-3 rounded-full font-bold transition-all duration-300 hover:shadow-xl hover:shadow-yellow-500/40 hover:scale-110 transform relative overflow-hidden group">
+              <span className="relative z-10">View Product</span>
+              <div className="absolute inset-0  bg-gradient-to-r from-yellow-300 to-yellow-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
             </button>
           </div>
         </div>
@@ -323,7 +290,7 @@ const NewArrival = () => {
             <p className="text-gray-300 text-lg mb-8 max-w-2xl mx-auto">
               New products arrive weekly. Be the first to get your hands on the latest trends.
             </p>
-            <button className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black px-16 py-5 rounded-full font-bold text-xl transition-all duration-300 hover:shadow-2xl hover:shadow-yellow-500/40 hover:scale-105 transform">
+            <button onClick={()=>navigate('/products')} className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 cursor-pointer hover:to-yellow-500 text-black px-16 py-5 rounded-full font-bold text-xl transition-all duration-300 hover:shadow-2xl hover:shadow-yellow-500/40 hover:scale-105 transform">
               View All New Arrivals
             </button>
           </div>
