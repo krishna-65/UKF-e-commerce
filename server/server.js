@@ -25,7 +25,7 @@ await connectDB()
 await connectCloudinary()
 
 // Allow multiple origins
-const allowedOrigins = ['http://localhost:5173']
+const allowedOrigins = ['http://localhost:5173','https://ukf-e-commerce.vercel.app']
 
 app.use(
 	fileUpload({
