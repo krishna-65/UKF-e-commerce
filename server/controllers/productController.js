@@ -349,7 +349,7 @@ export const getNewArrivals = async (req, res) => {
     })
     .sort({ createdAt: -1 })
     .limit(limit)
-    .populate('category');
+    .populate('category brand');
     
     res.json({ 
       success: true, 
@@ -375,7 +375,7 @@ export const getProductsOnSale = async (req, res) => {
     })
     .sort({ discountPercentage: -1 })
     .limit(limit)
-    .populate('category');
+    .populate('category brand');
     
     res.json({ 
       success: true, 
