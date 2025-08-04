@@ -53,6 +53,8 @@ const Navbar = () => {
         productId: item._id,
         quantity: item.quantity,
         price: item.price,
+        size:item.size,
+        color:item.color,
       }));
 
       const response = await apiConnector(

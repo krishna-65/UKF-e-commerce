@@ -380,6 +380,8 @@ export const bulkAddToCart = async (req, res) => {
         user.cartItems.push({
           product: product._id,
           quantity: item.quantity,
+          size: item.size,
+          color:item.color,
           addedAt: new Date(),
         });
       }
