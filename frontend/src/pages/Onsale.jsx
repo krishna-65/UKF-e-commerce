@@ -1,76 +1,50 @@
 import React, { useState, useEffect } from 'react';
 import { Star, Heart, ShoppingCart, Eye, Percent, Flame, Timer, Tag } from 'lucide-react';
+import { productEndpoints } from '../services/api';
+import { apiConnector } from '../services/apiConnector';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { setProductData } from '../slices/productSlice';
+
+const {onSale} = productEndpoints;
 
 const OnSale = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [hoveredCard, setHoveredCard] = useState(null);
 
-  // Mock data for demonstration (replace with actual API call)
-  useEffect(() => {
-    const fetchProducts = async () => {
-      // Simulate API call
-      setTimeout(() => {
-        setProducts([
-          {
-            _id: '1',
-            name: 'Premium Bluetooth Speaker',
-            price: 99,
-            originalPrice: 149,
-            discountPercentage: 34,
-            images: ['https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400'],
-            category: { name: 'Audio' },
-            rating: 4.7,
-            reviews: 189,
-            saleEndDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days from now
-            isHotDeal: true
-          },
-          {
-            _id: '2',
-            name: 'Wireless Gaming Mouse',
-            price: 59,
-            originalPrice: 89,
-            discountPercentage: 34,
-            images: ['https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400'],
-            category: { name: 'Gaming' },
-            rating: 4.8,
-            reviews: 267,
-            saleEndDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
-            isHotDeal: false
-          },
-          {
-            _id: '3',
-            name: 'Smart Fitness Watch',
-            price: 199,
-            originalPrice: 299,
-            discountPercentage: 33,
-            images: ['https://images.unsplash.com/photo-1544117519-31a4b719223d?w=400'],
-            category: { name: 'Wearables' },
-            rating: 4.6,
-            reviews: 423,
-            saleEndDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
-            isHotDeal: true
-          },
-          {
-            _id: '4',
-            name: 'Mechanical Keyboard',
-            price: 129,
-            originalPrice: 179,
-            discountPercentage: 28,
-            images: ['https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=400'],
-            category: { name: 'Accessories' },
-            rating: 4.9,
-            reviews: 156,
-            saleEndDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-            isHotDeal: false
-          }
-        ]);
+  const fetchProducts = async () => {
+      try{
+        setLoading(true);
+
+        const res = await apiConnector("GET",onSale);
+
+        console.log(res);
+
+        setProducts(res.data.products)
+      }catch(error){
+        console.log(error)
+        toast.error("Unable to get onsale products!")
+      }finally{
         setLoading(false);
-      }, 1000);
+      }
     };
+
+  useEffect(() => {
+    
 
     fetchProducts();
   }, []);
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+
+
+  const productHandler = (product)=>{
+    dispatch(setProductData(product));
+    navigate("/productdetail")
+  }
 
   const getTimeRemaining = (endDate) => {
     const now = new Date().getTime();
@@ -89,7 +63,7 @@ const OnSale = () => {
   const ProductCard = ({ product, index }) => {
     const isHovered = hoveredCard === product._id;
     const timeRemaining = getTimeRemaining(product.saleEndDate);
-    const savings = product.originalPrice - product.price;
+    const savings = product.comparePrice - product.price;
 
     return (
       <div
@@ -142,7 +116,7 @@ const OnSale = () => {
         {/* Product image with fire overlay */}
         <div className="relative h-72 overflow-hidden">
           <img
-            src={product.images[0]}
+            src={product.images[0].url}
             alt={product.name}
             className={`w-full h-full object-cover transition-all duration-1000 ${
               isHovered ? 'scale-130 rotate-2' : 'scale-100'
@@ -161,19 +135,14 @@ const OnSale = () => {
             isHovered ? 'translate-y-0 opacity-100' : '-translate-y-8 opacity-0'
           }`}>
             <Tag size={14} />
-            SAVE ${savings}
+            SAVE ₹{savings}
           </div>
 
           {/* Quick action buttons */}
           <div className={`absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-4 transition-all duration-500 ${
             isHovered ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'
           }`}>
-            <button className="bg-red-500 hover:bg-red-400 text-white p-3 rounded-full transition-all duration-300 hover:scale-125 transform hover:-rotate-12 shadow-lg">
-              <Eye size={18} />
-            </button>
-            <button className="bg-yellow-500 hover:bg-yellow-400 text-black p-3 rounded-full transition-all duration-300 hover:scale-125 transform hover:rotate-12 shadow-lg">
-              <ShoppingCart size={18} />
-            </button>
+           
           </div>
 
           {/* Flame effect */}
@@ -195,46 +164,25 @@ const OnSale = () => {
             {product.name}
           </h3>
 
-          {/* Rating with animated stars */}
-          <div className="flex items-center gap-3 mb-5">
-            <div className="flex">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  size={16}
-                  className={`transition-all duration-300 ${
-                    i < Math.floor(product.rating)
-                      ? 'text-yellow-400 fill-yellow-400'
-                      : 'text-gray-600'
-                  } hover:scale-125`}
-                  style={{ 
-                    animationDelay: `${i * 0.1}s`,
-                  }}
-                />
-              ))}
-            </div>
-            <span className="text-gray-400 text-sm font-medium">
-              {product.rating} ({product.reviews} reviews)
-            </span>
-          </div>
+          
 
           {/* Price section */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className="text-3xl font-bold text-red-400">
-                ${product.price}
+                ₹{product.price}
               </div>
               <div className="text-lg text-gray-500 line-through">
-                ${product.originalPrice}
+                ₹{product.comparePrice}
               </div>
             </div>
             <div className="bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-1 rounded-full text-sm font-bold">
-              ${savings} OFF
+              ₹{savings} OFF
             </div>
           </div>
 
           {/* CTA Button */}
-          <button className="w-full bg-gradient-to-r from-red-500 to-yellow-500 hover:from-red-400 hover:to-yellow-400 text-white font-bold py-4 px-6 rounded-full transition-all duration-300 hover:shadow-xl hover:shadow-red-500/40 hover:scale-105 transform relative overflow-hidden group">
+          <button onClick={()=>productHandler(product)} className="w-full cursor-pointer bg-gradient-to-r from-red-500 to-yellow-500 hover:from-red-400 hover:to-yellow-400 text-white font-bold py-4 px-6 rounded-full transition-all duration-300 hover:shadow-xl hover:shadow-red-500/40 hover:scale-105 transform relative overflow-hidden group">
             <span className="relative z-10 flex items-center justify-center gap-2">
               <Flame size={18} />
               Grab This Deal
@@ -318,7 +266,7 @@ const OnSale = () => {
               </div>
               <div className="flex items-center gap-2 bg-gradient-to-r from-green-500/20 to-green-600/20 rounded-full px-6 py-3 border border-green-500/30">
                 <Tag className="text-green-400" size={20} />
-                <span className="text-green-400 font-bold">FREE SHIPPING</span>
+                <span className="text-green-400 font-bold">MINIMUM SHIPPING CHARGES</span>
               </div>
             </div>
 
@@ -376,7 +324,7 @@ const OnSale = () => {
               <p className="text-gray-300 text-xl mb-8 max-w-2xl mx-auto">
                 Limited time offers with massive savings. Act fast before stock runs out!
               </p>
-              <button className="bg-gradient-to-r from-red-500 to-yellow-500 hover:from-red-400 hover:to-yellow-400 text-white px-16 py-5 rounded-full font-bold text-xl transition-all duration-300 hover:shadow-2xl hover:shadow-red-500/40 hover:scale-105 transform">
+              <button onClick={()=>navigate('/products')} className="bg-gradient-to-r from-red-500 to-yellow-500 cursor-pointer hover:from-red-400 hover:to-yellow-400 text-white px-16 py-5 rounded-full font-bold text-xl transition-all duration-300 hover:shadow-2xl hover:shadow-red-500/40 hover:scale-105 transform">
                 Shop All Sale Items
               </button>
             </div>
