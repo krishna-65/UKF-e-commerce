@@ -152,6 +152,7 @@ const Home = () => {
         buttonText: "Shop the latest",
         icon: Sparkles,
         key: "maninsuit",
+        link:'/newarrival'
       },
       {
         image: featuredImages.maninwinter,
@@ -159,6 +160,7 @@ const Home = () => {
         buttonText: "Shop Your Favourites",
         icon: Star,
         key: "maninwinter",
+        link:'/featuredproducts'
       },
       {
         image: featuredImages.maninsweater,
@@ -166,6 +168,7 @@ const Home = () => {
         buttonText: "Shop Occasion",
         icon: Heart,
         key: "maninsweater",
+        link:'/onsale'
       },
     ],
     []
@@ -422,7 +425,7 @@ const Home = () => {
                     : "translate-y-12 opacity-0"
                 }`}
                 style={{ transitionDelay: `${1200 + index * 200}ms` }}
-                onClick={handleShopNowClick}
+                onClick={()=>navigate(section.link)}
               >
                 {/* Image */}
                 <div className="relative h-80 lg:h-96 overflow-hidden">
