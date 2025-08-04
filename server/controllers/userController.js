@@ -46,38 +46,51 @@ export const register = async (req, res)=>{
 
 // Login User : /api/user/login
 
-export const login = async (req, res)=>{
-    try {
-        const { phone, password } = req.body;
+export const login = async (req, res) => {
+  try {
+    const { phone, password } = req.body;
 
-        if(!phone || !password)
-            return res.json({success: false, message: 'phone and password are required'});
-        const user = await User.findOne({phone});
-
-        if(!user){
-            return res.json({success: false, message: 'Invalid phone or password'});
-        }
-
-        const isMatch = await bcrypt.compare(password, user.password)
-
-        if(!isMatch)
-            return res.json({success: false, message: 'Invalid phone or password'});
-
-        const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, {expiresIn: '7d'});
-
-        res.cookie('token', token, {
-            httpOnly: true, 
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-        })
-
-        return res.json({success: true, user: {phone: user.phone, name: user.name,accountType: user.accountType, token:token, _id:user._id}})
-    } catch (error) {
-        console.log(error.message);
-        res.json({ success: false, message: error.message });
+    if (!phone || !password) {
+      return res.status(400).json({ success: false, message: 'Phone and password are required' });
     }
-}
+
+    const user = await User.findOne({ phone });
+
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Invalid phone or password' });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: 'Invalid phone or password' });
+    }
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    return res.status(200).json({
+      success: true,
+      user: {
+        phone: user.phone,
+        name: user.name,
+        accountType: user.accountType,
+        token: token,
+        _id: user._id,
+      },
+    });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ success: false, message: 'Server error: ' + error.message });
+  }
+};
+
 
 
 // Check Auth : /api/user/is-auth
