@@ -23,6 +23,7 @@ import {
   ChevronRight,
   Filter,
 } from "lucide-react";
+import { Truck, Building2, Hash, ExternalLink } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
 import { setProductData } from "../slices/productSlice";
 
@@ -879,315 +880,356 @@ const Profile = () => {
         </div>
 
         {/* Enhanced Modal */}
-        {selectedOrder && (
-          <div className="fixed inset-0  backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
-            <div className="bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] rounded-2xl max-w-4xl w-full lg:max-h-[70vh] mt-44 overflow-hidden border border-[#ecba49]/30 shadow-2xl animate-slideUp">
-              {/* Modal Header */}
-              <div className="bg-gradient-to-r from-[#ecba49]/20 to-[#ecba49]/10 px-6 py-4 border-b border-[#ecba49]/30">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h2 className="text-2xl font-bold text-[#ecba49] flex items-center gap-2">
-                      <Package className="animate-pulse" />
-                      Order Details
-                    </h2>
-                    <p className="text-gray-400 text-sm mt-1">
-                      Order #{selectedOrder.orderId}
-                    </p>
+       {selectedOrder && (
+  <div className="fixed inset-0  backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
+    <div className="bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] rounded-2xl max-w-4xl w-full lg:max-h-[70vh] mt-44 overflow-hidden border border-[#ecba49]/30 shadow-2xl animate-slideUp">
+      {/* Modal Header */}
+      <div className="bg-gradient-to-r from-[#ecba49]/20 to-[#ecba49]/10 px-6 py-4 border-b border-[#ecba49]/30">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold text-[#ecba49] flex items-center gap-2">
+              <Package className="animate-pulse" />
+              Order Details
+            </h2>
+            <p className="text-gray-400 text-sm mt-1">
+              Order #{selectedOrder.orderId}
+            </p>
+          </div>
+          <button
+            onClick={() => setSelectedOrder(null)}
+            className="p-2 hover:bg-red-500/20 rounded-xl transition-all duration-300 hover:scale-110 text-gray-400 hover:text-red-400"
+          >
+            <X size={24} />
+          </button>
+        </div>
+      </div>
+
+      {/* Modal Content */}
+      <div className="p-6 overflow-y-auto max-h-[50vh] hidescroll custom-scrollbar">
+        {/* Order Summary */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="bg-[#ecba49]/10 p-4 rounded-lg border border-[#ecba49]/20 hover:border-[#ecba49]/40 transition-all duration-300">
+            <p className="text-gray-400 text-sm">Order ID</p>
+            <p className="text-[#ecba49] font-bold font-mono">
+              #{selectedOrder.orderId}
+            </p>
+          </div>
+          <div className="bg-blue-400/10 p-4 rounded-lg border border-blue-400/20 hover:border-blue-400/40 transition-all duration-300">
+            <p className="text-gray-400 text-sm">Status</p>
+            <p
+              className={`font-bold ${
+                getStatusColor(selectedOrder.currentStatus).split(
+                  " "
+                )[0]
+              }`}
+            >
+              {selectedOrder.currentStatus}
+            </p>
+          </div>
+          <div className="bg-green-400/10 p-4 rounded-lg border border-green-400/20 hover:border-green-400/40 transition-all duration-300">
+            <p className="text-gray-400 text-sm">Total Amount</p>
+            <p className="text-green-400 font-bold text-lg">
+              ₹{selectedOrder.total?.toLocaleString()}
+            </p>
+          </div>
+          <div className="bg-purple-400/10 p-4 rounded-lg border border-purple-400/20 hover:border-purple-400/40 transition-all duration-300">
+            <p className="text-gray-400 text-sm">Payment Method</p>
+            <p className="text-purple-400 font-semibold">
+              {selectedOrder.paymentMethod}
+            </p>
+          </div>
+        </div>
+
+        {/* Tracking Information - Show only for Shipped orders */}
+        {selectedOrder.currentStatus === "Shipped" && (selectedOrder.trackingNumber || selectedOrder.trackingCompany) && (
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-4 text-[#ecba49] flex items-center gap-2">
+              <Truck size={20} />
+              Tracking Information
+            </h3>
+            <div className="bg-gradient-to-r from-blue-500/10 to-blue-600/10 p-4 rounded-lg border border-blue-500/30">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {selectedOrder.trackingCompany && (
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                      <Building2 size={20} className="text-blue-400" />
+                    </div>
+                    <div>
+                      <p className="text-gray-400 text-sm">Shipping Company</p>
+                      <p className="text-blue-400 font-semibold text-lg">
+                        {selectedOrder.trackingCompany}
+                      </p>
+                    </div>
                   </div>
-                  <button
-                    onClick={() => setSelectedOrder(null)}
-                    className="p-2 hover:bg-red-500/20 rounded-xl transition-all duration-300 hover:scale-110 text-gray-400 hover:text-red-400"
-                  >
-                    <X size={24} />
-                  </button>
-                </div>
+                )}
+                {selectedOrder.trackingNumber && (
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                      <Hash size={20} className="text-blue-400" />
+                    </div>
+                    <div>
+                      <p className="text-gray-400 text-sm">Tracking Number</p>
+                      <p className="text-blue-400 font-semibold text-lg font-mono">
+                        {selectedOrder.trackingNumber}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
+              
+            </div>
+          </div>
+        )}
 
-              {/* Modal Content */}
-              <div className="p-6 overflow-y-auto max-h-[50vh] hidescroll custom-scrollbar">
-                {/* Order Summary */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                  <div className="bg-[#ecba49]/10 p-4 rounded-lg border border-[#ecba49]/20 hover:border-[#ecba49]/40 transition-all duration-300">
-                    <p className="text-gray-400 text-sm">Order ID</p>
-                    <p className="text-[#ecba49] font-bold font-mono">
-                      #{selectedOrder.orderId}
-                    </p>
-                  </div>
-                  <div className="bg-blue-400/10 p-4 rounded-lg border border-blue-400/20 hover:border-blue-400/40 transition-all duration-300">
-                    <p className="text-gray-400 text-sm">Status</p>
-                    <p
-                      className={`font-bold ${
-                        getStatusColor(selectedOrder.currentStatus).split(
-                          " "
-                        )[0]
-                      }`}
-                    >
-                      {selectedOrder.currentStatus}
-                    </p>
-                  </div>
-                  <div className="bg-green-400/10 p-4 rounded-lg border border-green-400/20 hover:border-green-400/40 transition-all duration-300">
-                    <p className="text-gray-400 text-sm">Total Amount</p>
-                    <p className="text-green-400 font-bold text-lg">
-                      ₹{selectedOrder.total?.toLocaleString()}
-                    </p>
-                  </div>
-                  <div className="bg-purple-400/10 p-4 rounded-lg border border-purple-400/20 hover:border-purple-400/40 transition-all duration-300">
-                    <p className="text-gray-400 text-sm">Payment Method</p>
-                    <p className="text-purple-400 font-semibold">
-                      {selectedOrder.paymentMethod}
-                    </p>
-                  </div>
-                </div>
+        {/* Order Timeline */}
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold mb-4 text-[#ecba49] flex items-center gap-2">
+            <Calendar size={20} />
+            Order Timeline
+          </h3>
+          <div className="bg-[#0f0f0f] p-4 rounded-lg border border-[#ecba49]/20">
+            <div className="flex items-center gap-3">
+              <div className="w-3 h-3 bg-[#ecba49] rounded-full animate-pulse"></div>
+              <div>
+                <p className="text-[#ecba49] font-medium">
+                  Order Placed
+                </p>
+                <p className="text-gray-400 text-sm">
+                  {new Date(selectedOrder.createdAt).toLocaleString(
+                    "en-US",
+                    {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    }
+                  )}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
 
-                {/* Order Timeline */}
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold mb-4 text-[#ecba49] flex items-center gap-2">
-                    <Calendar size={20} />
-                    Order Timeline
-                  </h3>
-                  <div className="bg-[#0f0f0f] p-4 rounded-lg border border-[#ecba49]/20">
-                    <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 bg-[#ecba49] rounded-full animate-pulse"></div>
-                      <div>
-                        <p className="text-[#ecba49] font-medium">
-                          Order Placed
-                        </p>
-                        <p className="text-gray-400 text-sm">
-                          {new Date(selectedOrder.createdAt).toLocaleString(
-                            "en-US",
-                            {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            }
-                          )}
-                        </p>
+        {/* Items Ordered */}
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold mb-4 text-[#ecba49] flex items-center gap-2">
+            <ShoppingBag size={20} />
+            Items Ordered ({selectedOrder.items.length})
+          </h3>
+          <div className="space-y-3">
+            {selectedOrder.items.map((item, idx) => (
+              <div
+                key={idx}
+                // onClick={() => selectProduct(item)}
+                className="bg-[#0f0f0f] cursor-pointer rounded-lg p-4 border border-[#ecba49]/20 hover:border-[#ecba49]/40 transition-all duration-300 hover:shadow-lg"
+              >
+                {/* Desktop Layout */}
+                <div className="hidden md:flex items-center justify-between">
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className="w-16 h-16 bg-[#ecba49]/20 rounded-lg flex items-center justify-center border border-[#ecba49]/30 overflow-hidden">
+                      {item.product?.images?.[0] ? (
+                        <img
+                          src={item.product.images[0].url}
+                          alt={item.product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <Package size={24} className="text-[#ecba49]" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-white font-semibold text-lg hover:text-[#ecba49] transition-colors duration-300">
+                        {item.product?.name || item.name}
+                      </h4>
+                      <div className="flex items-center gap-4 mt-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-400 text-sm">
+                            Quantity:
+                          </span>
+                          <span className="bg-[#ecba49]/20 text-[#ecba49] px-2 py-1 rounded-full text-sm font-medium">
+                            {item.quantity}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-400 text-sm">
+                            Unit Price:
+                          </span>
+                          <span className="text-white font-medium">
+                            ₹
+                            {(
+                              item.product?.price || item.price
+                            )?.toLocaleString()}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-
-                {/* Items Ordered */}
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold mb-4 text-[#ecba49] flex items-center gap-2">
-                    <ShoppingBag size={20} />
-                    Items Ordered ({selectedOrder.items.length})
-                  </h3>
-                  <div className="space-y-3">
-                    {selectedOrder.items.map((item, idx) => (
-                      <div
-                        key={idx}
-                        // onClick={() => selectProduct(item)}
-                        className="bg-[#0f0f0f] cursor-pointer rounded-lg p-4 border border-[#ecba49]/20 hover:border-[#ecba49]/40 transition-all duration-300 hover:shadow-lg"
-                      >
-                        {/* Desktop Layout */}
-                        <div className="hidden md:flex items-center justify-between">
-                          <div className="flex items-center gap-4 flex-1">
-                            <div className="w-16 h-16 bg-[#ecba49]/20 rounded-lg flex items-center justify-center border border-[#ecba49]/30 overflow-hidden">
-                              {item.product?.images?.[0] ? (
-                                <img
-                                  src={item.product.images[0].url}
-                                  alt={item.product.name}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <Package size={24} className="text-[#ecba49]" />
-                              )}
-                            </div>
-                            <div className="flex-1">
-                              <h4 className="text-white font-semibold text-lg hover:text-[#ecba49] transition-colors duration-300">
-                                {item.product?.name || item.name}
-                              </h4>
-                              <div className="flex items-center gap-4 mt-2">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-gray-400 text-sm">
-                                    Quantity:
-                                  </span>
-                                  <span className="bg-[#ecba49]/20 text-[#ecba49] px-2 py-1 rounded-full text-sm font-medium">
-                                    {item.quantity}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <span className="text-gray-400 text-sm">
-                                    Unit Price:
-                                  </span>
-                                  <span className="text-white font-medium">
-                                    ₹
-                                    {(
-                                      item.product?.price || item.price
-                                    )?.toLocaleString()}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            <div className="text-right">
-                              <p className="text-[#ecba49] font-bold text-xl">
-                                ₹
-                                {(
-                                  (item.product?.price || item.price) *
-                                  item.quantity
-                                )?.toLocaleString()}
-                              </p>
-                              <p className="text-gray-400 text-sm">Total</p>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Mobile Layout */}
-                        <div className="md:hidden">
-                          <div className="flex gap-3 mb-3">
-                            <div className="w-16 h-16 bg-[#ecba49]/20 rounded-lg flex items-center justify-center border border-[#ecba49]/30 overflow-hidden flex-shrink-0">
-                              {item.product?.images?.[0] ? (
-                                <img
-                                  src={item.product.images[0].url}
-                                  alt={item.product.name}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <Package size={20} className="text-[#ecba49]" />
-                              )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h4 className="text-white font-semibold text-base hover:text-[#ecba49] transition-colors duration-300 truncate">
-                                {item.product?.name || item.name}
-                              </h4>
-                              <div className="grid grid-cols-2 gap-2 mt-2 text-sm">
-                                <div>
-                                  <span className="text-gray-400">
-                                    Quantity:
-                                  </span>
-                                  <span className="text-[#ecba49] font-medium ml-1">
-                                    {item.quantity}
-                                  </span>
-                                </div>
-                                <div>
-                                  <span className="text-gray-400">
-                                    Unit Price:
-                                  </span>
-                                  <span className="text-white font-medium ml-1">
-                                    ₹
-                                    {(
-                                      item.product?.price || item.price
-                                    )?.toLocaleString()}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <p className="text-[#ecba49] font-bold text-lg">
-                                ₹
-                                {(
-                                  (item.product?.price || item.price) *
-                                  item.quantity
-                                )?.toLocaleString()}
-                              </p>
-                              <p className="text-gray-400 text-xs">
-                                Total Price
-                              </p>
-                            </div>
-
-                            {/* Cancel button for individual items - Mobile */}
-                            {!["Delivered", "Cancelled"].includes(
-                              selectedOrder.currentStatus
-                            ) && (
-                              <button
-                                onClick={() => cancelOrder(selectedOrder._id)}
-                                className="px-3 py-2 border border-red-500 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all duration-300 text-xs font-medium"
-                              >
-                                Cancel
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Order Summary Breakdown */}
-                <div className="bg-gradient-to-r from-[#ecba49]/10 to-[#ecba49]/5 p-6 rounded-lg border border-[#ecba49]/30">
-                  <h3 className="text-lg font-semibold mb-4 text-[#ecba49]">
-                    Order Summary
-                  </h3>
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-300">Subtotal</span>
-                      <span className="text-white font-medium">
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <p className="text-[#ecba49] font-bold text-xl">
                         ₹
-                        {selectedOrder.items
-                          .reduce((total, item) => {
-                            const price =
-                              item.product?.price || item.price || 0;
-                            return total + price * item.quantity;
-                          }, 0)
-                          .toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-300">Shipping</span>
-                      <span className="text-green-400 font-medium">FREE</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-300">Tax</span>
-                      <span className="text-white font-medium">Included</span>
-                    </div>
-                    <div className="border-t border-[#ecba49]/30 pt-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-[#ecba49] font-bold text-lg">
-                          Total
-                        </span>
-                        <span className="text-[#ecba49] font-bold text-2xl">
-                          ₹{selectedOrder.total?.toLocaleString()}
-                        </span>
-                      </div>
+                        {(
+                          (item.product?.price || item.price) *
+                          item.quantity
+                        )?.toLocaleString()}
+                      </p>
+                      <p className="text-gray-400 text-sm">Total</p>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Modal Footer */}
-              <div className="bg-gradient-to-r from-[#0f0f0f] to-[#1a1a1a] px-6 py-4 border-t border-[#ecba49]/30">
-                <div className="flex justify-between items-center">
-                  <div
-                    onClick={() => navigate("/contactus")}
-                    className="text-sm hedden opacity-0 lg:flex lg:opacity-100 cursor-pointer text-gray-400"
-                  >
-                    Need help? Contact our support team
+                {/* Mobile Layout */}
+                <div className="md:hidden">
+                  <div className="flex gap-3 mb-3">
+                    <div className="w-16 h-16 bg-[#ecba49]/20 rounded-lg flex items-center justify-center border border-[#ecba49]/30 overflow-hidden flex-shrink-0">
+                      {item.product?.images?.[0] ? (
+                        <img
+                          src={item.product.images[0].url}
+                          alt={item.product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <Package size={20} className="text-[#ecba49]" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-white font-semibold text-base hover:text-[#ecba49] transition-colors duration-300 truncate">
+                        {item.product?.name || item.name}
+                      </h4>
+                      <div className="grid grid-cols-2 gap-2 mt-2 text-sm">
+                        <div>
+                          <span className="text-gray-400">
+                            Quantity:
+                          </span>
+                          <span className="text-[#ecba49] font-medium ml-1">
+                            {item.quantity}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-gray-400">
+                            Unit Price:
+                          </span>
+                          <span className="text-white font-medium ml-1">
+                            ₹
+                            {(
+                              item.product?.price || item.price
+                            )?.toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex gap-3">
+
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-[#ecba49] font-bold text-lg">
+                        ₹
+                        {(
+                          (item.product?.price || item.price) *
+                          item.quantity
+                        )?.toLocaleString()}
+                      </p>
+                      <p className="text-gray-400 text-xs">
+                        Total Price
+                      </p>
+                    </div>
+
+                    {/* Cancel button for individual items - Mobile */}
                     {!["Delivered", "Cancelled"].includes(
                       selectedOrder.currentStatus
                     ) && (
                       <button
-                        onClick={() => {
-                          cancelOrder(selectedOrder._id);
-                          setSelectedOrder(null);
-                        }}
-                        className="flex items-center gap-2 px-4 py-2 border border-red-500 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all duration-300 hover:scale-105"
+                        onClick={() => cancelOrder(selectedOrder._id)}
+                        className="px-3 py-2 border border-red-500 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all duration-300 text-xs font-medium"
                       >
-                        <XCircle size={16} />
-                        Cancel Order
+                        Cancel
                       </button>
                     )}
-                    <button
-                      onClick={() => setSelectedOrder(null)}
-                      className="px-6 py-2 bg-[#ecba49] text-black rounded-lg font-semibold hover:brightness-110 transition-all duration-300 hover:scale-105"
-                    >
-                      Close
-                    </button>
                   </div>
                 </div>
               </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Order Summary Breakdown */}
+        <div className="bg-gradient-to-r from-[#ecba49]/10 to-[#ecba49]/5 p-6 rounded-lg border border-[#ecba49]/30">
+          <h3 className="text-lg font-semibold mb-4 text-[#ecba49]">
+            Order Summary
+          </h3>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-gray-300">Subtotal</span>
+              <span className="text-white font-medium">
+                ₹
+                {selectedOrder.items
+                  .reduce((total, item) => {
+                    const price =
+                      item.product?.price || item.price || 0;
+                    return total + price * item.quantity;
+                  }, 0)
+                  .toLocaleString()}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-300">Shipping</span>
+              <span className="text-green-400 font-medium">FREE</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-300">Tax</span>
+              <span className="text-white font-medium">Included</span>
+            </div>
+            <div className="border-t border-[#ecba49]/30 pt-3">
+              <div className="flex justify-between items-center">
+                <span className="text-[#ecba49] font-bold text-lg">
+                  Total
+                </span>
+                <span className="text-[#ecba49] font-bold text-2xl">
+                  ₹{selectedOrder.total?.toLocaleString()}
+                </span>
+              </div>
             </div>
           </div>
-        )}
+        </div>
+      </div>
+
+      {/* Modal Footer */}
+      <div className="bg-gradient-to-r from-[#0f0f0f] to-[#1a1a1a] px-6 py-4 border-t border-[#ecba49]/30">
+        <div className="flex justify-between items-center">
+          <div
+            onClick={() => navigate("/contactus")}
+            className="text-sm hedden opacity-0 lg:flex lg:opacity-100 cursor-pointer text-gray-400"
+          >
+            Need help? Contact our support team
+          </div>
+          <div className="flex gap-3">
+            {!["Delivered", "Cancelled"].includes(
+              selectedOrder.currentStatus
+            ) && (
+              <button
+                onClick={() => {
+                  cancelOrder(selectedOrder._id);
+                  setSelectedOrder(null);
+                }}
+                className="flex items-center gap-2 px-4 py-2 border border-red-500 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all duration-300 hover:scale-105"
+              >
+                <XCircle size={16} />
+                Cancel Order
+              </button>
+            )}
+            <button
+              onClick={() => setSelectedOrder(null)}
+              className="px-6 py-2 bg-[#ecba49] text-black rounded-lg font-semibold hover:brightness-110 transition-all duration-300 hover:scale-105"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
       </div>
     );
   }

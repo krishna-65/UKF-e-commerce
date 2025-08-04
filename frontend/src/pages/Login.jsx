@@ -70,7 +70,10 @@ export default function Login() {
       dispatch(setToken(response.data.user.token));
       dispatch(setRole(response.data.user.accountType));
 
+
+
       if (response.data.user.accountType === "user") {
+        console.log("TOKEN FOR CART : ",response.data.user.token)
         const response2 = await apiConnector("GET", `${getCart}/${user._id}`,null,{Authorization : `Bearer ${response.data.user.token}`});
         console.log("this is get cart", response2);
         response2.data.cart.forEach((entry) => {

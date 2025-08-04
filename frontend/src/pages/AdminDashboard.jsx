@@ -50,7 +50,10 @@ const AdminDashboard = () => {
   const fetchDashboardData = async () => {
     setIsLoading(true);
     try {
-      const response = await apiConnector("GET", adminDashboard);
+      const response = await apiConnector("GET", adminDashboard, null,
+        {
+          Authorization: `Bearer ${token}`
+        });
       console.log('API Response:', response);
 
       if (response?.data?.success) {
@@ -99,7 +102,10 @@ const AdminDashboard = () => {
     try {
       dispatch(setLoading(true));
       console.log(token)
-      const res = await apiConnector("GET", allOrdersWithoutPagination);
+      const res = await apiConnector("GET", allOrdersWithoutPagination ,null,
+        {
+          Authorization: `Bearer ${token}`
+        });
       console.log(res);
       if (res.data.success) {
         setOrders(res.data.orders);
