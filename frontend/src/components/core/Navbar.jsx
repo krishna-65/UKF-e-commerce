@@ -454,15 +454,16 @@ const Navbar = () => {
 
       <div className="hidden opacity-0 lg:flex lg:opacity-100 h-[7vh] w-[100vw] bg-[#FFD700] text-black justify-center z-[49]">
         <ul className="flex items-center gap-5">
-          <li className="hover:scale-105 cursor-pointer">Holiday Gifting</li>
-          <li className="hover:scale-105 cursor-pointer">New Arrivals</li>
-          <li className="hover:scale-105 cursor-pointer">Best-Sellers</li>
-          <li className="hover:scale-105 cursor-pointer">Clothing</li>
-          <li className="hover:scale-105 cursor-pointer">Tops & Sweaters</li>
-          <li className="hover:scale-105 cursor-pointer">Pants & Jeans</li>
-          <li className="hover:scale-105 cursor-pointer">Outerwear</li>
-          <li className="hover:scale-105 cursor-pointer">Shoes & Bags</li>
-          <li className="text-red-600 hover:scale-105 cursor-pointer">Sale</li>
+          {/* <li className="hover:scale-105 cursor-pointer">Holiday Gifting</li> */}
+          <li onClick={()=>navigate('/newarrival')} className="hover:scale-105 cursor-pointer">New Arrivals</li>
+          {/* <li className="hover:scale-105 cursor-pointer">Best-Sellers</li> */}
+          <li onClick={()=>navigate('/products')} className="hover:scale-105 cursor-pointer">Clothing</li>
+          {/* <li className="hover:scale-105 cursor-pointer">Tops & Sweaters</li> */}
+          {/* <li className="hover:scale-105 cursor-pointer">Pants & Jeans</li> */}
+          {/* <li className="hover:scale-105 cursor-pointer">Outerwear</li> */}
+          {/* <li className="hover:scale-105 cursor-pointer">Shoes & Bags</li> */}
+          <li onClick={()=>navigate('/featuredproducts')}  className="hover:scale-105 cursor-pointer">Featured Products</li>
+          <li onClick={()=>navigate('/onsale')} className="text-red-600 hover:scale-105 cursor-pointer">Sale</li>
         </ul>
       </div>
     </div>

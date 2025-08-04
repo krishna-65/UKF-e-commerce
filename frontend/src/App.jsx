@@ -29,6 +29,9 @@ import { useSelector } from "react-redux";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import ResetForgotPassword from "./pages/ResetForgotPassword";
+import FeaturedProduct from "./pages/FeaturedProducts";
+import NewArrival from "./pages/NewArrival";
+import OnSale from "./pages/Onsale";
 
 const App = () => {
   
@@ -85,7 +88,9 @@ const App = () => {
           <Route path="/about" element={<AboutUs />} />
           <Route path="/products" element={<Products />} />
           <Route path="/productdetail" element={<ProductDetail />} />
-
+          <Route path="/featuredproducts" element={<FeaturedProduct/>}/>
+            <Route path="/newarrival" element={<NewArrival/>}/>
+            <Route path="/onsale" element={<OnSale/>}/>
           <Route
             path="/create-order"
             element={

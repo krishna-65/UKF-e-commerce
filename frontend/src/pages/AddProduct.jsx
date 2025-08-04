@@ -54,6 +54,8 @@ const AddProduct = () => {
     isNewArrival: false,
     isBestSeller: false,
     isOnSale: false,
+    saleStartDate: "",
+    saleEndDate: "",
     lookbookImages: [],
   });
 
@@ -188,9 +190,35 @@ const AddProduct = () => {
     }));
   };
 
+  // Format date for input field (convert from ISO to YYYY-MM-DD)
+  const formatDateForInput = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toISOString().split('T')[0];
+  };
+
   const handleSubmit = async (edit = false) => {
     try {
       dispatch(setLoading(true));
+      
+      // Validation for sale dates
+      if (formData.isOnSale) {
+        if (!formData.saleStartDate || !formData.saleEndDate) {
+          toast.error("Please provide both sale start and end dates when marking as on sale");
+          dispatch(setLoading(false));
+          return;
+        }
+        
+        const startDate = new Date(formData.saleStartDate);
+        const endDate = new Date(formData.saleEndDate);
+        
+        if (startDate >= endDate) {
+          toast.error("Sale end date must be after start date");
+          dispatch(setLoading(false));
+          return;
+        }
+      }
+      
       const payload = new FormData();
       const numericFields = ["price", "comparePrice", "costPerItem", "stock"];
 
@@ -202,6 +230,11 @@ const AddProduct = () => {
         } else if (Array.isArray(value)) {
           // Handle arrays (size, color, etc.)
           value.forEach((v) => payload.append(key, v));
+        } else if (key === 'saleStartDate' || key === 'saleEndDate') {
+          // Handle date fields - only append if isOnSale is true and dates are provided
+          if (formData.isOnSale && value) {
+            payload.append(key, new Date(value).toISOString());
+          }
         } else {
           payload.append(key, value);
         }
@@ -215,7 +248,7 @@ const AddProduct = () => {
       const method = edit ? "PUT" : "POST";
 
       const response = await apiConnector(method, endpoint, payload, {
-        headers: { "Content-Type": "multipart/form-data" },
+        "Content-Type": "multipart/form-data",
         Authorization : `Bearer ${token}`
       });
 
@@ -238,7 +271,6 @@ const AddProduct = () => {
   const handleEditOpen = (prod) => {
     setEditId(prod._id);
     setFormData({
-      ...formData,
       name: prod.name || "",
       description: prod.description || "",
       shortDescription: prod.shortDescription || "",
@@ -248,7 +280,7 @@ const AddProduct = () => {
       stock: prod.stock || "",
       category: prod.category?._id || "",
       subCategory: prod.subCategory || "",
-      brand: prod.brand._id || "",
+      brand: prod.brand?._id || "",
       size: Array.isArray(prod.size) ? prod.size : [],
       color: Array.isArray(prod.color) ? prod.color : [],
       material: prod.material || "",
@@ -264,6 +296,8 @@ const AddProduct = () => {
       isNewArrival: prod.isNewArrival || false,
       isBestSeller: prod.isBestSeller || false,
       isOnSale: prod.isOnSale || false,
+      saleStartDate: formatDateForInput(prod.saleStartDate) || "",
+      saleEndDate: formatDateForInput(prod.saleEndDate) || "",
       lookbookImages: prod.lookbookImages || [],
     });
     setImages({});
@@ -298,6 +332,8 @@ const AddProduct = () => {
       isNewArrival: false,
       isBestSeller: false,
       isOnSale: false,
+      saleStartDate: "",
+      saleEndDate: "",
       lookbookImages: [],
     });
     setImages({});
@@ -629,7 +665,7 @@ const AddProduct = () => {
 
             {/* Boolean Flags */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-4">
-              {["isFeatured", "isNewArrival", "isBestSeller", "isOnSale"].map(
+              {["isFeatured", "isNewArrival", "isBestSeller"].map(
                 (flag) => (
                   <label key={flag} className="flex items-center gap-2">
                     <input
@@ -644,7 +680,66 @@ const AddProduct = () => {
                   </label>
                 )
               )}
+              
+              {/* Special handling for isOnSale checkbox */}
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={formData.isOnSale}
+                  onChange={(e) => {
+                    const isChecked = e.target.checked;
+                    setFormData({ 
+                      ...formData, 
+                      isOnSale: isChecked,
+                      // Clear dates if unchecking
+                      saleStartDate: isChecked ? formData.saleStartDate : "",
+                      saleEndDate: isChecked ? formData.saleEndDate : ""
+                    });
+                  }}
+                  className="w-4 h-4"
+                />
+                <span className="text-sm sm:text-base">isOnSale</span>
+              </label>
             </div>
+
+            {/* Sale Date Fields - Show only when isOnSale is true */}
+            {formData.isOnSale && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-4 p-4 bg-black/20 border border-[#FFD770]/20 rounded-md">
+                <div>
+                  <label className="block font-semibold mb-2 text-[#FFD770] text-sm sm:text-base">
+                    Sale Start Date *
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.saleStartDate}
+                    onChange={(e) =>
+                      setFormData({ ...formData, saleStartDate: e.target.value })
+                    }
+                    className="w-full px-3 py-2 sm:py-3 bg-black/30 text-[#FFD770] border border-[#FFD770]/40 rounded-md focus:outline-none focus:border-[#FFD770]/80 text-sm sm:text-base"
+                    required={formData.isOnSale}
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold mb-2 text-[#FFD770] text-sm sm:text-base">
+                    Sale End Date *
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.saleEndDate}
+                    onChange={(e) =>
+                      setFormData({ ...formData, saleEndDate: e.target.value })
+                    }
+                    className="w-full px-3 py-2 sm:py-3 bg-black/30 text-[#FFD770] border border-[#FFD770]/40 rounded-md focus:outline-none focus:border-[#FFD770]/80 text-sm sm:text-base"
+                    required={formData.isOnSale}
+                    min={formData.saleStartDate} // Prevent end date from being before start date
+                  />
+                </div>
+                <div className="sm:col-span-2 text-xs sm:text-sm text-[#FFD770]/60 mt-2">
+                  <p>* Both dates are required when marking product as on sale</p>
+                  <p>Sale end date must be after the start date</p>
+                </div>
+              </div>
+            )}
 
             {/* Image Upload */}
             <div className="mt-6">
