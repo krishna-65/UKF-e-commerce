@@ -164,7 +164,7 @@ const Brands = () => {
   };
 
   return (
-    <div className="min-h-screen lg:w-[calc(100vw-256px)] h-[100vh] overflow-scroll hidescroll bg-gray-50 text-gray-900 p-4 md:p-6 lg:p-8">
+    <div className="min-h-screen w-[100vw] lg:w-[calc(100vw-256px)] h-[100vh] overflow-scroll hidescroll bg-gray-50 text-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">

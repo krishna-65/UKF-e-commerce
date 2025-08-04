@@ -261,7 +261,7 @@ const ManageOrders = () => {
   }, [searchTerm, searchFilter, orders]);
 
   return (
-    <div className="manage-orders text-[#FFD700] lg:w-[calc(100vw-256px)] overflow-y-auto h-screen p-3 sm:p-6 hidescroll">
+    <div className="manage-orders text-[#FFD700] w-[100vw] lg:w-[calc(100vw-256px)] overflow-y-auto h-screen p-3 sm:p-6 hidescroll">
       <h2 className="text-xl sm:text-2xl font-bold mb-4">Manage Orders</h2>
 
       {/* Search Bar */}
