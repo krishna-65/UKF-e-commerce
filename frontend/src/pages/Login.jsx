@@ -80,6 +80,8 @@ export default function Login() {
           const completeProduct = {
             ...entry.product,
             quantity: entry.quantity,
+            size:entry.size,
+            color:entry.color,
           };
           dispatch(addToCart(completeProduct));
         });
