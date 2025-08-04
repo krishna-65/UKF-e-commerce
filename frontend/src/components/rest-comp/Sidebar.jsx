@@ -20,23 +20,28 @@ export default function Sidebar() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const logoutHandler = () =>{
-          try{
-              localStorage.removeItem('token');
-              localStorage.removeItem('role');
-              localStorage.removeItem('userdata');
+  const logoutHandler = async () => {
+      try {
+       
+        // Clear local storage
+        localStorage.removeItem("token");
+        localStorage.removeItem("role");
+        localStorage.removeItem("userdata");
+        localStorage.clear();
   
-              dispatch(setToken(null));
-              dispatch(setUserData(null));
-              dispatch(setRole(null))
+        // Clear Redux state
+        dispatch(setToken(null));
+        dispatch(setUserData(null));
+        dispatch(setRole(null));
+        dispatch(resetCart());
   
-              toast.success("Logged out Successfully!")
-              navigate('/signup')
-          }catch(err){
-              console.log(err);
-              toast.error("unable to LogOut")
-          }
+        toast.success("Logged out Successfully!");
+        navigate("/");
+      } catch (error) {
+        console.error("Logout error:", error);
+        toast.error("Unable to logout. Please try again.");
       }
+    };
 
   return (
     <>
