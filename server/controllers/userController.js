@@ -51,7 +51,7 @@ export const login = async (req, res)=>{
         const { phone, password } = req.body;
 
         if(!phone || !password)
-            return res.json({success: false, message: 'phone and password are required'});
+            return res.status(401).json({success: false, message: 'phone and password are required'});
         const user = await User.findOne({phone});
 
         if(!user){
