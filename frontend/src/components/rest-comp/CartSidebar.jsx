@@ -1,25 +1,27 @@
 import React, { useState } from 'react';
 import { FaShoppingCart, FaTimes, FaPlus, FaMinus, FaTrash } from 'react-icons/fa';
 import { useSelector, useDispatch } from 'react-redux';
-import { addToCart, decreaseItemQuantity, removeFromCart } from '../../slices/cartSlice';
+import { addToCart, decreaseItemQuantity, removeFromCart, setIsCartOpen } from '../../slices/cartSlice';
 import { useNavigate } from 'react-router-dom';
 import { setProductData } from '../../slices/productSlice';
 import toast from 'react-hot-toast';
 
 const CartSidebar = () => {
-  const [isOpen, setIsOpen] = useState(false);
+ 
   const dispatch = useDispatch();
   
   const cart = useSelector(state => state.cart.cart || []);
   const totalItems = useSelector(state => state.cart.totalItems || 0);
   const total = useSelector(state => state.cart.total || 0);
+
+  const isCartOpen = useSelector(state => state.cart.isCartOpen)
   
   const navigate = useNavigate();
 
   const handleClick = (product) => {
     dispatch(setProductData(product));
     navigate("/productdetail");
-    setIsOpen(false);
+    dispatch(setIsCartOpen(false));
   };
 
   // Function to handle checkout navigation
@@ -33,7 +35,7 @@ const CartSidebar = () => {
     navigate("/create-order?fromCart=true", {
       state: { fromCart: true }
     });
-    setIsOpen(false);
+    dispatch(setIsCartOpen(false));
   };
   
   const displayItems = cart;
@@ -49,7 +51,7 @@ const CartSidebar = () => {
   return (
     <>
       {/* Cart Icon */}
-      <div className="relative cursor-pointer" onClick={() => setIsOpen(true)}>
+      <div className="relative cursor-pointer" onClick={() => dispatch(setIsCartOpen(true))}>
         <FaShoppingCart className="text-[#FFD700] text-xl" />
         {(totalItems > 0 || cart.length > 0) && (
           <div className="absolute z-[140] w-5 h-5 bg-[#FFD700] rounded-full top-0 right-0 text-sm text-black -translate-y-1/2 translate-x-1/2 flex justify-center items-center font-bold">
@@ -59,23 +61,23 @@ const CartSidebar = () => {
       </div>
 
       {/* Overlay */}
-      {isOpen && (
+      {isCartOpen && (
         <div 
           className="fixed inset-0 backdrop-blur-2xl bg-opacity-50 z-[300]" 
-          onClick={() => setIsOpen(false)}
+          onClick={() => dispatch(setIsCartOpen(false))}
         />
       )}
 
       {/* Cart Sidebar */}
       <div className={`fixed top-0 right-0 h-full w-full max-w-sm bg-black text-[#FFD700] z-[400] transform transition-transform duration-300 ease-in-out ${
-        isOpen ? 'translate-x-0' : 'translate-x-full'
+        isCartOpen ? 'translate-x-0' : 'translate-x-full'
       } shadow-2xl border-l-2 border-[#FFD700]`}>
         
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-[#FFD700] border-opacity-30">
           <h2 className="text-xl font-bold ml-8">Your Cart</h2>
           <button 
-            onClick={() => setIsOpen(false)}
+            onClick={() => dispatch(setIsCartOpen(false))}
             className="text-[#FFD700] hover:text-white text-xl p-1"
           >
             <FaTimes />

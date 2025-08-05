@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addToCart } from "../slices/cartSlice";
+import { addToCart, setIsCartOpen } from "../slices/cartSlice";
 import { apiConnector } from "../services/apiConnector";
-import { orderEndpoints, reviewEndpoints } from "../services/api";
+import { orderEndpoints, reviewEndpoints, productEndpoints } from "../services/api";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { setProductData } from "../slices/productSlice";
+import ProductCard from "../components/rest-comp/ProductCard";
 
 export default function ProductDetail() {
   const product = useSelector((state) => state.product.productData);
   const images = product?.images || [];
   const user = useSelector((state) => state.auth.userData);
   const token = useSelector((state) => state.auth.token);
+  const cart = useSelector((state) => state.cart.cart);
 
   const navigate = useNavigate();
   const userRole = useSelector((state) => state.auth.role);
@@ -40,6 +42,14 @@ export default function ProductDetail() {
   });
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [reviewsLoading, setReviewsLoading] = useState(true);
+
+  // Similar products states
+  const [similarProducts, setSimilarProducts] = useState([]);
+  const [similarProductsLoading, setSimilarProductsLoading] = useState(false);
+  const [showSimilarProducts, setShowSimilarProducts] = useState(false);
+
+  // Check if product is in cart
+  const isProductInCart = cart.some(item => item._id === product?._id);
 
   const buyNowHandler = () => {
     if (userRole !== "user") {
@@ -130,10 +140,42 @@ export default function ProductDetail() {
     }
   };
 
+  const goToCartHandler = () => {
+    dispatch(setIsCartOpen(true));
+  };
+
   const handleImageSelect = (imageUrl) => {
     setImageLoading(true);
     setSelectedImage(imageUrl);
     setTimeout(() => setImageLoading(false), 200);
+  };
+
+  // Fetch similar products
+  const fetchSimilarProducts = async () => {
+    if (!product?.category?._id) return;
+
+    try {
+      setSimilarProductsLoading(true);
+      const response = await apiConnector("GET", productEndpoints.getAllProduct);
+      
+      if (response.data.success) {
+        const allProducts = response.data.products || [];
+        // Filter products by same category but exclude current product
+        const similar = allProducts
+          .filter(prod => 
+            prod.category?._id === product.category._id && 
+            prod._id !== product._id
+          )
+          .slice(0, 8); // Limit to 8 similar products
+        
+        setSimilarProducts(similar);
+        setTimeout(() => setShowSimilarProducts(true), 300);
+      }
+    } catch (error) {
+      console.error("Error fetching similar products:", error);
+    } finally {
+      setSimilarProductsLoading(false);
+    }
   };
 
   // Fetch user's orders to check eligibility for review
@@ -298,6 +340,7 @@ export default function ProductDetail() {
     if (product?._id) {
       fetchProductReviews();
       checkReviewEligibility();
+      fetchSimilarProducts();
     }
   }, [product?._id, user, token]);
 
@@ -531,25 +574,40 @@ export default function ProductDetail() {
 
           {/* Action Buttons */}
           <div className={`flex flex-wrap gap-4 mt-6 transition-all duration-800 ${animateButtons ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-            <button
-              onClick={cartHandler}
-              disabled={product?.stock <= 0 || isAddingToCart}
-              className={`relative bg-[#ecba49] text-black px-6 py-3 rounded-lg font-bold transition-all duration-300 hover:brightness-110 hover:scale-105 hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden ${
-                isAddingToCart ? 'animate-pulse' : ''
-              }`}
-            >
-              <div className="absolute inset-0 bg-white opacity-0 hover:opacity-20 transition-opacity duration-300 rounded-lg"></div>
-              <span className="relative z-10">
-                {isAddingToCart ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-                    Adding...
-                  </div>
-                ) : (
-                  "Add to Cart"
-                )}
-              </span>
-            </button>
+            {isProductInCart ? (
+              <button
+                onClick={goToCartHandler}
+                className="relative bg-green-600 text-white px-6 py-3 rounded-lg font-bold transition-all duration-300 hover:brightness-110 hover:scale-105 hover:shadow-lg active:scale-95 overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-white opacity-0 hover:opacity-20 transition-opacity duration-300 rounded-lg"></div>
+                <span className="relative z-10 flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Go to Cart
+                </span>
+              </button>
+            ) : (
+              <button
+                onClick={cartHandler}
+                disabled={product?.stock <= 0 || isAddingToCart}
+                className={`relative bg-[#ecba49] text-black px-6 py-3 rounded-lg font-bold transition-all duration-300 hover:brightness-110 hover:scale-105 hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden ${
+                  isAddingToCart ? 'animate-pulse' : ''
+                }`}
+              >
+                <div className="absolute inset-0 bg-white opacity-0 hover:opacity-20 transition-opacity duration-300 rounded-lg"></div>
+                <span className="relative z-10">
+                  {isAddingToCart ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                      Adding...
+                    </div>
+                  ) : (
+                    "Add to Cart"
+                  )}
+                </span>
+              </button>
+            )}
             
             <button
               onClick={buyNowHandler}
@@ -575,6 +633,122 @@ export default function ProductDetail() {
         </div>
       </div>
 
+      {/* Similar Products Section */}
+      {product?.category && (
+        <div className="max-w-7xl mx-auto mt-16 space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-[#ecba49] hover:text-yellow-300 transition-colors duration-300">
+              Similar Products in {product.category.name}
+            </h2>
+            {similarProducts.length > 4 && (
+              <button 
+                onClick={() => navigate('/products')}
+                className="text-sm text-gray-400 hover:text-[#ecba49] transition-colors duration-300 underline"
+              >
+                View All →
+              </button>
+            )}
+          </div>
+
+          {similarProductsLoading ? (
+            <div className="flex justify-center py-8">
+              <div className="relative">
+                <div className="w-12 h-12 border-4 border-yellow-400/30 border-t-yellow-400 rounded-full animate-spin"></div>
+                <div className="absolute top-2 left-2 w-8 h-8 border-4 border-yellow-300/20 border-t-yellow-300 rounded-full animate-spin animate-reverse"></div>
+                <div className="mt-4 text-center text-yellow-400 animate-pulse">Loading similar products...</div>
+              </div>
+            </div>
+          ) : similarProducts.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {similarProducts.slice(0, 8).map((similarProduct, index) => (
+                <div
+                  key={similarProduct._id}
+                  className={`product-card-wrapper transform transition-all duration-500 ease-out ${
+                    showSimilarProducts
+                      ? 'translate-y-0 opacity-100 scale-100' 
+                      : 'translate-y-4 opacity-80 scale-95'
+                  }`}
+                  style={{ 
+                    transitionDelay: `${Math.min(index * 100, 800)}ms`
+                  }}
+                >
+                  <div className="group relative overflow-hidden rounded-lg transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-[#ecba49]/20">
+                    <div className="bg-[#1a1a1a] border border-[#ecba49]/20 rounded-lg overflow-hidden hover:border-[#ecba49]/50 transition-all duration-300">
+                      {/* Enhanced Product Card */}
+                      <div className="relative overflow-hidden">
+                        <img
+                          src={similarProduct.images?.[0]?.url || '/placeholder-image.jpg'}
+                          alt={similarProduct.name}
+                          className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        
+                        {/* Quick View Button */}
+                        <button 
+                          onClick={() => {
+                            dispatch(setProductData(similarProduct));
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                          }}
+                          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#ecba49] text-black px-4 py-2 rounded-lg font-semibold opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-105"
+                        >
+                          Quick View
+                        </button>
+
+                        {/* Stock Badge */}
+                        {similarProduct.stock <= 0 && (
+                          <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">
+                            Out of Stock
+                          </div>
+                        )}
+
+                        {/* Discount Badge */}
+                        {similarProduct.comparePrice && similarProduct.comparePrice > similarProduct.price && (
+                          <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">
+                            -{Math.round(((similarProduct.comparePrice - similarProduct.price) / similarProduct.comparePrice) * 100)}%
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Product Info */}
+                      <div className="p-4 space-y-2">
+                        <h3 className="font-semibold text-[#ecba49] hover:text-yellow-300 transition-colors duration-300 truncate" title={similarProduct.name}>
+                          {similarProduct.name}
+                        </h3>
+                        
+                        <p className="text-gray-400 text-sm hover:text-gray-300 transition-colors duration-300">
+                          {similarProduct.brand?.name || 'No Brand'}
+                        </p>
+
+                        {/* Price */}
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg font-bold text-[#ecba49]">
+                            ₹{similarProduct.price}
+                          </span>
+                          {similarProduct.comparePrice && similarProduct.comparePrice > similarProduct.price && (
+                            <span className="text-sm text-gray-400 line-through">
+                              ₹{similarProduct.comparePrice}
+                            </span>
+                          )}
+                        </div>
+
+                        
+                      </div>
+                    </div>
+                    
+                    {/* Hover Overlay Effect */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-yellow-400/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-lg"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-400">
+              <p>No similar products found in this category.</p>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Reviews Section */}
       <div className="max-w-7xl mx-auto mt-12 space-y-6">
         <h2 className="text-2xl font-bold text-[#ecba49]">Customer Reviews</h2>
@@ -586,7 +760,7 @@ export default function ProductDetail() {
         ) : reviews.length > 0 ? (
           <div className="space-y-4">
             {reviews.map((review) => (
-              <div key={review._id} className="bg-[#1a1a1a] p-6 rounded-lg border border-[#ecba49]/20">
+              <div key={review._id} className="bg-[#1a1a1a] p-6 rounded-lg border border-[#ecba49]/20 hover:border-[#ecba49]/40 transition-all duration-300 hover:shadow-lg">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-[#ecba49] rounded-full flex items-center justify-center text-black font-bold">
                     {review.user?.name?.charAt(0).toUpperCase() || "U"}
@@ -694,6 +868,11 @@ export default function ProductDetail() {
           100% { transform: translateX(100%); }
         }
 
+        @keyframes reverse {
+          from { transform: rotate(360deg); }
+          to { transform: rotate(0deg); }
+        }
+
         .shimmer {
           position: relative;
           overflow: hidden;
@@ -708,6 +887,20 @@ export default function ProductDetail() {
           height: 100%;
           background: linear-gradient(90deg, transparent, rgba(236, 186, 73, 0.2), transparent);
           animation: shimmer 2s infinite;
+        }
+
+        .animate-reverse {
+          animation-direction: reverse;
+        }
+
+        .product-card-wrapper {
+          will-change: transform, opacity;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .product-card-wrapper {
+            transition: none;
+          }
         }
       `}</style>
     </div>

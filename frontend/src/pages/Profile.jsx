@@ -503,7 +503,9 @@ const Profile = () => {
     try {
       const response = await apiConnector(
         "PUT",
-        `${orderEndpoints.cancelOrder}${orderId}/cancel`
+        `${orderEndpoints.cancelOrder}${orderId}/cancel`,
+        null,
+        {Authorization : `Bearer ${token}`}
       );
       if (response.data.success) {
         toast.success("Order cancelled successfully");

@@ -105,8 +105,7 @@ export default function Footer() {
                     width={200} 
                     src={logo}
                     alt="UKF Outlets Logo" 
-                    className="filter  invert rounded-4xl brightness-100 hover:invert-0 transition-all duration-500 transform hover:scale-110"
-                  />
+                    />
                 </div>
                 
                 <p className="text-gray-300 leading-relaxed text-sm md:text-base transform transition-all duration-300 hover:text-[#FFD700]">
