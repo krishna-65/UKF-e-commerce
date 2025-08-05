@@ -15,6 +15,7 @@ import {
   Calendar,
   MapPin,
   Phone,
+  FileText,
   Mail,
   User,
   Settings,
@@ -24,6 +25,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Filter,
+  
+  MessageSquare, // Added missing import
 } from "lucide-react";
 import { Truck, Building2, Hash, ExternalLink } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
