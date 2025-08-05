@@ -265,7 +265,7 @@ const Navbar = () => {
         </div>
 
         <div className="flex gap-4 text-xl z-[91]">
-          {user?.accountType === "user" && (
+          {user?.accountType !== "admin" && (
             <div className=" relative">
               <FaSearch onClick={() => setShowSearch(!showSearch)} />
               {showSearch && (
@@ -451,7 +451,7 @@ const Navbar = () => {
             )}
           </div>
 
-          {user?.accountType === "user" && <CartSidebar />}
+          {user?.accountType !== "admin" && <CartSidebar />}
         </div>
       </div>
 

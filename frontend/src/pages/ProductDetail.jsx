@@ -90,10 +90,10 @@ export default function ProductDetail() {
   };
 
   const cartHandler = async () => {
-    if (userRole !== "user") {
-      toast.error("Please log in as a valid user!");
-      return;
-    }
+    // if (userRole !== "user") {
+    //   toast.error("Please log in as a valid user!");
+    //   return;
+    // }
 
     if (!product || !product._id || product.stock <= 0) {
       toast.error("Product is out of stock or invalid");

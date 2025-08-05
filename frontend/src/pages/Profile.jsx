@@ -4,6 +4,8 @@ import { toast } from "react-hot-toast";
 import { apiConnector } from "../services/apiConnector";
 import { endpoints, orderEndpoints } from "../services/api";
 import {
+  Home,
+  Globe,
   Edit3,
   Save,
   X,
@@ -882,9 +884,9 @@ const Profile = () => {
         </div>
 
         {/* Enhanced Modal */}
-       {selectedOrder && (
-  <div className="fixed inset-0  backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
-    <div className="bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] rounded-2xl max-w-4xl w-full lg:max-h-[70vh] mt-44 overflow-hidden border border-[#ecba49]/30 shadow-2xl animate-slideUp">
+      {selectedOrder && (
+  <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
+    <div className="bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] rounded-2xl max-w-4xl w-full lg:max-h-[80vh] mt-44 overflow-hidden border border-[#ecba49]/30 shadow-2xl animate-slideUp">
       {/* Modal Header */}
       <div className="bg-gradient-to-r from-[#ecba49]/20 to-[#ecba49]/10 px-6 py-4 border-b border-[#ecba49]/30">
         <div className="flex justify-between items-center">
@@ -907,7 +909,7 @@ const Profile = () => {
       </div>
 
       {/* Modal Content */}
-      <div className="p-6 overflow-y-auto max-h-[50vh] hidescroll custom-scrollbar">
+      <div className="p-6 overflow-y-auto max-h-[60vh] hidescroll custom-scrollbar">
         {/* Order Summary */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <div className="bg-[#ecba49]/10 p-4 rounded-lg border border-[#ecba49]/20 hover:border-[#ecba49]/40 transition-all duration-300">
@@ -941,6 +943,199 @@ const Profile = () => {
             </p>
           </div>
         </div>
+
+        {/* Shipping Address Section */}
+        {selectedOrder.shippingAddress && (
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-4 text-[#ecba49] flex items-center gap-2">
+              <MapPin size={20} />
+              Shipping Address
+            </h3>
+            <div className="bg-gradient-to-r from-indigo-500/10 to-purple-600/10 p-5 rounded-lg border border-indigo-500/30 hover:border-indigo-500/50 transition-all duration-300">
+              {/* Desktop Layout */}
+              <div className="hidden md:grid md:grid-cols-2 gap-6">
+                {/* Left Column - Main Address Info */}
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-indigo-500/20 rounded-lg flex items-center justify-center mt-1">
+                      <User size={18} className="text-indigo-400" />
+                    </div>
+                    <div>
+                      <p className="text-gray-400 text-sm">Recipient</p>
+                      <p className="text-white font-semibold text-lg">
+                        {selectedOrder.shippingAddress.recipientName}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-indigo-500/20 rounded-lg flex items-center justify-center mt-1">
+                      <Home size={18} className="text-indigo-400" />
+                    </div>
+                    <div>
+                      <p className="text-gray-400 text-sm">Street Address</p>
+                      <p className="text-white font-medium">
+                        {selectedOrder.shippingAddress.street}
+                      </p>
+                      {selectedOrder.shippingAddress.landmark && (
+                        <p className="text-gray-300 text-sm mt-1">
+                          Near: {selectedOrder.shippingAddress.landmark}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-indigo-500/20 rounded-lg flex items-center justify-center mt-1">
+                      <Phone size={18} className="text-indigo-400" />
+                    </div>
+                    <div>
+                      <p className="text-gray-400 text-sm">Phone</p>
+                      <p className="text-white font-medium font-mono">
+                        {selectedOrder.shippingAddress.phone}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Column - Location Details */}
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-indigo-500/20 rounded-lg flex items-center justify-center mt-1">
+                      <MapPin size={18} className="text-indigo-400" />
+                    </div>
+                    <div>
+                      <p className="text-gray-400 text-sm">City & State</p>
+                      <p className="text-white font-medium">
+                        {selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.state}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-indigo-500/20 rounded-lg flex items-center justify-center mt-1">
+                      <Mail size={18} className="text-indigo-400" />
+                    </div>
+                    <div>
+                      <p className="text-gray-400 text-sm">Postal Code</p>
+                      <p className="text-white font-medium font-mono">
+                        {selectedOrder.shippingAddress.postalCode}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-indigo-500/20 rounded-lg flex items-center justify-center mt-1">
+                      <Globe size={18} className="text-indigo-400" />
+                    </div>
+                    <div>
+                      <p className="text-gray-400 text-sm">Country</p>
+                      <p className="text-white font-medium">
+                        {selectedOrder.shippingAddress.country}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Mobile Layout */}
+              <div className="md:hidden space-y-4">
+                <div className="text-center border-b border-indigo-500/30 pb-3">
+                  <div className="w-16 h-16 bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <User size={24} className="text-indigo-400" />
+                  </div>
+                  <p className="text-white font-bold text-lg">
+                    {selectedOrder.shippingAddress.recipientName}
+                  </p>
+                  <p className="text-gray-400 text-sm">Recipient</p>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 p-3 bg-black/20 rounded-lg">
+                    <Home size={18} className="text-indigo-400" />
+                    <div>
+                      <p className="text-white font-medium">
+                        {selectedOrder.shippingAddress.street}
+                      </p>
+                      {selectedOrder.shippingAddress.landmark && (
+                        <p className="text-gray-400 text-sm">
+                          Near: {selectedOrder.shippingAddress.landmark}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 p-3 bg-black/20 rounded-lg">
+                    <MapPin size={18} className="text-indigo-400" />
+                    <div>
+                      <p className="text-white font-medium">
+                        {selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.state}
+                      </p>
+                      <p className="text-gray-400 text-sm">
+                        {selectedOrder.shippingAddress.postalCode}, {selectedOrder.shippingAddress.country}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 p-3 bg-black/20 rounded-lg">
+                    <Phone size={18} className="text-indigo-400" />
+                    <p className="text-white font-medium font-mono">
+                      {selectedOrder.shippingAddress.phone}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Address Type Badge */}
+              <div className="mt-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    selectedOrder.shippingAddress.addressType === 'Home' 
+                      ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                      : selectedOrder.shippingAddress.addressType === 'Work'
+                      ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                      : 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                  }`}>
+                    {selectedOrder.shippingAddress.addressType || 'Other'}
+                  </span>
+                  {selectedOrder.shippingAddress.isDefault && (
+                    <span className="px-2 py-1 bg-[#ecba49]/20 text-[#ecba49] border border-[#ecba49]/30 rounded-full text-xs font-medium">
+                      Default
+                    </span>
+                  )}
+                </div>
+                {selectedOrder.shippingAddress.instructions && (
+                  <div className="text-right">
+                    <p className="text-gray-400 text-xs">Special Instructions:</p>
+                    <p className="text-gray-300 text-sm italic">
+                      "{selectedOrder.shippingAddress.instructions}"
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Notes Section */}
+        {selectedOrder.notes && (
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-3 text-[#ecba49] flex items-center gap-2">
+              <FileText size={20} />
+              Order Notes
+            </h3>
+            <div className="bg-orange-500/10 p-4 rounded-lg border border-orange-500/30 hover:border-orange-500/50 transition-all duration-300">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 bg-orange-500/20 rounded-lg flex items-center justify-center mt-1">
+                  <MessageSquare size={16} className="text-orange-400" />
+                </div>
+                <p className="text-gray-300 italic leading-relaxed">
+                  "{selectedOrder.notes}"
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Tracking Information - Show only for Shipped orders */}
         {selectedOrder.currentStatus === "Shipped" && (selectedOrder.trackingNumber || selectedOrder.trackingCompany) && (
@@ -978,7 +1173,6 @@ const Profile = () => {
                   </div>
                 )}
               </div>
-              
             </div>
           </div>
         )}
@@ -1023,7 +1217,6 @@ const Profile = () => {
             {selectedOrder.items.map((item, idx) => (
               <div
                 key={idx}
-                // onClick={() => selectProduct(item)}
                 className="bg-[#0f0f0f] cursor-pointer rounded-lg p-4 border border-[#ecba49]/20 hover:border-[#ecba49]/40 transition-all duration-300 hover:shadow-lg"
               >
                 {/* Desktop Layout */}
@@ -1201,7 +1394,7 @@ const Profile = () => {
         <div className="flex justify-between items-center">
           <div
             onClick={() => navigate("/contactus")}
-            className="text-sm hedden opacity-0 lg:flex lg:opacity-100 cursor-pointer text-gray-400"
+            className="text-sm hedden opacity-0 lg:flex lg:opacity-100 cursor-pointer text-gray-400 hover:text-[#ecba49] transition-colors duration-300"
           >
             Need help? Contact our support team
           </div>
