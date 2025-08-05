@@ -196,3 +196,51 @@ export const getBrandsWithProducts = async (req, res) => {
     });
   }
 };
+
+export const makeBrandDeactivated = async (req, res) => {
+  try {
+    const brand = await Brand.findByIdAndUpdate(req.params.brandId, { status: 'inactive' }, { new: true });
+
+    if (!brand) {
+      return res.status(404).json({
+        success: false,
+        message: 'Brand not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Brand deactivated successfully',
+      brand
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+}
+
+ export const makeBrandActivated = async (req, res) => {
+  try {
+    const brand = await Brand.findByIdAndUpdate(req.params.brandId, { status: 'active' }, { new: true });
+
+    if (!brand) {
+      return res.status(404).json({
+        success: false,
+        message: 'Brand not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Brand activated successfully',
+      brand
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+}

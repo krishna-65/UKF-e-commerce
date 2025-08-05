@@ -77,7 +77,7 @@ export async function sendOrderConfirmationEmail(data) {
 
 
   if (!email || !fullName || !orderId || !items || !totalAmount || !shippingInfo) {
-    return res.status(400).json({ success: false, message: "Missing required fields" });
+      throw new Error("Missing required fields in email data");
   }
 
   const transporter = nodemailer.createTransport({

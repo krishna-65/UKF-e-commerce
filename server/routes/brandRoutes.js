@@ -7,7 +7,9 @@ import {
   updateBrand,
   deleteBrand,
   getFeaturedBrands,
-  getBrandsWithProducts
+  getBrandsWithProducts,
+  makeBrandDeactivated,
+  makeBrandActivated
 } from '../controllers/brandController.js';
 
 import { protect, restrictTo } from '../middlewares/authUser.js';
@@ -26,5 +28,8 @@ router.get('/:id', protect, getBrandById);
 router.post('/', protect, restrictTo('admin'), createBrand);
 router.put('/:id', protect, restrictTo('admin'), updateBrand);
 router.delete('/:id', protect, restrictTo('admin'), deleteBrand);
+
+// router.put('/deactivate/:brandId', protect, restrictTo('admin'), makeBrandDeactivated);
+// router.put('/activate/:brandId', protect, restrictTo('admin'), makeBrandActivated);
 
 export default router;

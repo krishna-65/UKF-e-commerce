@@ -1,7 +1,7 @@
 import express from 'express';
-import { forgotPassword, getAdminDashboardStats, getMe, getProfile, getUserNoPagination, getUsers, isAuth, login, logout, register, resetPassword, sendOTPToPhone, updatePicture, updateProfile } from '../controllers/userController.js';
+import { activateSingleUser, deactivateSingleUser, forgotPassword, getAdminDashboardStats, getMe, getProfile, getUserNoPagination, getUsers, isAuth, login, logout, register, resetPassword, sendOTPToPhone, updatePicture, updateProfile } from '../controllers/userController.js';
 
-import { protect } from '../middlewares/authUser.js';
+import { protect, restrictTo } from '../middlewares/authUser.js';
 import { sendEmail } from '../controllers/contact.js';
 
 
@@ -19,11 +19,13 @@ userRouter.get('/admin-dashboard', protect, getAdminDashboardStats)
 userRouter.get('/getuser', protect, getUsers)
 userRouter.get('/getUserNoPagination', protect, getUserNoPagination)
 userRouter.get('/me', protect, getMe);
-
+// userRouter.put('/deactivate/:userId', protect, restrictTo('admin'), deactivateSingleUser);
+// userRouter.put('/activate/:userId', protect, restrictTo('admin'), activateSingleUser);
 
 //mail sender route
 
 userRouter.post('/send-email', sendEmail);
 userRouter.post('/reset-password', resetPassword);
+
 
 export default userRouter

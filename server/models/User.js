@@ -50,7 +50,7 @@ const userSchema = new mongoose.Schema({
     },
   otp: String,
   otpExpires: Date,
-  isVerified: { type: Boolean, default: false },
+  isActive: { type: Boolean, default: true },
 }, {minimize: false})
 
 const User = mongoose.models.user || mongoose.model('user', userSchema)

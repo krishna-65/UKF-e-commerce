@@ -59,7 +59,9 @@ export const login = async (req, res) => {
     if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid phone or password' });
     }
-
+    if(user.isActive === false){
+      return res.status(403).json({ success: false, message: 'Your account is deactivated. Please contact support.' });
+    }
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -468,3 +470,73 @@ export const getMe = async (req, res) => {
     res.status(401).json({ success: false, message: 'Unauthorized' });
   }
 };
+
+export const deactivateSingleUser = async (req, res) => {
+  try {
+    const { userId } = req.params; // or req.body.userId if using body instead
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    user.isActive = false;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: `User ${userId} deactivated successfully`,
+    });
+  } catch (error) {
+    console.error('Error deactivating user:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+};
+
+export const activateSingleUser = async (req, res) => {
+  try {
+    const { userId } = req.params; // or req.body.userId if using body instead
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    user.isActive = true;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: `User ${userId} activated successfully`,
+    });
+  } catch (error) {
+    console.error('Error activating user:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+};
+
+// export const addIsActiveToAllUsers = async (req, res) => {
+//   try {
+//     const result = await User.updateMany(
+//       { isActive: { $exists: false } }, // Only update users who don't have isActive
+//       { $set: { isActive: true } } // Set isActive to true
+//     );
+
+//     res.status(200).json({
+//       success: true,
+//       message: `Updated ${result.modifiedCount} users with isActive: true`,
+//     });
+//   } catch (error) {
+//     console.error('Error updating users:', error);
+//     res.status(500).json({
+//       success: false,
+//       message: 'Internal server error while updating users',
+//     });
+//   }
+// };

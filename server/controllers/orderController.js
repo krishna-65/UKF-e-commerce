@@ -328,7 +328,7 @@ export const createOrder = async (req, res) => {
       });
     }
     
-
+if(user.profile.email) {
    await sendOrderConfirmationEmail({
     email: user.profile.email,
     fullName: user.fullName || user.name,
@@ -345,9 +345,9 @@ export const createOrder = async (req, res) => {
       address: `${shippingAddr.street}, ${shippingAddr.city}, ${shippingAddr.state}, ${shippingAddr.postalCode}`,
       mobile: shippingAddr.phone,
     }
-  });
+  });}
 
-    res.status(201).json({
+   return res.status(201).json({
       success: true,
       order,
       message: 'Order created successfully'
@@ -355,7 +355,7 @@ export const createOrder = async (req, res) => {
 
   } catch (error) {
     console.error('Order creation error:', error);
-    res.status(500).json({ 
+    return res.status(500).json({ 
       success: false, 
       message: error.message,
       error: process.env.NODE_ENV === 'development' ? error.stack : undefined
