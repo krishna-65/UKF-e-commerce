@@ -659,7 +659,8 @@ export const getUserOrders = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .populate('items.product', 'name price images');
+      .populate('items.product', 'name price images')
+      .populate('shippingAddress');
 
     res.json({
       success: true,
