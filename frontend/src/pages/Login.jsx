@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { addToCart } from "../slices/cartSlice";
 import { motion } from "framer-motion"; // Import motion
 import { Eye, EyeOff } from "lucide-react"; // Import Eye icons
+import { setProductData, setProductWithoutLogin } from "../slices/productSlice";
 
 const { LOGIN_API } = endpoints;
 const { getCart } = cartEndpoints;
@@ -47,6 +48,7 @@ export default function Login() {
   });
   const [showPassword, setShowPassword] = useState(false); // State for password visibility
 
+  const productWithoutLogin = useSelector(state => state.product.productWithoutLogin)
   const loading = useSelector((state) => state.auth.loading);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -93,7 +95,14 @@ export default function Login() {
       });
 
       if (response.data.user.accountType === "user") {
-        navigate("/");
+        if(productWithoutLogin){
+          dispatch(setProductData(productWithoutLogin));
+          dispatch(setProductWithoutLogin(null))
+          navigate('/create-order')
+        }
+        else{
+          navigate("/");
+        }
       } else {
         navigate("/admindashboard");
       }

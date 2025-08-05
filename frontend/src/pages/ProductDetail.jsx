@@ -5,7 +5,7 @@ import { apiConnector } from "../services/apiConnector";
 import { orderEndpoints, reviewEndpoints, productEndpoints } from "../services/api";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import { setProductData } from "../slices/productSlice";
+import { setProductData, setProductWithoutLogin } from "../slices/productSlice";
 import ProductCard from "../components/rest-comp/ProductCard";
 
 export default function ProductDetail() {
@@ -52,10 +52,7 @@ export default function ProductDetail() {
   const isProductInCart = cart.some(item => item._id === product?._id);
 
   const buyNowHandler = () => {
-    if (userRole !== "user") {
-      toast.error("Please log in as a valid user!");
-      return;
-    }
+    
 
     // Set default values if no selection is required
     let finalSize = "Default";
@@ -84,6 +81,12 @@ export default function ProductDetail() {
       size: finalSize,
       color: finalColor
     };
+
+    if (userRole !== "user") {
+      dispatch(setProductWithoutLogin(productWithSelections));
+      navigate('/login')
+      return;
+    }
     
     dispatch(setProductData(productWithSelections));
     navigate("/create-order");

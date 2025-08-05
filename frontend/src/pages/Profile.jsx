@@ -889,7 +889,7 @@ const Profile = () => {
         {/* Enhanced Modal */}
       {selectedOrder && (
   <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
-    <div className="bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] rounded-2xl max-w-4xl w-full lg:max-h-[80vh] mt-44 overflow-hidden border border-[#ecba49]/30 shadow-2xl animate-slideUp">
+    <div className="bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] rounded-2xl max-w-4xl w-full lg:max-h-[80vh] mt-24 lg:mt-44 overflow-hidden border border-[#ecba49]/30 shadow-2xl animate-slideUp">
       {/* Modal Header */}
       <div className="bg-gradient-to-r from-[#ecba49]/20 to-[#ecba49]/10 px-6 py-4 border-b border-[#ecba49]/30">
         <div className="flex justify-between items-center">
@@ -1243,6 +1243,18 @@ const Profile = () => {
                       <div className="flex items-center gap-4 mt-2">
                         <div className="flex items-center gap-2">
                           <span className="text-gray-400 text-sm">
+                            SIze:
+                          </span>
+                          <span className=" text-[#ecba49] px-2 py-1 rounded-full text-sm font-medium">
+                            {item.size}
+                          </span>
+                          <span className="text-gray-400 text-sm">
+                            Color:
+                          </span>
+                          <span className=" text-[#ecba49] px-2 py-1 rounded-full text-sm font-medium">
+                            {item.color}
+                          </span>
+                          <span className="text-gray-400 text-sm">
                             Quantity:
                           </span>
                           <span className="bg-[#ecba49]/20 text-[#ecba49] px-2 py-1 rounded-full text-sm font-medium">
@@ -1303,6 +1315,7 @@ const Profile = () => {
                           <span className="text-[#ecba49] font-medium ml-1">
                             {item.quantity}
                           </span>
+                          
                         </div>
                         <div>
                           <span className="text-gray-400">
@@ -1332,18 +1345,26 @@ const Profile = () => {
                         Total Price
                       </p>
                     </div>
-
-                    {/* Cancel button for individual items - Mobile */}
-                    {!["Delivered", "Cancelled"].includes(
-                      selectedOrder.currentStatus
-                    ) && (
-                      <button
-                        onClick={() => cancelOrder(selectedOrder._id)}
-                        className="px-3 py-2 border border-red-500 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all duration-300 text-xs font-medium"
-                      >
-                        Cancel
-                      </button>
-                    )}
+                         <div className="grid grid-cols-2 gap-2 mt-2 text-sm">
+                        <div>
+                          <span className="text-gray-400">
+                            Size:
+                          </span>
+                          <span className="text-[#ecba49] font-medium ml-1">
+                            {item.size}
+                          </span>
+                          
+                        </div>
+                        <div>
+                          <span className="text-gray-400">
+                            Color:
+                          </span>
+                          <span className="text-white font-medium ml-1">
+                            {item.color}
+                          </span>
+                        </div>
+                      </div>
+                    
                   </div>
                 </div>
               </div>
