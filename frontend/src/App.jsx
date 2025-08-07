@@ -32,6 +32,9 @@ import ResetForgotPassword from "./pages/ResetForgotPassword";
 import FeaturedProduct from "./pages/FeaturedProducts";
 import NewArrival from "./pages/NewArrival";
 import OnSale from "./pages/Onsale";
+import Faq from "./pages/FAQ";
+import Policy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsofService";
 
 const App = () => {
   
@@ -91,6 +94,11 @@ const App = () => {
           <Route path="/featuredproducts" element={<FeaturedProduct/>}/>
             <Route path="/newarrival" element={<NewArrival/>}/>
             <Route path="/onsale" element={<OnSale/>}/>
+            <Route path="/faq" element={<Faq/>}/>
+            
+            <Route path="/policy" element={<Policy/>}/>
+            <Route path="/service" element={<TermsOfService/>}/>
+
           <Route
             path="/create-order"
             element={
